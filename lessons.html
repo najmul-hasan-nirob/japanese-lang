@@ -2,7 +2,7 @@
 layout: default
 title: Japanese Lessons
 css: /css/lessons.css
-js: 
+js:
   - /js/main.js
   - /js/lessons/lesson1.js
   - /js/lessons/lesson2.js
@@ -31,6 +31,7 @@ js:
   - /js/lessons/lesson25.js
   - /js/lessons.js
   - /js/lesson-filter.js
+  - /js/lesson-type.js
 ---
 
 <div class="toolbar">
@@ -67,8 +68,6 @@ js:
 <div class="count-display" id="countDisplay" aria-live="polite"></div>
 <div class="grid" id="grid"></div>
 
-
-
 <style>
 @media (max-width:520px){
     .grid{grid-template-columns:repeat(2,1fr);}
@@ -81,11 +80,12 @@ js:
     const count=document.getElementById('countDisplay');
 
     function updateCount(){
+        if (!grid || !count) return;
         const total=grid.querySelectorAll(':scope > .card').length;
         count.textContent=`Showing ${total} ${total===1 ? 'card' : 'cards'}`;
     }
 
     updateCount();
-    new MutationObserver(updateCount).observe(grid,{childList:true});
+    if (grid) new MutationObserver(updateCount).observe(grid,{childList:true});
 })();
 </script>
