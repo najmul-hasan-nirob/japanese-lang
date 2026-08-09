@@ -321,7 +321,7 @@ select:focus-visible{ outline:2px solid var(--vermilion); outline-offset:2px; }
     background:var(--paper-cell);
     color:var(--ink);
     cursor:pointer;
-    min-width:168px;
+    min-width:140px;
     text-align:left;
     white-space:nowrap;
     overflow:hidden;
@@ -396,7 +396,7 @@ select:focus-visible{ outline:2px solid var(--vermilion); outline-offset:2px; }
         margin-top: 0px;
     }
     .field{
-        width: 100% !important;
+        width: 47.7% !important;
 
 }
 select{
