@@ -1,11 +1,6 @@
-// Lesson data loader
-// The split lesson files are loaded synchronously before building lessonsData.
-// This keeps lessons.html simple while allowing each lesson to live in its own file.
-const lessonFiles = Array.from({ length: 25 }, (_, i) => `/japanese-lang/js/lessons/lesson${i + 1}.js`);
-
-lessonFiles.forEach(src => {
-    document.write(`<script src="${src}"><\/script>`);
-});
+// Lesson data registry
+// Each lesson is stored in its own file under /js/lessons/.
+// The lesson files are loaded by lessons.html BEFORE this file.
 
 const lessonsData = {
     lesson1,
