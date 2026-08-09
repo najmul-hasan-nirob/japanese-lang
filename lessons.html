@@ -51,16 +51,5 @@ js:
 </style>
 
 <script>
-(function(){
-    const grid=document.getElementById('grid');
-    const count=document.getElementById('countDisplay');
 
-    function updateCount(){
-        const total=grid.querySelectorAll(':scope > .card').length;
-        count.textContent=`Showing ${total} ${total===1 ? 'card' : 'cards'}`;
-    }
-
-    updateCount();
-    new MutationObserver(updateCount).observe(grid,{childList:true});
-})();
 </script>
