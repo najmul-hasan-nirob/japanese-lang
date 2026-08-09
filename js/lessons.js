@@ -29,3 +29,16 @@ const lessonsData = {
     lesson24,
     lesson25
 };
+
+function sortedLessonKeys() {
+    return Object.keys(lessonsData).sort((a, b) => {
+        const na = parseInt(a.replace("lesson", ""), 10);
+        const nb = parseInt(b.replace("lesson", ""), 10);
+        return na - nb;
+    });
+}
+
+function lessonLabel(key) {
+    const number = key.replace(/^lesson/i, "");
+    return `Lesson ${number}`;
+}
