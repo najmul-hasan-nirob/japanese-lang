@@ -1,0 +1,311 @@
+// Lesson 21
+const lesson21 = {
+  "vocabulary": [
+    {
+      "jp": "おもいます",
+      "romaji": "omoimasu",
+      "en": "think",
+      "bn": "ভাবা"
+    },
+    {
+      "jp": "いいます",
+      "romaji": "iimasu",
+      "en": "say",
+      "bn": "বলা"
+    },
+    {
+      "jp": "かちます",
+      "romaji": "kachimasu",
+      "en": "win",
+      "bn": "জেতা"
+    },
+    {
+      "jp": "まけます",
+      "romaji": "makemasu",
+      "en": "lose, be beaten",
+      "bn": "হারা / পরাজিত হওয়া"
+    },
+    {
+      "jp": "あります[おまつりが～]",
+      "romaji": "arimasu[omatsuriga～]",
+      "en": "[a festival] be held, take place",
+      "bn": "জায়গা / নেওয়া"
+    },
+    {
+      "jp": "やくに たちます",
+      "romaji": "yakuni tachimasu",
+      "en": "be useful",
+      "bn": "উপকারী হওয়া"
+    },
+    {
+      "jp": "うごきます",
+      "romaji": "ugokimasu",
+      "en": "move, work",
+      "bn": "চলা / কাজ করা"
+    },
+    {
+      "jp": "やめます[かいしゃを～]",
+      "romaji": "yamemasu[kaishao～]",
+      "en": "quit or retire from [a company], give up",
+      "bn": "চাকরি ছাড়া / অবসর নেওয়া / ছেড়ে দেওয়া"
+    },
+    {
+      "jp": "きを つけます",
+      "romaji": "kio tsukemasu",
+      "en": "pay attention, take care",
+      "bn": "সতর্ক থাকা / খেয়াল রাখা"
+    },
+    {
+      "jp": "りゅうがくします",
+      "romaji": "ryuugakushimasu",
+      "en": "study abroad",
+      "bn": "বিদেশে পড়াশোনা করা"
+    },
+    {
+      "jp": "むだ[な]",
+      "romaji": "muda[na]",
+      "en": "wasteful",
+      "bn": "অপচয়ী"
+    },
+    {
+      "jp": "ふべん[な]",
+      "romaji": "fuben[na]",
+      "en": "inconvenient",
+      "bn": "অসুবিধাজনক"
+    },
+    {
+      "jp": "すごい",
+      "romaji": "sugoi",
+      "en": "awful, great (expresses astonishment or admiration)",
+      "bn": "ভয়ংকর / দারুণ"
+    },
+    {
+      "jp": "ほんとう",
+      "romaji": "hontou",
+      "en": "true",
+      "bn": "সত্য"
+    },
+    {
+      "jp": "うそ",
+      "romaji": "uso",
+      "en": "lie",
+      "bn": "মিথ্যা"
+    },
+    {
+      "jp": "じどうしゃ",
+      "romaji": "jidousha",
+      "en": "car, automobile",
+      "bn": "গাড়ি"
+    },
+    {
+      "jp": "こうつう",
+      "romaji": "koutsuu",
+      "en": "transport, traffic",
+      "bn": "পরিবহন / যানবাহন চলাচল"
+    },
+    {
+      "jp": "ぶっか",
+      "romaji": "bukka",
+      "en": "[commodity] prices",
+      "bn": "পণ্যের দাম"
+    },
+    {
+      "jp": "ほうそう",
+      "romaji": "housou",
+      "en": "announcement, broadcast",
+      "bn": "ঘোষণা / সম্প্রচার"
+    },
+    {
+      "jp": "ニュース",
+      "romaji": "niュ-su",
+      "en": "news",
+      "bn": "খবর / সংবাদ"
+    },
+    {
+      "jp": "アニメ",
+      "romaji": "anime",
+      "en": "anime (Japanese animated film)",
+      "bn": "অ্যানিমে (জাপানি অ্যানিমেটেড চলচ্চিত্র)"
+    },
+    {
+      "jp": "マンガ",
+      "romaji": "manga",
+      "en": "comic book",
+      "bn": "কমিক বই"
+    },
+    {
+      "jp": "デザイン",
+      "romaji": "dezain",
+      "en": "design, artwork",
+      "bn": "নকশা / শিল্পকর্ম"
+    },
+    {
+      "jp": "ゆめ",
+      "romaji": "yume",
+      "en": "dream",
+      "bn": "স্বপ্ন"
+    },
+    {
+      "jp": "てんさい",
+      "romaji": "tensai",
+      "en": "genius",
+      "bn": "প্রতিভাবান ব্যক্তি / জিনিয়াস"
+    },
+    {
+      "jp": "しあい",
+      "romaji": "shiai",
+      "en": "game, match (〜をします: play a game/match)",
+      "bn": "খেলা / ম্যাচ"
+    },
+    {
+      "jp": "いけん",
+      "romaji": "iken",
+      "en": "opinion",
+      "bn": "মতামত"
+    },
+    {
+      "jp": "はなし",
+      "romaji": "hanashi",
+      "en": "talk, speech, what one says, story (〜をします: talk, tell a story)",
+      "bn": "কথা / বক্তব্য / গল্প"
+    },
+    {
+      "jp": "ちきゅう",
+      "romaji": "chikyuu",
+      "en": "earth",
+      "bn": "পৃথিবী"
+    },
+    {
+      "jp": "つき",
+      "romaji": "tsuki",
+      "en": "moon",
+      "bn": "চাঁদ"
+    },
+    {
+      "jp": "さいきん",
+      "romaji": "saikin",
+      "en": "recently, these days",
+      "bn": "সম্প্রতি / আজকাল"
+    },
+    {
+      "jp": "たぶん",
+      "romaji": "tabun",
+      "en": "probably, perhaps, maybe",
+      "bn": "সম্ভবত / হয়তো"
+    },
+    {
+      "jp": "きっと",
+      "romaji": "kitto",
+      "en": "surely, definitely",
+      "bn": "নিশ্চয়ই / অবশ্যই"
+    },
+    {
+      "jp": "ほんとうに",
+      "romaji": "hontouni",
+      "en": "really",
+      "bn": "সত্যিই / আসলেই"
+    },
+    {
+      "jp": "そんなに",
+      "romaji": "sonnani",
+      "en": "not so (used with negatives)",
+      "bn": "তেমন নয় / খুব একটা নয়"
+    },
+    {
+      "jp": "～について",
+      "romaji": "～nitsuite",
+      "en": "about ~, concerning ~",
+      "bn": "~ সম্পর্কে"
+    },
+    {
+      "jp": "おひさしぶりですね。",
+      "romaji": "ohisashiburidesune。",
+      "en": "It's been a long time [since we last met].",
+      "bn": "সময়"
+    },
+    {
+      "jp": "～でも のみませんか。",
+      "romaji": "～demo nomimasenka。",
+      "en": "How about drinking ~ or something?",
+      "bn": "~ বা কিছু পান করলে কেমন হয়?"
+    },
+    {
+      "jp": "もちろん",
+      "romaji": "mochiron",
+      "en": "of course",
+      "bn": "অবশ্যই"
+    },
+    {
+      "jp": "もう かえらないと……。",
+      "romaji": "mou kaeranaito……。",
+      "en": "I have to get home now......",
+      "bn": "আমাকে এখন বাড়ি ফিরতে হবে…"
+    },
+    {
+      "jp": "アインシュタイン",
+      "romaji": "ainshiュtain",
+      "en": "Albert Einstein (1879-1955)",
+      "bn": "আলবার্ট আইনস্টাইন (১৮৭৯–১৯৫৫)"
+    },
+    {
+      "jp": "ガガーリン",
+      "romaji": "gaga-rin",
+      "en": "Yuri Alekseyevich Gagarin (1934-1968)",
+      "bn": "ইউরি গ্যাগারিন (১৯৩৪–১৯৬৮)"
+    },
+    {
+      "jp": "ガリレオ",
+      "romaji": "garireo",
+      "en": "Galileo Galilei (1564-1642)",
+      "bn": "গ্যালিলিও গ্যালিলেই (১৫৬৪–১৬৪২)"
+    },
+    {
+      "jp": "キングぼくし",
+      "romaji": "kingubokushi",
+      "en": "Martin Luther King, Jr. (1929-1968)",
+      "bn": "মার্টিন লুথার কিং জুনিয়র (১৯২৯–১৯৬৮)"
+    },
+    {
+      "jp": "フランクリン",
+      "romaji": "furankurin",
+      "en": "Benjamin Franklin (1706-1790)",
+      "bn": "বেঞ্জামিন ফ্র্যাঙ্কলিন (১৭০৬–১৭৯০)"
+    },
+    {
+      "jp": "かぐやひめ",
+      "romaji": "kaguyahime",
+      "en": "Princess Kaguya (heroine of the old Japanese folk tale 'Taketori Monogatari')",
+      "bn": "রাজকুমারী কাগুয়া (তাকেতোরি মনোগাতারি লোককথার নায়িকা)"
+    },
+    {
+      "jp": "てんじんまつり",
+      "romaji": "tenjinmatsuri",
+      "en": "Tenjin Festival (a festival in Osaka)",
+      "bn": "তেনজিন উৎসব (ওসাকার উৎসব)"
+    },
+    {
+      "jp": "よしのやま",
+      "romaji": "yoshinoyama",
+      "en": "Mt. Yoshino (a mountain in Nara Prefecture)",
+      "bn": "মাউন্ট ইয়োশিনো (নারা প্রিফেকচারের পাহাড়)"
+    },
+    {
+      "jp": "カンガルー",
+      "romaji": "kangaru-",
+      "en": "kangaroo",
+      "bn": "ক্যাঙ্গারু"
+    },
+    {
+      "jp": "キャプテン・クック",
+      "romaji": "kiャputen・kukku",
+      "en": "Captain James Cook (1728-1779)",
+      "bn": "ক্যাপ্টেন জেমস কুক (১৭২৮–১৭৭৯)"
+    },
+    {
+      "jp": "ヨーネン",
+      "romaji": "yo-nen",
+      "en": "a fictitious company",
+      "bn": "কাল্পনিক company"
+    }
+  ]
+};
