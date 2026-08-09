@@ -1,5 +1,12 @@
 // Lesson data loader
-// Load all lesson*.js files before this file.
+// The split lesson files are loaded synchronously before building lessonsData.
+// This keeps lessons.html simple while allowing each lesson to live in its own file.
+const lessonFiles = Array.from({ length: 25 }, (_, i) => `/japanese-lang/js/lessons/lesson${i + 1}.js`);
+
+lessonFiles.forEach(src => {
+    document.write(`<script src="${src}"><\/script>`);
+});
+
 const lessonsData = {
     lesson1,
     lesson2,
@@ -25,5 +32,5 @@ const lessonsData = {
     lesson22,
     lesson23,
     lesson24,
-    lesson25,
+    lesson25
 };
