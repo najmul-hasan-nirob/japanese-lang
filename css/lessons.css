@@ -112,8 +112,8 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
 }
 
 @media only screen and (max-width:500px) {
-    .front{ font-size:14px; }
-    .back{ font-size:13px; }
+    .front{ font-size:18px; text-align: center;}
+    .back{ font-size:16px; }
     .vocabulary-back .romaji,
     .vocabulary-back .english,
     .vocabulary-back .bangla{ font-size:13px; }

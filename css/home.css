@@ -118,12 +118,12 @@ button:focus-visible{ outline:2px solid var(--vermilion); outline-offset:2px; }
     background:var(--paper-cell);
     color:var(--ink);
     font-weight:700;
-    font-size:26px;
+    font-size:30px;
 
 }
 
 @media only screen and (max-width: 500px) {
-    .front{ font-size:21px; }
+    .front{ font-size:24px; }
     button{ justify-content:center; }
     .field-theme{ margin-left:0; }
     .multiselect-panel{ left:0; right:0; }
