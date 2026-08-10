@@ -1,14 +1,69 @@
 // =====================================================
 // Lesson card controls
-// - Restores the Kana ↔ Romaji direction switch state.
-// - Adds a separate Romaji visibility switch for back cards.
+// - Kana ↔ Romaji direction switch
+// - Separate back-card Romaji visibility switch
+// - Keeps the current Lesson card structure intact, including Bangla.
 // =====================================================
 
-// lesson-filter.js uses this variable when building cards.
-// var is intentionally global so both scripts share the state.
 var showJapaneseFirst = true;
 
 (function () {
+    function getCardParts(card) {
+        const front = card.querySelector(".front > div:last-child, .front > div");
+        const back = card.querySelector(".vocabulary-back");
+        if (!front || !back) return null;
+
+        const romaji = back.querySelector(".romaji");
+        const english = back.querySelector(".english");
+        const bangla = back.querySelector(".bangla");
+        const tag = back.querySelector(".lesson-tag");
+
+        if (!romaji || !english || !bangla) return null;
+
+        return {
+            front,
+            back,
+            kana: front.textContent.trim(),
+            romaji: romaji.textContent.trim(),
+            english: english.textContent.trim(),
+            bangla: bangla.textContent.trim(),
+            tag: tag ? tag.outerHTML : ""
+        };
+    }
+
+    function switchExistingCards() {
+        document.querySelectorAll("#grid .card").forEach(card => {
+            const back = card.querySelector(".vocabulary-back");
+            if (!back) return;
+
+            let data = card.__lessonDirectionData;
+
+            if (!data) {
+                data = getCardParts(card);
+                if (!data) return;
+                card.__lessonDirectionData = data;
+            }
+
+            if (showJapaneseFirst) {
+                data.front.textContent = data.kana;
+                data.back.innerHTML = `
+                    ${data.tag}
+                    <span class="romaji">${data.romaji}</span>
+                    <span class="english">${data.english}</span>
+                    <span class="bangla">${data.bangla}</span>
+                `;
+            } else {
+                data.front.textContent = data.romaji;
+                data.back.innerHTML = `
+                    ${data.tag}
+                    <span class="kana-back">${data.kana}</span>
+                    <span class="english">${data.english}</span>
+                    <span class="bangla">${data.bangla}</span>
+                `;
+            }
+        });
+    }
+
     function initLessonControls() {
         const direction = document.getElementById("direction");
         const leftLabel = document.getElementById("directionLeftLabel");
@@ -17,7 +72,6 @@ var showJapaneseFirst = true;
 
         if (!direction || !toolbar) return;
 
-        // The separate switch controls only the Romaji line on vocabulary back cards.
         let romajiBtn = document.getElementById("romajiToggle");
 
         if (!romajiBtn) {
@@ -25,7 +79,7 @@ var showJapaneseFirst = true;
             field.className = "field lesson-romaji-control";
 
             const label = document.createElement("label");
-            label.textContent = "Romaji";
+            label.textContent = "Back Romaji";
 
             romajiBtn = document.createElement("button");
             romajiBtn.type = "button";
@@ -55,14 +109,14 @@ var showJapaneseFirst = true;
         function updateRomajiUI() {
             romajiBtn.textContent = romajiVisible ? "Romaji: ON" : "Romaji: OFF";
             romajiBtn.setAttribute("aria-pressed", String(romajiVisible));
-            document.querySelectorAll(".vocabulary-back .romaji").forEach(el => {
+
+            document.querySelectorAll("#grid .vocabulary-back .romaji").forEach(el => {
                 el.style.display = romajiVisible ? "" : "none";
             });
         }
 
-        // Remove only our own previous listener if this script is accidentally initialized twice.
         if (direction.__lessonDirectionHandler) {
-            direction.removeEventListener("click", direction.__lessonDirectionHandler);
+            direction.removeEventListener("click", direction.__lessonDirectionHandler, true);
         }
 
         direction.__lessonDirectionHandler = function (event) {
@@ -71,11 +125,8 @@ var showJapaneseFirst = true;
 
             showJapaneseFirst = !showJapaneseFirst;
             updateDirectionUI();
-
-            if (typeof renderLessons === "function") {
-                renderLessons();
-                updateRomajiUI();
-            }
+            switchExistingCards();
+            updateRomajiUI();
         };
 
         direction.addEventListener("click", direction.__lessonDirectionHandler, true);
@@ -92,10 +143,15 @@ var showJapaneseFirst = true;
         };
         direction.addEventListener("keydown", direction.__lessonKeydownHandler);
 
-        romajiBtn.addEventListener("click", function () {
+        if (romajiBtn.__lessonRomajiHandler) {
+            romajiBtn.removeEventListener("click", romajiBtn.__lessonRomajiHandler);
+        }
+
+        romajiBtn.__lessonRomajiHandler = function () {
             romajiVisible = !romajiVisible;
             updateRomajiUI();
-        });
+        };
+        romajiBtn.addEventListener("click", romajiBtn.__lessonRomajiHandler);
 
         updateDirectionUI();
         updateRomajiUI();
