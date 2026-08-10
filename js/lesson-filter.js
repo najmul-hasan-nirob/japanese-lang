@@ -50,9 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
             selected.length === 0 ? "None" : selected.map(lessonLabel).join(" + ");
     }
 
-    // -----------------------------------------------------
-    // Japanese → Romaji (Hepburn-style)
-    // -----------------------------------------------------
     const kana = {
         "あ":"a","い":"i","う":"u","え":"e","お":"o","か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko",
         "が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go","さ":"sa","し":"shi","す":"su","せ":"se","そ":"so",
@@ -97,7 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return out.replace(/\s+/g, " ").trim();
     }
 
-    // Common Bangla meanings. Vocabulary data can also define its own `bn` value.
     const bn = {
         "I":"আমি","you":"তুমি / আপনি","student":"ছাত্র / শিক্ষার্থী","company employee":"কোম্পানির কর্মচারী",
         "bank employee":"ব্যাংকের কর্মচারী","[medical] doctor":"ডাক্তার","researcher, scholar":"গবেষক","university":"বিশ্ববিদ্যালয়","hospital":"হাসপাতাল",
@@ -137,14 +133,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = document.createElement("div");
             card.className = "card" + (item.type === "grammar" ? " grammar" : "");
             const tag = `${item.lesson} · ${item.type === "grammar" ? "Grammar" : "Vocabulary"}`;
-            const frontText = showJapaneseFirst ? item.jp : item.en;
+            const isVocab = item.type === "vocabulary" || item.type === "cpart" || item.type === "country";
+            const frontText = showJapaneseFirst ? item.jp : (isVocab ? toRomaji(item.jp) : item.en);
 
-            if (item.type === "vocabulary" || item.type === "cpart" || item.type === "country") {
+            if (isVocab) {
+                const hideRomaji = window.lessonBackRomajiVisible === false;
                 card.innerHTML = `
                     <div class="inner">
                         <div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div>
                         <div class="back vocabulary-back">
-                            <span class="romaji">${toRomaji(item.jp)}</span>
+                            <span class="romaji" style="display:${hideRomaji ? 'none' : ''}">${toRomaji(item.jp)}</span>
                             <span class="english">${item.en}</span>
                             <span class="bangla">${banglaMeaning(item)}</span>
                         </div>
