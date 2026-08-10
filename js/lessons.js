@@ -113,23 +113,7 @@ function shuffle(array) {
     return array;
 }
 
-// Default direction: Japanese first.
-// lesson-filter.js reads this variable when rendering cards.
+// Lessons always use Japanese as the card FRONT.
+// The Front / Back switch is handled by lesson-controls.js and flips
+// the cards physically; it must not change the card content to Romaji.
 let showJapaneseFirst = true;
-
-// The direction control is optional, so this is safe on pages where it doesn't exist.
-document.addEventListener("DOMContentLoaded", () => {
-    const direction = document.getElementById("direction");
-    if (!direction) return;
-
-    direction.addEventListener("click", () => {
-        showJapaneseFirst = !showJapaneseFirst;
-    });
-
-    direction.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            showJapaneseFirst = !showJapaneseFirst;
-        }
-    });
-});
