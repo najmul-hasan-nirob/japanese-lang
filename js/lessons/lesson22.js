@@ -108,7 +108,9 @@ const lesson22 = {
       "romaji": "yoku",
       "en": "often",
       "bn": "প্রায়ই"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "えーと",
       "romaji": "e-to",
@@ -168,7 +170,9 @@ const lesson22 = {
       "romaji": "futon",
       "en": "Japanese-style mattress and quilt",
       "bn": "জাপানি ধাঁচের বিছানা ও লেপ"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "パリ",
       "romaji": "pari",

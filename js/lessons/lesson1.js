@@ -126,7 +126,9 @@ const lesson1 = {
       "romaji": "iie",
       "en": "no",
       "bn": "না"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "はじめまして。",
       "romaji": "hajimemashite。",
@@ -162,7 +164,9 @@ const lesson1 = {
       "romaji": "kochiraha～sandesu。",
       "en": "This is Mr./Ms. ~.",
       "bn": "ইনি জনাব/জনাবা ~।"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "アメリカ",
       "romaji": "amerika",

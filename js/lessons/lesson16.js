@@ -246,7 +246,9 @@ const lesson16 = {
       "romaji": "dore",
       "en": "which one (of three or more things)",
       "bn": "তিন বা তার বেশি জিনিসের মধ্যে কোনটি"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "すごいですね。",
       "romaji": "sugoidesune。",
@@ -306,7 +308,9 @@ const lesson16 = {
       "romaji": "botan",
       "en": "button",
       "bn": "বোতাম"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "JR",
       "romaji": "JR",

@@ -216,7 +216,9 @@ const lesson21 = {
       "romaji": "～nitsuite",
       "en": "about ~, concerning ~",
       "bn": "~ সম্পর্কে"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "おひさしぶりですね。",
       "romaji": "ohisashiburidesune。",
@@ -240,7 +242,9 @@ const lesson21 = {
       "romaji": "mou kaeranaito……。",
       "en": "I have to get home now......",
       "bn": "আমাকে এখন বাড়ি ফিরতে হবে…"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "アインシュタイン",
       "romaji": "ainshiュtain",

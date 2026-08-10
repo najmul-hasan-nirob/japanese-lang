@@ -7,16 +7,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateTypeLabel() {
         const boxes = Array.from(typePanel.querySelectorAll("input[type=checkbox]"));
-        const selected = boxes.filter(box => box.checked).map(box => box.value);
+        const selected = boxes.filter(box => box.checked);
 
         if (selected.length === boxes.length) {
             typeBtn.textContent = "All types";
         } else if (selected.length === 0) {
             typeBtn.textContent = "None";
         } else {
-            typeBtn.textContent = selected.map(value =>
-                value.charAt(0).toUpperCase() + value.slice(1)
-            ).join(" + ");
+            typeBtn.textContent = selected
+                .map(box => box.closest("label").textContent.trim())
+                .join(" + ");
         }
     }
 
@@ -30,7 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
         typeBtn.setAttribute("aria-expanded", String(!open));
     });
 
-    typePanel.addEventListener("change", updateTypeLabel);
+    typePanel.addEventListener("change", event => {
+        const boxes = Array.from(typePanel.querySelectorAll("input[type=checkbox]"));
+        if (boxes.every(box => !box.checked)) {
+            event.target.checked = true;
+            return;
+        }
+        updateTypeLabel();
+    });
 
     document.addEventListener("click", event => {
         if (!typePanel.contains(event.target) && event.target !== typeBtn) {

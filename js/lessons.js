@@ -61,6 +61,28 @@ function buildLessonCards(key) {
         });
     }
 
+    if (Array.isArray(lesson.cpart)) {
+        lesson.cpart.forEach(item => {
+            if (!item || !item.jp) return;
+            cards.push({
+                ...item,
+                type: "cpart",
+                lesson: lessonLabel(key)
+            });
+        });
+    }
+
+    if (Array.isArray(lesson.country)) {
+        lesson.country.forEach(item => {
+            if (!item || !item.jp) return;
+            cards.push({
+                ...item,
+                type: "country",
+                lesson: lessonLabel(key)
+            });
+        });
+    }
+
     if (Array.isArray(lesson.grammar)) {
         lesson.grammar.forEach(item => {
             if (!item) return;

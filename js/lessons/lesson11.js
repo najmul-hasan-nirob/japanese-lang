@@ -282,7 +282,9 @@ const lesson11 = {
       "romaji": "～nenkan",
       "en": "~ year(s)",
       "bn": "~ বছর"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "おでかけですか。",
       "romaji": "odekakedesuka。",
@@ -318,7 +320,9 @@ const lesson11 = {
       "romaji": "soudesune。",
       "en": "Certainly. (Sir/Madam)",
       "bn": "অবশ্যই। / জি, অবশ্যই।"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "オーストラリア",
       "romaji": "o-sutoraria",

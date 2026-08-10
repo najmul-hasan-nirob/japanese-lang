@@ -120,7 +120,9 @@ const lesson19 = {
       "romaji": "demo",
       "en": "but",
       "bn": "কিন্তু"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "かんぱい",
       "romaji": "kanpai",
@@ -144,7 +146,9 @@ const lesson19 = {
       "romaji": "karadani ii",
       "en": "good for one's health",
       "bn": "স্বাস্থ্যের জন্য ভালো"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "とうきょうスカイツリー",
       "romaji": "toukyousukaitsuri-",

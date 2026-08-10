@@ -276,7 +276,9 @@ const lesson6 = {
       "romaji": "ee",
       "en": "yes",
       "bn": "হ্যাঁ"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "いいですね。",
       "romaji": "iidesune。",
@@ -300,7 +302,9 @@ const lesson6 = {
       "romaji": "ja、mata [ashita]。",
       "en": "See you [tomorrow].",
       "bn": "আবার দেখা হবে [আগামীকাল]।"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "メキシコ",
       "romaji": "mekishiko",

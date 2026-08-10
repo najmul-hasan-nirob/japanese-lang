@@ -264,7 +264,9 @@ const lesson12 = {
       "romaji": "hajimete",
       "en": "for the first time",
       "bn": "সময়"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "ただいま。",
       "romaji": "tadaima。",
@@ -288,7 +290,9 @@ const lesson12 = {
       "romaji": "tsukaremashita。",
       "en": "I'm tired.",
       "bn": "আমি ক্লান্ত।"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "ぎおんまつり",
       "romaji": "gionmatsuri",

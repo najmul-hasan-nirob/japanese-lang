@@ -240,7 +240,9 @@ const lesson14 = {
       "romaji": "mou～",
       "en": "~ more, another ~",
       "bn": "আরও ~"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "さあ",
       "romaji": "saa",
@@ -270,7 +272,9 @@ const lesson14 = {
       "romaji": "otsuri",
       "en": "change",
       "bn": "বদলানো"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "みどりちょう",
       "romaji": "midorichou",

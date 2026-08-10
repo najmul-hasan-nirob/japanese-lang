@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const tag = `${item.lesson} · ${item.type === "grammar" ? "Grammar" : "Vocabulary"}`;
             const frontText = showJapaneseFirst ? item.jp : item.en;
 
-            if (item.type === "vocabulary") {
+            if (item.type === "vocabulary" || item.type === "cpart" || item.type === "country") {
                 card.innerHTML = `
                     <div class="inner">
                         <div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div>

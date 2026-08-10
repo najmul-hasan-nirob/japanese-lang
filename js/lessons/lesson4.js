@@ -288,7 +288,9 @@ const lesson4 = {
       "romaji": "～to～",
       "en": "and (used to connect nouns)",
       "bn": "এবং / ও"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "たいへんですね。",
       "romaji": "taihendesune。",
@@ -312,7 +314,9 @@ const lesson4 = {
       "romaji": "sochira",
       "en": "your place",
       "bn": "জায়গা"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "ニューヨーク",
       "romaji": "niュ-yo-ku",

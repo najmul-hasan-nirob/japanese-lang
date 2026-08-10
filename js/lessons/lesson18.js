@@ -126,7 +126,9 @@ const lesson18 = {
       "romaji": "inta-netto",
       "en": "the Internet",
       "bn": "ইন্টারনেট"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "とくに",
       "romaji": "tokuni",
@@ -162,7 +164,9 @@ const lesson18 = {
       "romaji": "zehi",
       "en": "by all means, really",
       "bn": "সব"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "ふるさと",
       "romaji": "furusato",

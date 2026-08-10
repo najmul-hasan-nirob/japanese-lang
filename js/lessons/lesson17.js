@@ -174,7 +174,9 @@ const lesson17 = {
       "romaji": "desukara",
       "en": "therefore, so",
       "bn": "তাই / সুতরাং"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "どう しましたか。",
       "romaji": "dou shimashitaka。",
@@ -211,5 +213,6 @@ const lesson17 = {
       "en": "Take care of yourself. (said to people who are ill)",
       "bn": "নেওয়া"
     }
-  ]
+  ],
+  "country": []
 };

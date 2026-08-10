@@ -144,7 +144,9 @@ const lesson13 = {
       "romaji": "onakaga sukimasu",
       "en": "get hungry",
       "bn": "ক্ষুধার্ত হওয়া"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "そう しましょう。",
       "romaji": "sou shimashou。",
@@ -186,7 +188,9 @@ const lesson13 = {
       "romaji": "betsubetsuni",
       "en": "separately",
       "bn": "আলাদাভাবে"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "アキックス",
       "romaji": "akikkusu",

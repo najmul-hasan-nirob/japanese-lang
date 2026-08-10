@@ -306,7 +306,9 @@ const lesson5 = {
       "romaji": "tanjoubi",
       "en": "birthday",
       "bn": "জন্মদিন"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "そうですね。",
       "romaji": "soudesune。",
@@ -354,7 +356,9 @@ const lesson5 = {
       "romaji": "tokkyuu",
       "en": "express",
       "bn": "এক্সপ্রেস ট্রেন"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "こうしえん",
       "romaji": "koushien",

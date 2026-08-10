@@ -228,7 +228,9 @@ const lesson7 = {
       "romaji": "korekara",
       "en": "from now on, soon",
       "bn": "এখন থেকে / শিগগির"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "[～]って すてきですね。",
       "romaji": "[～]tte sutekidesune。",
@@ -270,7 +272,9 @@ const lesson7 = {
       "romaji": "gochisousama[deshita]。",
       "en": "That was delicious. (said after eating or drinking)",
       "bn": "সুস্বাদু"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "スペイン",
       "romaji": "supein",

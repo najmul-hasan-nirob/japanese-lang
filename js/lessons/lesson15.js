@@ -114,7 +114,9 @@ const lesson15 = {
       "romaji": "sumimasen",
       "en": "I'm sorry.",
       "bn": "আমি দুঃখিত / ক্ষমা করবেন।"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "みなさん",
       "romaji": "minasan",
@@ -132,7 +134,9 @@ const lesson15 = {
       "romaji": "irasshaimasu",
       "en": "be (honorific equivalent of います)",
       "bn": "থাকা / উপস্থিত থাকা-এর সম্মানসূচক রূপ"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "にっぽんばし",
       "romaji": "nipponbashi",

@@ -216,7 +216,9 @@ const lesson3 = {
       "romaji": "man",
       "en": "ten thousand",
       "bn": "দশ হাজার"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "すみません。",
       "romaji": "sumimasen。",
@@ -252,7 +254,9 @@ const lesson3 = {
       "romaji": "[～o] kudasai。",
       "en": "Give me [~], please.",
       "bn": "দেওয়া"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "イタリア",
       "romaji": "itaria",

@@ -252,7 +252,9 @@ const lesson9 = {
       "romaji": "hayaku",
       "en": "early, quickly, fast",
       "bn": "দ্রুত / তাড়াতাড়ি"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "いっしょに いかがですか。",
       "romaji": "isshoni ikagadesuka。",
@@ -277,5 +279,6 @@ const lesson9 = {
       "en": "So you can't (come)? Please ask me again some other time.",
       "bn": "সময় / জিজ্ঞাসা করা"
     }
-  ]
+  ],
+  "country": []
 };

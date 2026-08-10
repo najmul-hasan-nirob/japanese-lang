@@ -282,7 +282,9 @@ const lesson8 = {
       "romaji": "～ga、～",
       "en": "~, but ~",
       "bn": "~, কিন্তু ~"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "おげんきですか。",
       "romaji": "ogenkidesuka。",
@@ -330,7 +332,9 @@ const lesson8 = {
       "romaji": "mata irasshatte kudasai。",
       "en": "Please come again.",
       "bn": "আসা"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "シャンハイ",
       "romaji": "shiャnhai",

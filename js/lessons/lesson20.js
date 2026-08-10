@@ -120,7 +120,9 @@ const lesson20 = {
       "romaji": "onakaga ippaidesu。",
       "en": "(I'm) full.",
       "bn": "পেট ভরা"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "よかったら",
       "romaji": "yokattara",
@@ -133,5 +135,6 @@ const lesson20 = {
       "en": "various",
       "bn": "বিভিন্ন"
     }
-  ]
+  ],
+  "country": []
 };

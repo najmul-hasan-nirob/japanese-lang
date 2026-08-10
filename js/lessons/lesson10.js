@@ -252,7 +252,9 @@ const lesson10 = {
       "romaji": "～ya～[nado]",
       "en": "~ and ~ and so on",
       "bn": "~ এবং ~ ইত্যাদি"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "すみません、～。",
       "romaji": "sumimasen、～。",
@@ -282,7 +284,9 @@ const lesson10 = {
       "romaji": "ichiban shita",
       "en": "the bottom",
       "bn": "নিচের অংশ / তলা"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "アジアストア",
       "romaji": "ajiasutoa",

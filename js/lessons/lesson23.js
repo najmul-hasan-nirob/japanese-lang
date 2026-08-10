@@ -138,7 +138,10 @@ const lesson23 = {
       "romaji": "～me",
       "en": "the -th (indicating order)",
       "bn": "ক্রম বোঝাতে ব্যবহৃত -তম"
-    },
+    }
+  ],
+  "cpart": [],
+  "country": [
     {
       "jp": "しょうとくたいし",
       "romaji": "shoutokutaishi",

@@ -222,7 +222,9 @@ const lesson2 = {
       "romaji": "sou",
       "en": "so",
       "bn": "তাই / এইভাবে"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "あのう",
       "romaji": "anou",
@@ -240,12 +242,6 @@ const lesson2 = {
       "romaji": "douzo。",
       "en": "Here you are. (used when offering someone something)",
       "bn": "এই নিন।"
-    },
-    {
-      "jp": "[どうも] ありがとう [ございます]。",
-      "romaji": "[doumo] arigatou [gozaimasu]。",
-      "en": "Thank you [very much].",
-      "bn": "ধন্যবাদ [অনেক ধন্যবাদ]।"
     },
     {
       "jp": "そうですか。",
@@ -272,10 +268,17 @@ const lesson2 = {
       "bn": "আগাম আপনার সহযোগিতার জন্য ধন্যবাদ।"
     },
     {
+      "jp": "[どうも] ありがとう [ございます]。",
+      "romaji": "[doumo] arigatou [gozaimasu]。",
+      "en": "Thank you [very much].",
+      "bn": "ধন্যবাদ [অনেক ধন্যবাদ]।"
+    },
+    {
       "jp": "こちらこそ [どうぞ] よろしく [おねがいします]。",
       "romaji": "kochirakoso [douzo] yoroshiku [onegaishimasu]。",
       "en": "Pleased to meet you, too.",
       "bn": "দেখা করা"
     }
-  ]
+  ],
+  "country": []
 };

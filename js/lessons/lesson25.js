@@ -54,7 +54,9 @@ const lesson25 = {
       "romaji": "imi",
       "en": "meaning",
       "bn": "অর্থ"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "もしもし",
       "romaji": "moshimoshi",
@@ -96,7 +98,9 @@ const lesson25 = {
       "romaji": "douzo ogenkide。",
       "en": "Please take care of yourself. (said when expecting a long separation)",
       "bn": "দীর্ঘ বিচ্ছেদের আগে নিজের যত্ন নেবেন"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "ベトナム",
       "romaji": "betonamu",

@@ -96,13 +96,17 @@ const lesson24 = {
       "romaji": "jibunde",
       "en": "by oneself",
       "bn": "নিজে নিজে / একা"
-    },
+    }
+  ],
+  "cpart": [
     {
       "jp": "ほかに",
       "romaji": "hokani",
       "en": "besides",
       "bn": "এছাড়াও / ছাড়াও"
-    },
+    }
+  ],
+  "country": [
     {
       "jp": "ははのひ",
       "romaji": "hahanohi",
