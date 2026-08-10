@@ -1,135 +1,102 @@
 // =====================================================
-// Lesson Kana ↔ Romaji direction control
+// Lessons page: show Front / Back on all cards
 // =====================================================
-// Kana mode:
-//   Front = Japanese/Kana
-//   Back  = Romaji → English → Bangla
+// This control is intentionally NOT a Kana ↔ Romaji switch.
+// It acts like clicking every lesson card at the same time.
 //
-// Romaji mode:
-//   Front = Romaji
-//   Back  = Japanese/Kana → English → Bangla
+// Front = every card shows its front side.
+// Back  = every card shows its back side.
 // =====================================================
-
-var showJapaneseFirst = true;
 
 (function () {
-    function updateDirectionUI() {
+    let showBack = false;
+    let observer = null;
+
+    function getCards() {
+        return Array.from(document.querySelectorAll("#grid .card"));
+    }
+
+    function updateSwitchUI() {
         const direction = document.getElementById("direction");
         const leftLabel = document.getElementById("directionLeftLabel");
         const rightLabel = document.getElementById("directionRightLabel");
+
         if (!direction) return;
 
-        direction.classList.toggle("right", !showJapaneseFirst);
-        direction.setAttribute("aria-pressed", String(!showJapaneseFirst));
+        direction.classList.toggle("right", showBack);
+        direction.setAttribute("aria-pressed", String(showBack));
 
         if (leftLabel) {
-            leftLabel.textContent = "Kana";
-            leftLabel.classList.toggle("active", showJapaneseFirst);
+            leftLabel.textContent = "Front";
+            leftLabel.classList.toggle("active", !showBack);
         }
 
         if (rightLabel) {
-            rightLabel.textContent = "Romaji";
-            rightLabel.classList.toggle("active", !showJapaneseFirst);
+            rightLabel.textContent = "Back";
+            rightLabel.classList.toggle("active", showBack);
         }
     }
 
-    function getVocabularyItems() {
-        const items = [];
-        if (typeof lessonsData === "undefined") return items;
-
-        Object.values(lessonsData).forEach(lesson => {
-            if (!lesson || !Array.isArray(lesson.vocabulary)) return;
-            lesson.vocabulary.forEach(item => items.push(item));
-        });
-
-        return items;
-    }
-
-    function syncVocabularyBackCards() {
-        const cards = document.querySelectorAll("#grid .vocabulary-back");
-        if (!cards.length) return;
-
-        const vocabulary = getVocabularyItems();
-
-        cards.forEach(back => {
-            const card = back.closest(".card");
-            const front = card?.querySelector(".front > div");
-            const english = back.querySelector(".english");
-            const firstLine = back.querySelector(".romaji");
-
-            if (!front || !english || !firstLine) return;
-
-            const frontText = front.textContent.trim();
-            const englishText = english.textContent.trim();
-
-            // Match by Romaji + English when Romaji is shown first.
-            // Match by Japanese + English when Kana is shown first.
-            const item = vocabulary.find(v => {
-                const jp = String(v.jp || "").trim();
-                const romaji = String(v.romaji || "").trim();
-                const en = String(v.en || "").trim();
-
-                if (en !== englishText) return false;
-                return showJapaneseFirst ? jp === frontText : romaji === frontText;
-            });
-
-            if (!item) return;
-
-            if (showJapaneseFirst) {
-                // Kana front → Romaji back.
-                firstLine.textContent = item.romaji || "";
-                firstLine.style.display = "";
-            } else {
-                // Romaji front → Kana back.
-                firstLine.textContent = item.jp || "";
-                firstLine.style.display = "";
-            }
+    function applyCardState() {
+        getCards().forEach(card => {
+            card.classList.toggle("flipped", showBack);
         });
     }
 
-    function refreshCardsAfterDirectionChange() {
-        // lesson-filter.js owns rendering. Wait until its normal click listener
-        // has rebuilt the cards, then update the vocabulary back side.
-        setTimeout(syncVocabularyBackCards, 0);
+    function toggleAllCards() {
+        showBack = !showBack;
+        updateSwitchUI();
+        applyCardState();
     }
 
-    function initLessonDirection() {
+    function init() {
         const direction = document.getElementById("direction");
-        if (!direction) return;
+        const grid = document.getElementById("grid");
 
-        if (direction.__lessonDirectionHandler) {
-            direction.removeEventListener("click", direction.__lessonDirectionHandler, true);
+        if (!direction || !grid) return;
+
+        // Repurpose the existing header abacus only on the Lessons page.
+        direction.setAttribute("aria-label", "Show all lesson cards front or back");
+
+        if (direction.__lessonCardsHandler) {
+            direction.removeEventListener("click", direction.__lessonCardsHandler);
         }
 
-        direction.__lessonDirectionHandler = function (event) {
+        direction.__lessonCardsHandler = function (event) {
             event.preventDefault();
-            showJapaneseFirst = !showJapaneseFirst;
-            updateDirectionUI();
-            refreshCardsAfterDirectionChange();
+            toggleAllCards();
         };
 
-        direction.addEventListener("click", direction.__lessonDirectionHandler, true);
+        direction.addEventListener("click", direction.__lessonCardsHandler);
 
-        if (direction.__lessonKeydownHandler) {
-            direction.removeEventListener("keydown", direction.__lessonKeydownHandler);
+        if (direction.__lessonCardsKeyHandler) {
+            direction.removeEventListener("keydown", direction.__lessonCardsKeyHandler);
         }
 
-        direction.__lessonKeydownHandler = function (event) {
+        direction.__lessonCardsKeyHandler = function (event) {
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                direction.click();
+                toggleAllCards();
             }
         };
 
-        direction.addEventListener("keydown", direction.__lessonKeydownHandler);
+        direction.addEventListener("keydown", direction.__lessonCardsKeyHandler);
 
-        updateDirectionUI();
-        syncVocabularyBackCards();
+        updateSwitchUI();
+        applyCardState();
+
+        // lesson-filter.js rebuilds #grid when filters/order change.
+        // Keep the current Front/Back state for newly created cards.
+        if (observer) observer.disconnect();
+        observer = new MutationObserver(() => {
+            if (showBack) applyCardState();
+        });
+        observer.observe(grid, { childList: true });
     }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initLessonDirection);
+        document.addEventListener("DOMContentLoaded", init);
     } else {
-        initLessonDirection();
+        init();
     }
 })();
