@@ -1,15 +1,14 @@
 // =====================================================
-// Lessons page: show Front / Back on all cards
+// Lessons page controls
 // =====================================================
-// This control is intentionally NOT a Kana ↔ Romaji switch.
-// It acts like clicking every lesson card at the same time.
-//
-// Front = every card shows its front side.
-// Back  = every card shows its back side.
+// 1. Front / Back switch: flips all lesson cards.
+// 2. Back Romaji switch: hides/shows only the .romaji line
+//    on vocabulary backs. It does not affect the card face.
 // =====================================================
 
 (function () {
     let showBack = false;
+    let showBackRomaji = true;
     let observer = null;
 
     function getCards() {
@@ -37,9 +36,22 @@
         }
     }
 
+    function updateRomajiUI() {
+        const button = document.getElementById("backRomajiToggle");
+        if (!button) return;
+
+        button.textContent = showBackRomaji ? "Romaji: ON" : "Romaji: OFF";
+        button.setAttribute("aria-pressed", String(showBackRomaji));
+    }
+
     function applyCardState() {
         getCards().forEach(card => {
             card.classList.toggle("flipped", showBack);
+
+            const romaji = card.querySelector(".vocabulary-back .romaji");
+            if (romaji) {
+                romaji.style.display = showBackRomaji ? "" : "none";
+            }
         });
     }
 
@@ -49,13 +61,19 @@
         applyCardState();
     }
 
+    function toggleBackRomaji() {
+        showBackRomaji = !showBackRomaji;
+        updateRomajiUI();
+        applyCardState();
+    }
+
     function init() {
         const direction = document.getElementById("direction");
         const grid = document.getElementById("grid");
+        const romajiButton = document.getElementById("backRomajiToggle");
 
         if (!direction || !grid) return;
 
-        // Repurpose the existing header abacus only on the Lessons page.
         direction.setAttribute("aria-label", "Show all lesson cards front or back");
 
         if (direction.__lessonCardsHandler) {
@@ -66,7 +84,6 @@
             event.preventDefault();
             toggleAllCards();
         };
-
         direction.addEventListener("click", direction.__lessonCardsHandler);
 
         if (direction.__lessonCardsKeyHandler) {
@@ -79,17 +96,28 @@
                 toggleAllCards();
             }
         };
-
         direction.addEventListener("keydown", direction.__lessonCardsKeyHandler);
 
+        if (romajiButton) {
+            if (romajiButton.__handler) {
+                romajiButton.removeEventListener("click", romajiButton.__handler);
+            }
+            romajiButton.__handler = function (event) {
+                event.preventDefault();
+                toggleBackRomaji();
+            };
+            romajiButton.addEventListener("click", romajiButton.__handler);
+        }
+
         updateSwitchUI();
+        updateRomajiUI();
         applyCardState();
 
         // lesson-filter.js rebuilds #grid when filters/order change.
-        // Keep the current Front/Back state for newly created cards.
+        // Preserve both the Front/Back state and Romaji visibility.
         if (observer) observer.disconnect();
         observer = new MutationObserver(() => {
-            if (showBack) applyCardState();
+            if (showBack || !showBackRomaji) applyCardState();
         });
         observer.observe(grid, { childList: true });
     }
