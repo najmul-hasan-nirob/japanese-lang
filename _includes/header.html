@@ -45,7 +45,7 @@
         if(window.innerWidth<=520 && e.target.closest('a')) close();
     });
     document.addEventListener('click',function(e){
-        if(window.innerWidth<=520 && !e.target.closest('.page-head')) close();
+        if(window.innerWidth<=520 && !e.target.closest('.page-head') && !e.target.closest('.toolbar')) close();
     });
     window.addEventListener('resize',function(){if(window.innerWidth>520)close();});
 })();
