@@ -33,8 +33,10 @@
 
         const mainNav=nav.querySelector('.main-nav');
         const direction=document.getElementById('direction');
+        const bottomControls=document.querySelector('.mobile-bottom-controls');
         let filters=[];
         let placeholders=[];
+        let directionPlaceholder=null;
         let moved=false;
 
         function moveFilters(){
@@ -49,6 +51,14 @@
                 field.classList.add('mobile-menu-filter');
                 mainNav.insertBefore(field,direction);
             });
+
+            if(direction && bottomControls && direction.parentNode !== bottomControls){
+                directionPlaceholder=document.createComment('desktop-direction-position');
+                mainNav.insertBefore(directionPlaceholder,direction);
+                direction.classList.add('mobile-bottom-direction');
+                bottomControls.appendChild(direction);
+            }
+
             moved=true;
         }
 
@@ -60,8 +70,15 @@
                 if(marker && marker.parentNode) marker.parentNode.insertBefore(field,marker.nextSibling);
             });
             placeholders.forEach(marker=>marker.remove());
-            filters=[];
             placeholders=[];
+            filters=[];
+
+            if(direction && directionPlaceholder){
+                direction.classList.remove('mobile-bottom-direction');
+                directionPlaceholder.parentNode.insertBefore(direction,directionPlaceholder);
+                directionPlaceholder.remove();
+                directionPlaceholder=null;
+            }
             moved=false;
         }
 
