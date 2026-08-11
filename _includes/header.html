@@ -14,7 +14,7 @@
             <a href="{{ '/numbers.html' | relative_url }}">数 Numbers</a>
             <a href="{{ '/lessons.html' | relative_url }}">📖 Lessons</a>
             <button id="theme">🌙 Dark</button>
-            <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show all lesson cards front or back">
+            <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show all cards front or back">
                 <span class="abacus-label left active" id="directionLeftLabel">Front</span>
                 <div class="rod"><div class="bead" id="bead"></div></div>
                 <span class="abacus-label right" id="directionRightLabel">Back</span>
@@ -41,7 +41,11 @@
 
         function moveFilters(){
             if(moved || window.innerWidth>520 || !toolbar || !mainNav)return;
-            filters=Array.from(toolbar.querySelectorAll(':scope > .filter-field'));
+
+            // Move every normal filter field from the page toolbar into
+            // the mobile hamburger menu. Lessons already uses this same
+            // mechanism; Kana and Numbers now use it too.
+            filters=Array.from(toolbar.querySelectorAll(':scope > .field:not(.mobile-bottom-control-field)'));
             if(!filters.length)return;
 
             filters.forEach(field=>{
@@ -49,9 +53,10 @@
                 field.parentNode.insertBefore(marker,field);
                 placeholders.push(marker);
                 field.classList.add('mobile-menu-filter');
-                mainNav.insertBefore(field,direction);
+                mainNav.appendChild(field);
             });
 
+            // Keep the shared Front/Back switch in the mobile sticky bar.
             if(direction && bottomControls && direction.parentNode !== bottomControls){
                 directionPlaceholder=document.createComment('desktop-direction-position');
                 mainNav.insertBefore(directionPlaceholder,direction);
@@ -64,6 +69,7 @@
 
         function restoreFilters(){
             if(!moved)return;
+
             filters.forEach((field,i)=>{
                 field.classList.remove('mobile-menu-filter');
                 const marker=placeholders[i];
