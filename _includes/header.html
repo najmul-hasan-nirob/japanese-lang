@@ -4,7 +4,7 @@
         <h1>Japanese Learning</h1>
     </div>
 
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="mobileMenuArea" aria-label="Open menu">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-label="Open menu">
         <span></span>
         <span></span>
         <span></span>
@@ -16,13 +16,37 @@
             <a href="{{ '/numbers.html' | relative_url }}">数 Numbers</a>
             <a href="{{ '/lessons.html' | relative_url }}">📖 Lessons</a>
             <button id="theme">🌙 Dark</button>
-            <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show all lesson cards front or back">
-                <span class="abacus-label left active" id="directionLeftLabel">Front</span>
+            <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Switch which side shows first">
+                <span class="abacus-label left active" id="directionLeftLabel">Kana</span>
                 <div class="rod"><div class="bead" id="bead"></div></div>
-                <span class="abacus-label right" id="directionRightLabel">Back</span>
+                <span class="abacus-label right" id="directionRightLabel">Romaji</span>
             </div>
         </nav>
-
-        <div class="mobile-menu-extra" id="mobileMenuExtra"></div>
     </div>
 </div>
+
+<script>
+(function(){
+    const toggle=document.getElementById('mobileMenuToggle');
+    const nav=document.getElementById('mobileMenuArea');
+    if(!toggle||!nav)return;
+    function close(){
+        document.body.classList.remove('mobile-menu-open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded','false');
+    }
+    toggle.addEventListener('click',function(e){
+        e.stopPropagation();
+        const open=document.body.classList.toggle('mobile-menu-open');
+        toggle.classList.toggle('open',open);
+        toggle.setAttribute('aria-expanded',String(open));
+    });
+    nav.addEventListener('click',function(e){
+        if(window.innerWidth<=520 && e.target.closest('a')) close();
+    });
+    document.addEventListener('click',function(e){
+        if(window.innerWidth<=520 && !e.target.closest('.page-head')) close();
+    });
+    window.addEventListener('resize',function(){if(window.innerWidth>520)close();});
+})();
+</script>
