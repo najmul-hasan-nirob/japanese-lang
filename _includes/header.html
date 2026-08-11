@@ -1,19 +1,28 @@
 <div class="page-head">
     <div class="logo">
         <div class="kanji-mark">あ数</div>
-        <h1>Japanese Learning</h1>  
+        <h1>Japanese Learning</h1>
     </div>
-        <div class="nav">
-            <nav class="main-nav">
-                <a href="{{ '/index.html' | relative_url }}">あ Kana</a>
-                <a href="{{ '/numbers.html' | relative_url }}">数 Numbers</a>
-                <a href="{{ '/lessons.html' | relative_url }}">📖 Lessons</a>
-                <button id="theme">🌙 Dark</button>
-                <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Switch which side shows first">
-                    <span class="abacus-label left active" id="directionLeftLabel">Kana</span>
-                    <div class="rod"><div class="bead" id="bead"></div></div>
-                    <span class="abacus-label right" id="directionRightLabel">Romaji</span>
-                </div>                
-            </nav>
-        </div>
+
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="mobileMenuArea" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <div class="nav" id="mobileMenuArea">
+        <nav class="main-nav">
+            <a href="{{ '/index.html' | relative_url }}">あ Kana</a>
+            <a href="{{ '/numbers.html' | relative_url }}">数 Numbers</a>
+            <a href="{{ '/lessons.html' | relative_url }}">📖 Lessons</a>
+            <button id="theme">🌙 Dark</button>
+            <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show all lesson cards front or back">
+                <span class="abacus-label left active" id="directionLeftLabel">Front</span>
+                <div class="rod"><div class="bead" id="bead"></div></div>
+                <span class="abacus-label right" id="directionRightLabel">Back</span>
+            </div>
+        </nav>
+
+        <div class="mobile-menu-extra" id="mobileMenuExtra"></div>
+    </div>
 </div>
