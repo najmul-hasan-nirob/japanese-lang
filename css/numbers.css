@@ -150,14 +150,6 @@
 
 }
 
-@media (max-width:520px){
-
-    .kanji-mark{ font-size:42px; }
-    h1{ font-size:22px; }
-    .nav-btn{ margin-left:0; }
-
-}
-
 .field{
 
     display:flex;
