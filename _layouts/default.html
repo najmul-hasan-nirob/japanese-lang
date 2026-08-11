@@ -31,7 +31,10 @@
     {% for script in page.js %}
         <script src="{{ script | relative_url }}"></script>
     {% endfor %}
-{% endif %}
+    {% endif %}
+
+    <!-- Shared Front / Back switch for Kana, Numbers and Lessons -->
+    <script src="{{ '/js/direction.js' | relative_url }}"></script>
 
 </body>
 </html>
