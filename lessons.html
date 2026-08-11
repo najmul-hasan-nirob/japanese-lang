@@ -37,13 +37,13 @@ js:
 
 <div class="toolbar">
 
-    <div class="field">
+    <div class="field filter-field">
         <label id="lessonLabel">Lesson</label>
         <button type="button" class="multiselect-btn" id="lessonBtn" aria-haspopup="true" aria-expanded="false">Lesson 1</button>
         <div class="multiselect-panel" id="lessonPanel"></div>
     </div>
 
-    <div class="field">
+    <div class="field filter-field">
         <label for="mode">Order</label>
         <select id="mode">
             <option value="normal">Normal</option>
@@ -51,7 +51,7 @@ js:
         </select>
     </div>
 
-    <div class="field">
+    <div class="field filter-field">
         <label id="typeLabel">Type</label>
         <button type="button" class="multiselect-btn" id="typeBtn" aria-haspopup="true" aria-expanded="false">Vocabulary</button>
         <div class="multiselect-panel" id="typePanel">
@@ -62,11 +62,16 @@ js:
         </div>
     </div>
 
-</div>
+    <div class="field mobile-bottom-control-field">
+        <label>&nbsp;</label>
+        <button id="shuffleBtn" class="shuffle-btn" type="button">🔀 Shuffle</button>
+    </div>
 
-<div class="mobile-bottom-controls">
-    <button id="shuffleBtn" class="shuffle-btn" type="button">🔀 Shuffle</button>
-    <button id="backRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true">Romaji: ON</button>
+    <div class="field romaji-toggle-field mobile-bottom-control-field">
+        <label for="backRomajiToggle">Back Romaji</label>
+        <button id="backRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true">Romaji: ON</button>
+    </div>
+
 </div>
 
 <div class="count-display" id="countDisplay" aria-live="polite"></div>
