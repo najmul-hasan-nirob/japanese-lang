@@ -75,12 +75,14 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
 
 .back .lesson-tag{ color:rgba(247,242,231,.65); }
 
+/* Each field takes only the width it needs; the toolbar fills the row. */
 .field{
     display:flex;
     flex-direction:column;
     gap:4px;
     position:relative;
-    width:23.8%;
+    width:auto;
+    flex:0 0 auto;
 }
 
 /* Vocabulary flip-back: Romaji → English → Bangla */
