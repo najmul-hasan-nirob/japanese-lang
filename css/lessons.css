@@ -135,10 +135,11 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
         align-items:stretch;
         gap:0;
         width:100%;
-        padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+        padding:5px 5px calc(5px + env(safe-area-inset-bottom));
         background:var(--paper-cell);
         border-top:1px solid var(--paper-line);
         box-shadow:0 -4px 14px rgba(36,31,24,.12);
+        gap: 5px;
     }
 
     .mobile-bottom-controls > button,
