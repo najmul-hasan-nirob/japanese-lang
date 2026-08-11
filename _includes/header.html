@@ -3,11 +3,7 @@
         <div class="kanji-mark">あ数</div>
         <h1>Japanese Learning</h1>
     </div>
-
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-label="Open menu">
-        <span></span><span></span><span></span>
-    </button>
-
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-label="Open menu"><span></span><span></span><span></span></button>
     <div class="nav" id="mobileMenuArea">
         <nav class="main-nav">
             <a href="{{ '/index.html' | relative_url }}">あ Kana</a>
@@ -15,118 +11,49 @@
             <a href="{{ '/lessons.html' | relative_url }}">📖 Lessons</a>
             <button id="theme">🌙 Dark</button>
             <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show all cards front or back">
-                <span class="abacus-label left active" id="directionLeftLabel">Front</span>
-                <div class="rod"><div class="bead" id="bead"></div></div>
-                <span class="abacus-label right" id="directionRightLabel">Back</span>
+                <span class="abacus-label left active" id="directionLeftLabel">Front</span><div class="rod"><div class="bead" id="bead"></div></div><span class="abacus-label right" id="directionRightLabel">Back</span>
             </div>
         </nav>
     </div>
 </div>
-
 <script>
 (function(){
-    function initMobileMenu(){
-        const toggle=document.getElementById('mobileMenuToggle');
-        const nav=document.getElementById('mobileMenuArea');
-        const toolbar=document.querySelector('.toolbar');
-        if(!toggle||!nav)return;
-
-        const mainNav=nav.querySelector('.main-nav');
-        const direction=document.getElementById('direction');
-        const bottomControls=document.querySelector('.mobile-bottom-controls');
-        let filters=[];
-        let placeholders=[];
-        let directionPlaceholder=null;
-        let moved=false;
-
-        function moveFilters(){
-            if(moved || window.innerWidth>520 || !toolbar || !mainNav)return;
-
-            // Move every normal filter field from the page toolbar into
-            // the mobile hamburger menu. Lessons already uses this same
-            // mechanism; Kana and Numbers now use it too.
-            filters=Array.from(toolbar.querySelectorAll(':scope > .field:not(.mobile-bottom-control-field)'));
-            if(!filters.length)return;
-
-            filters.forEach(field=>{
-                const marker=document.createComment('desktop-filter-position');
-                field.parentNode.insertBefore(marker,field);
-                placeholders.push(marker);
-                field.classList.add('mobile-menu-filter');
-                mainNav.appendChild(field);
-            });
-
-            // Keep the shared Front/Back switch in the mobile sticky bar.
-            if(direction && bottomControls && direction.parentNode !== bottomControls){
-                directionPlaceholder=document.createComment('desktop-direction-position');
-                mainNav.insertBefore(directionPlaceholder,direction);
-                direction.classList.add('mobile-bottom-direction');
-                bottomControls.appendChild(direction);
-            }
-
-            moved=true;
-        }
-
-        function restoreFilters(){
-            if(!moved)return;
-
-            filters.forEach((field,i)=>{
-                field.classList.remove('mobile-menu-filter');
-                const marker=placeholders[i];
-                if(marker && marker.parentNode) marker.parentNode.insertBefore(field,marker.nextSibling);
-            });
-            placeholders.forEach(marker=>marker.remove());
-            placeholders=[];
-            filters=[];
-
-            if(direction && directionPlaceholder){
-                direction.classList.remove('mobile-bottom-direction');
-                directionPlaceholder.parentNode.insertBefore(direction,directionPlaceholder);
-                directionPlaceholder.remove();
-                directionPlaceholder=null;
-            }
-            moved=false;
-        }
-
-        function sync(){
-            if(window.innerWidth<=520) moveFilters();
-            else restoreFilters();
-        }
-
-        function close(){
-            document.body.classList.remove('mobile-menu-open');
-            toggle.classList.remove('open');
-            toggle.setAttribute('aria-expanded','false');
-        }
-
-        sync();
-
-        toggle.addEventListener('click',function(e){
-            e.stopPropagation();
-            sync();
-            const open=document.body.classList.toggle('mobile-menu-open');
-            toggle.classList.toggle('open',open);
-            toggle.setAttribute('aria-expanded',String(open));
-        });
-
-        nav.addEventListener('click',function(e){
-            if(window.innerWidth<=520 && e.target.closest('a'))close();
-        });
-
-        document.addEventListener('click',function(e){
-            if(window.innerWidth<=520 && !e.target.closest('.page-head'))close();
-        });
-
-        window.addEventListener('resize',function(){
-            sync();
-            if(window.innerWidth>520)close();
-        });
-    }
-
-    if(document.readyState==='loading'){
-        document.addEventListener('DOMContentLoaded',initMobileMenu);
-    }else{
-        initMobileMenu();
-    }
+function initMobileMenu(){
+ const toggle=document.getElementById('mobileMenuToggle'),nav=document.getElementById('mobileMenuArea'),toolbar=document.querySelector('.toolbar');
+ if(!toggle||!nav)return;
+ const mainNav=nav.querySelector('.main-nav'),direction=document.getElementById('direction');
+ let bottom=document.querySelector('.mobile-bottom-controls'),filters=[],filterMarks=[],directionMark=null,shuffleMark=null,romajiMark=null,moved=false;
+ if(!bottom){bottom=document.createElement('div');bottom.className='mobile-bottom-controls';document.body.appendChild(bottom);}
+ function move(){
+  if(moved||innerWidth>520)return;
+  if(toolbar){
+   filters=Array.from(toolbar.querySelectorAll(':scope > .field')).filter(f=>!f.querySelector('#shuffleBtn')&&!f.querySelector('#backRomajiToggle'));
+   filters.forEach(f=>{const m=document.createComment('desktop-filter-position');f.before(m);filterMarks.push(m);f.classList.add('mobile-menu-filter');mainNav.appendChild(f);});
+   const shuffle=document.getElementById('shuffleBtn');
+   if(shuffle&&shuffle.parentNode!==bottom){shuffleMark=document.createComment('desktop-shuffle-position');shuffle.before(shuffleMark);bottom.appendChild(shuffle);}
+  }
+  const romaji=document.getElementById('backRomajiToggle');
+  if(romaji&&romaji.parentNode!==bottom){romajiMark=document.createComment('desktop-romaji-position');romaji.before(romajiMark);bottom.appendChild(romaji);}
+  if(direction&&direction.parentNode!==bottom){directionMark=document.createComment('desktop-direction-position');direction.before(directionMark);direction.classList.add('mobile-bottom-direction');bottom.appendChild(direction);}
+  if(bottom.parentNode!==document.body)document.body.appendChild(bottom);
+  moved=true;
+ }
+ function restore(){
+  if(!moved)return;
+  filters.forEach((f,i)=>{f.classList.remove('mobile-menu-filter');const m=filterMarks[i];if(m&&m.parentNode)m.after(f);});filterMarks.forEach(m=>m.remove());filters=[];filterMarks=[];
+  const shuffle=document.getElementById('shuffleBtn');if(shuffle&&shuffleMark&&shuffleMark.parentNode){shuffle.remove();shuffleMark.after(shuffle);}if(shuffleMark){shuffleMark.remove();shuffleMark=null;}
+  const romaji=document.getElementById('backRomajiToggle');if(romaji&&romajiMark&&romajiMark.parentNode){romaji.remove();romajiMark.after(romaji);}if(romajiMark){romajiMark.remove();romajiMark=null;}
+  if(direction&&directionMark&&directionMark.parentNode){direction.remove();direction.classList.remove('mobile-bottom-direction');directionMark.after(direction);}if(directionMark){directionMark.remove();directionMark=null;}
+  moved=false;
+ }
+ function sync(){innerWidth<=520?move():restore();}
+ function close(){document.body.classList.remove('mobile-menu-open');toggle.classList.remove('open');toggle.setAttribute('aria-expanded','false');}
+ sync();
+ toggle.addEventListener('click',e=>{e.stopPropagation();sync();const open=document.body.classList.toggle('mobile-menu-open');toggle.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));});
+ nav.addEventListener('click',e=>{if(innerWidth<=520&&e.target.closest('a'))close();});
+ document.addEventListener('click',e=>{if(innerWidth<=520&&!e.target.closest('.page-head'))close();});
+ addEventListener('resize',()=>{sync();if(innerWidth>520)close();});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initMobileMenu);else initMobileMenu();
 })();
 </script>
