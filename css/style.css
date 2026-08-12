@@ -9,7 +9,7 @@ body.dark{--paper:#15141A;--paper-cell:#1E1C24;--paper-line:#33303C;--ink:#EDE7D
 body{font-family:'Zen Kaku Gothic New',sans-serif;background-color:var(--paper);color:var(--ink);padding:36px 20px 60px;transition:background-color .35s ease,color .35s ease;background-image:linear-gradient(var(--paper-line) 1px,transparent 1px),linear-gradient(90deg,var(--paper-line) 1px,transparent 1px);background-size:34px 34px;background-position:center top;}
 .grid{max-width:var(--layout-width);margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background-color:var(--paper);opacity:.55;z-index:-1;transition:background-color .35s ease;}
-.page-head{max-width:var(--layout-width);margin:0 auto 30px;gap:20px;}
+.page-head{max-width:var(--layout-width);margin:0 auto 30px;gap:20px;position:sticky;top:0;z-index:900;background:var(--paper);padding:12px 0;box-shadow:0 1px 0 var(--paper-line);}
 .kanji-mark{font-family:'Shippori Mincho',serif;font-size:40px;font-weight:800;color:var(--vermilion);line-height:1;flex-shrink:0;}
 h1{font-family:'Shippori Mincho',serif;font-weight:700;font-size:38px;letter-spacing:.02em;margin-bottom:4px;margin-top:-13px;}
 .subtitle{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink-soft);letter-spacing:.03em;}
@@ -38,7 +38,7 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
 .mobile-menu-toggle{display:none;}
 @media (max-width:520px){
     body{padding:18px 12px 100px;}
-    .page-head{display:flex;align-items:center;justify-content:space-between;position:relative;margin-bottom:20px;}
+    .page-head{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;margin-bottom:20px;padding:12px 0;}
     .logo{align-items:center;gap:10px;} .kanji-mark{font-size:35px;} h1{font-size:20px;margin-top:0;}
     .mobile-menu-toggle{display:flex;width:42px;height:42px;padding:8px;flex-direction:column;justify-content:center;align-items:center;gap:5px;border:1px solid var(--paper-line);border-radius:7px;background:var(--paper-cell);color:var(--ink);cursor:pointer;flex-shrink:0;}
     .mobile-menu-toggle span{display:block;width:20px;height:2px;border-radius:2px;background:var(--ink);transition:transform .2s ease,opacity .2s ease;}
@@ -57,8 +57,7 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
     .mobile-bottom-controls .rod{width:42px;}
     .mobile-bottom-controls .abacus.right .bead{transform:translate(22px,-50%);}
     .count-display{margin-bottom:14px;}
-    .logo h1{font-size: 20px !important;}
-    .logo .kanji-mark {
-        font-size: 30px;
+    .logo h1{font-size:20px!important;}
+    .logo .kanji-mark{font-size:30px;}
 }
 @media (min-width:521px){.mobile-bottom-controls{display:none!important;}}
