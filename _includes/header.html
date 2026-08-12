@@ -1,3 +1,27 @@
+<style>
+/* Sticky site header: remove the initial gap above it on every page. */
+.page-head{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:var(--paper);
+    padding-top:0;
+    padding-bottom:12px;
+}
+body{
+    padding-top:0 !important;
+}
+@media (max-width:520px){
+    .page-head{
+        padding-top:0;
+        padding-bottom:10px;
+    }
+    body{
+        padding-top:0 !important;
+    }
+}
+</style>
+
 <div class="page-head">
     <div class="logo">
         <div class="kanji-mark">あ数</div>
