@@ -29,6 +29,7 @@
             const visual = document.createElement("div");
             visual.className = "lesson-illustration";
             visual.setAttribute("aria-hidden", "true");
+            visual.style.setProperty("--cell", window.matchMedia("(max-width: 520px)").matches ? "88px" : "120px");
             visual.style.backgroundImage = `url("${spriteUrl}")`;
             visual.style.setProperty("--sprite-col", col);
             visual.style.setProperty("--sprite-row", row);
@@ -45,6 +46,11 @@
         addIllustrations();
         const grid = document.getElementById("grid");
         if (grid) new MutationObserver(addIllustrations).observe(grid, { childList: true });
+        window.addEventListener("resize", () => {
+            document.querySelectorAll(".lesson-illustration").forEach(el => {
+                el.style.setProperty("--cell", window.matchMedia("(max-width: 520px)").matches ? "88px" : "120px");
+            });
+        });
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
