@@ -20,7 +20,6 @@
     }
 
     function addIllustrations() {
-        // Only vocabulary cards from Lesson 1 get artwork.
         document.querySelectorAll("#grid .card").forEach(card => {
             if (card.dataset.lessonIllustration === "done") return;
 
@@ -29,7 +28,7 @@
             if (!front || !back) return;
 
             const key = Object.keys(illustrations).find(word => normalize(front.textContent).includes(word));
-            const asset = key && window.lesson1WebP ? lesson1WebP[illustrations[key]] : null;
+            const asset = key && typeof lesson1WebP !== "undefined" ? lesson1WebP[illustrations[key]] : null;
             if (!asset) return;
 
             const visual = document.createElement("img");
