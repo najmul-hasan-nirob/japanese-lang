@@ -113,6 +113,28 @@ document.addEventListener("DOMContentLoaded", () => {
         return item.bn || bn[item.en] || "বাংলা অর্থ যোগ করা হবে";
     }
 
+    function speakJapanese(text) {
+        if (!("speechSynthesis" in window)) return;
+
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "ja-JP";
+        utter.rate = 0.9;
+
+        const applyVoiceAndSpeak = () => {
+            const voices = window.speechSynthesis.getVoices();
+            const jaVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("ja"));
+            if (jaVoice) utter.voice = jaVoice;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utter);
+        };
+
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.addEventListener("voiceschanged", applyVoiceAndSpeak, { once: true });
+        } else {
+            applyVoiceAndSpeak();
+        }
+    }
+
     function renderLessons() {
         const grid = document.getElementById("grid");
         const mode = document.getElementById("mode");
@@ -156,6 +178,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>`;
             }
             card.addEventListener("click", () => card.classList.toggle("flipped"));
+
+            // TEST: pronunciation button, scoped to just the わたし card for now
+            if (item.jp === "わたし") {
+                const speakerBtn = document.createElement("button");
+                speakerBtn.type = "button";
+                speakerBtn.className = "speaker-btn";
+                speakerBtn.setAttribute("aria-label", "Play pronunciation");
+                speakerBtn.textContent = "🔊";
+                speakerBtn.addEventListener("click", e => {
+                    e.stopPropagation();
+                    speakJapanese(item.jp);
+                });
+                card.appendChild(speakerBtn);
+            }
+
             frag.appendChild(card);
         });
         grid.appendChild(frag);
