@@ -63,39 +63,48 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
 @media (min-width:521px){.mobile-bottom-controls{display:none!important;}}
 
 /* ---------- SPEAKER BUTTON (shared, all pages) ---------- */
-
+/*
+   The speaker remains a real clickable button in the card corner,
+   but the visual speaker icon is hidden. Clicking the invisible
+   corner still triggers the existing pronunciation JavaScript.
+*/
 .speaker-btn{
     position:absolute;
-    top:4px;
-    right:4px;
-    width:20px;
-    height:32px;
+    top:0;
+    right:0;
+    width:34px;
+    height:34px;
+    padding:0;
     border:none;
-    border-radius:50%;
-    background:rgba(0,0,0,.08);
-    color:var(--ink);
-    font-size:12px;
+    border-radius:0;
+    background:transparent !important;
+    color:transparent !important;
+    font-size:0;
     line-height:1;
     display:flex;
     align-items:center;
     justify-content:center;
     cursor:pointer;
     z-index:5;
-    transition:background-color .15s ease, transform .15s ease;
+    opacity:0;
+    box-shadow:none;
+    transform:none !important;
 }
 
 .speaker-btn:hover{
-    background:var(--vermilion);
-    color:#fff;
-    transform:scale(1.08);
+    background:transparent !important;
+    color:transparent !important;
+    transform:none !important;
 }
 
-body.dark .speaker-btn{
-    background:rgba(255,255,255,.12);
-    color:var(--ink);
+.speaker-btn:focus-visible{
+    opacity:.35;
+    outline:2px solid var(--vermilion);
+    outline-offset:-2px;
 }
 
+body.dark .speaker-btn,
 body.dark .speaker-btn:hover{
-    background:var(--vermilion);
-    color:#fff;
+    background:transparent !important;
+    color:transparent !important;
 }
