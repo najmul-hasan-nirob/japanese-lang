@@ -24,17 +24,37 @@ themeBtn.addEventListener("click",()=>{
 });
 
 // =====================================================
-// Shared: Japanese pronunciation (Web Speech API)
+// Shared: Japanese pronunciation
 // =====================================================
-// Used by home.js, numbers.js, and lesson-filter.js to
-// add a speaker button to flashcards.
+// Android WebView does not expose the browser Web Speech
+// synthesis API. When the app provides the AndroidTTS
+// bridge, use native Android TextToSpeech first. Normal
+// browsers continue using the existing Web Speech API.
 // =====================================================
 
 function speakJapanese(text){
 
-    if(!("speechSynthesis" in window) || !text) return;
+    if(!text) return;
 
-    const utter = new SpeechSynthesisUtterance(String(text));
+    const japaneseText = String(text).trim();
+    if(!japaneseText) return;
+
+    // Native Android TTS bridge (used by the WebView app).
+    // Keep this first so Android does not depend on
+    // window.speechSynthesis, which WebView may not support.
+    if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
+        try{
+            window.AndroidTTS.speak(japaneseText);
+            return;
+        }catch(e){
+            // Fall through to browser TTS if the bridge fails.
+        }
+    }
+
+    // Normal browser pronunciation.
+    if(!window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") return;
+
+    const utter = new SpeechSynthesisUtterance(japaneseText);
     utter.lang = "ja-JP";
     utter.rate = 0.9;
 
