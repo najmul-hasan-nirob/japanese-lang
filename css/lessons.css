@@ -82,7 +82,7 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     gap:4px;
     position:relative;
     width:auto;
-    flex:0 0 auto;
+    flex:1 0 auto;
 }
 
 /* Vocabulary flip-back: Romaji → English → Bangla */
