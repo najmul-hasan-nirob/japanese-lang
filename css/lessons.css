@@ -57,6 +57,9 @@
     transform:rotateY(180deg);
     border-color:var(--indigo-deep);
 }
+.back .bangla{
+    color: #59cb75
+}
 
 .card:hover .front,
 .card:hover .back{ border-color:var(--vermilion); }
