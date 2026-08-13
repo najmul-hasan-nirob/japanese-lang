@@ -12,7 +12,6 @@
         "あなた": "anata",
         "せんせい": "sensei",
         "がくせい": "gakusei",
-        "だいがく": "gakkou",
         "かいしゃいん": "kaisha"
     };
 
