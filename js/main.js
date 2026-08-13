@@ -24,62 +24,15 @@ themeBtn.addEventListener("click",()=>{
 });
 
 // =====================================================
-// Shared: Japanese pronunciation
+// Shared: Japanese pronunciation (Web Speech API)
 // =====================================================
-// Primary: direct Japanese TTS audio (no MP3 files in the repo).
-// Fallback: the device/browser Web Speech API.
-// The audio request is started directly from the speaker click,
-// which is important for Android WebView user-gesture policies.
+// Used by home.js, numbers.js, and lesson-filter.js to
+// add a speaker button to flashcards.
 // =====================================================
-
-let activeTtsAudio = null;
-const ttsAudioCache = new Map();
 
 function speakJapanese(text){
-    text = cleanForSpeech(text);
-    if(!text) return;
 
-    // Stop the previous pronunciation first.
-    if(activeTtsAudio){
-        try{
-            activeTtsAudio.pause();
-            activeTtsAudio.currentTime = 0;
-        }catch(e){}
-        activeTtsAudio = null;
-    }
-
-    // Direct audio TTS. No per-card audio files are stored in GitHub.
-    const key = String(text);
-    let audio = ttsAudioCache.get(key);
-
-    if(!audio){
-        const url = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&total=1&idx=0&q=" + encodeURIComponent(key);
-        audio = new Audio(url);
-        audio.preload = "auto";
-        audio.setAttribute("playsinline", "true");
-        ttsAudioCache.set(key, audio);
-    }
-
-    activeTtsAudio = audio;
-
-    const fallback = () => {
-        if(activeTtsAudio === audio) activeTtsAudio = null;
-        speakJapaneseWithWebSpeech(key);
-    };
-
-    audio.onended = () => {
-        if(activeTtsAudio === audio) activeTtsAudio = null;
-    };
-    audio.onerror = fallback;
-
-    const playPromise = audio.play();
-    if(playPromise && typeof playPromise.catch === "function"){
-        playPromise.catch(fallback);
-    }
-}
-
-function speakJapaneseWithWebSpeech(text){
-    if(!(window.speechSynthesis && window.SpeechSynthesisUtterance)) return;
+    if(!("speechSynthesis" in window) || !text) return;
 
     const utter = new SpeechSynthesisUtterance(String(text));
     utter.lang = "ja-JP";
@@ -98,6 +51,7 @@ function speakJapaneseWithWebSpeech(text){
     }else{
         applyVoiceAndSpeak();
     }
+
 }
 
 // Strips example-sentence numbering (①②③...) before speaking
