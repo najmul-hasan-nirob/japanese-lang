@@ -41,7 +41,7 @@
         "person-question": () => `<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="40" cy="34" r="13" fill="none" stroke="currentColor" stroke-width="5"/><path d="M18 82c2-20 10-29 22-29s20 9 22 29" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M69 35c0-8 14-10 17-2 2 6-4 9-8 12v4" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="78" cy="57" r="2.5" fill="currentColor"/></svg>`,
         birthday: () => `<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="18" y="48" width="64" height="34" rx="4" fill="none" stroke="currentColor" stroke-width="5"/><path d="M18 60h64M35 48c-9-11 7-18 15-5 8-13 24-6 15 5" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M50 24v14M43 31h14" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`,
         yes: () => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 52l20 20 44-46" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-        no: () => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M25 25l50 50M75 25L25 75" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>"
+        no: () => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M25 25l50 50M75 25L25 75" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>`
     };
 
     function normalize(text) {
@@ -56,9 +56,7 @@
             const back = card.querySelector(".back.vocabulary-back, .back");
             if (!front || !back) return;
 
-            // The front contains the Japanese word. Ignore lesson/type labels.
-            const candidates = Object.keys(illustrations);
-            const key = candidates.find(word => normalize(front.textContent).includes(word));
+            const key = Object.keys(illustrations).find(word => normalize(front.textContent).includes(word));
             if (!key || !svg[illustrations[key]]) return;
 
             const visual = document.createElement("div");
@@ -66,7 +64,7 @@
             visual.innerHTML = svg[illustrations[key]]();
             visual.setAttribute("aria-hidden", "true");
 
-            // IMPORTANT: illustration is added ONLY to the back.
+            // Illustration is deliberately added ONLY to the back.
             back.appendChild(visual);
             card.dataset.lessonIllustration = "done";
         });
@@ -75,9 +73,7 @@
     function init() {
         addIllustrations();
         const grid = document.getElementById("grid");
-        if (grid) {
-            new MutationObserver(addIllustrations).observe(grid, { childList: true });
-        }
+        if (grid) new MutationObserver(addIllustrations).observe(grid, { childList: true });
     }
 
     if (document.readyState === "loading") {
