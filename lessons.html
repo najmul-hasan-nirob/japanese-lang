@@ -79,8 +79,31 @@ js:
 <div class="grid" id="grid"></div>
 
 <style>
+/* Lesson 1 visual memory layer */
+.lesson-illustration{
+    display:block;
+    width:72px;
+    height:72px;
+    flex:0 0 auto;
+    margin:2px auto;
+}
+
+.card:has(.lesson-illustration){
+    min-height:190px;
+}
+
+.front .lesson-illustration{ order:3; }
+.back .lesson-illustration{ order:1; }
+
 @media (max-width:520px){
     .grid{grid-template-columns:repeat(2,1fr);}
+    .lesson-illustration{
+        width:58px;
+        height:58px;
+    }
+    .card:has(.lesson-illustration){
+        min-height:180px;
+    }
 }
 </style>
 
