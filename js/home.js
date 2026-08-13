@@ -485,6 +485,8 @@ function render(){
                     card.classList.toggle("flipped");
                 });
 
+                card.appendChild(createSpeakerButton(item.jp));
+
                 grid.appendChild(card);
 
             });
@@ -525,6 +527,8 @@ function render(){
         card.addEventListener("click",()=>{
             card.classList.toggle("flipped");
         });
+
+        card.appendChild(createSpeakerButton(item.jp));
 
         grid.appendChild(card);
 

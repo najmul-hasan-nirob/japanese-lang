@@ -120,6 +120,8 @@ function render(){
             card.classList.toggle("flipped");
         });
 
+        card.appendChild(createSpeakerButton(item.num));
+
         frag.appendChild(card);
 
     });
