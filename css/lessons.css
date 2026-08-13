@@ -121,6 +121,31 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     line-height:1.5;
 }
 
+/* Lesson 1 visual memory illustration — BACK CARD ONLY. */
+.lesson-illustration{
+    width:64px;
+    height:64px;
+    flex:0 0 64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:5px auto 0;
+    border:1px solid rgba(247,242,231,.18);
+    border-radius:12px;
+    background:rgba(247,242,231,.06);
+    color:#F7F2E7;
+    opacity:.94;
+}
+
+.lesson-illustration svg{
+    width:48px;
+    height:48px;
+    display:block;
+}
+
+/* Each lesson visual is intentionally appended to .back, never .front. */
+.front .lesson-illustration{ display:none !important; }
+
 /* Mobile: keep all three lesson controls in one fixed bottom bar. */
 .mobile-bottom-controls{
     display:none;
@@ -132,6 +157,19 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     .vocabulary-back .romaji,
     .vocabulary-back .english,
     .vocabulary-back .bangla{ font-size:13px; }
+
+    .lesson-illustration{
+        width:52px;
+        height:52px;
+        flex-basis:52px;
+        margin-top:4px;
+        border-radius:10px;
+    }
+
+    .lesson-illustration svg{
+        width:40px;
+        height:40px;
+    }
 
     .mobile-bottom-controls{
         position:fixed;
