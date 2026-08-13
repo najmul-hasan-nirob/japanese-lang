@@ -68,7 +68,7 @@ button:focus-visible{ outline:2px solid var(--vermilion); outline-offset:2px; }
 .card{
 
     position:relative;
-    height:64px;
+    height:90px;
     perspective:1000px;
     cursor:pointer;
 
@@ -110,6 +110,7 @@ button:focus-visible{ outline:2px solid var(--vermilion); outline-offset:2px; }
     backface-visibility:hidden;
     border:1px solid var(--paper-line);
     box-shadow:var(--shadow);
+    padding-top: 35px;
 
 }
 

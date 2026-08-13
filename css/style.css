@@ -7,7 +7,7 @@
 body.dark{--paper:#15141A;--paper-cell:#1E1C24;--paper-line:#33303C;--ink:#EDE7DA;--ink-soft:#948C7C;--indigo:#7C93D6;--indigo-deep:#AFC0F0;--vermilion:#E37A52;--vermilion-soft:rgba(227,122,82,.14);--shadow:0 2px 14px rgba(0,0,0,.35);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Zen Kaku Gothic New',sans-serif;background-color:var(--paper);color:var(--ink);padding:36px 20px 60px;transition:background-color .35s ease,color .35s ease;background-image:linear-gradient(var(--paper-line) 1px,transparent 1px),linear-gradient(90deg,var(--paper-line) 1px,transparent 1px);background-size:34px 34px;background-position:center top;}
-.grid{max-width:var(--layout-width);margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.grid{max-width:var(--layout-width);margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background-color:var(--paper);opacity:.55;z-index:-1;transition:background-color .35s ease;}
 .page-head{max-width:var(--layout-width);margin:0 auto 30px;gap:20px;position:sticky;top:0;z-index:900;background:var(--paper);padding:12px 0;box-shadow:0 1px 0 var(--paper-line);}
 .kanji-mark{font-family:'Shippori Mincho',serif;font-size:40px;font-weight:800;color:var(--vermilion);line-height:1;flex-shrink:0;}
@@ -69,12 +69,12 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
     top:4px;
     right:4px;
     width:20px;
-    height:20px;
+    height:32px;
     border:none;
     border-radius:50%;
     background:rgba(0,0,0,.08);
     color:var(--ink);
-    font-size:10px;
+    font-size:12px;
     line-height:1;
     display:flex;
     align-items:center;
