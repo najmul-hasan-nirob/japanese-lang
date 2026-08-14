@@ -10,18 +10,10 @@
     display: flex;
     align-items: center;
 }
-body{
-    padding-top:0 !important;
-}
+body{padding-top:0 !important;}
 @media (max-width:520px){
-    .page-head{
-        padding-top:5px;
-        padding-bottom:10px;
-        padding-left: 10px;
-    }
-    body{
-        padding-top:0 !important;
-    }
+    .page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}
+    body{padding-top:0 !important;}
 }
 </style>
 
@@ -36,6 +28,7 @@ body{
             <a href="{{ '/index.html' | relative_url }}">あ Kana</a>
             <a href="{{ '/numbers.html' | relative_url }}">数 Numbers</a>
             <a href="{{ '/lessons.html' | relative_url }}">📖 Lessons</a>
+            <a href="{{ '/practice.html' | relative_url }}">🧠 Practice</a>
             <button id="theme">🌙 Dark</button>
             <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show all cards front or back">
                 <span class="abacus-label left active" id="directionLeftLabel">Front</span><div class="rod"><div class="bead" id="bead"></div></div><span class="abacus-label right" id="directionRightLabel">Back</span>
@@ -55,7 +48,7 @@ function initMobileMenu(){
   if(moved||innerWidth>520)return;
   if(toolbar){
    filters=Array.from(toolbar.querySelectorAll(':scope > .field')).filter(f=>!f.querySelector('#shuffleBtn')&&!f.querySelector('#backRomajiToggle'));
-   filters.forEach(f=>{const m=document.createComment('desktop-filter-position');f.before(m);filterMarks.push(m);f.classList.add('mobile-menu-filter');mainNav.appendChild(f);});
+   filters.forEach(f=>{const m=document.createComment('desktop-filter-position');f.before(m);f.classList.add('mobile-menu-filter');mainNav.appendChild(f);filterMarks.push(m);});
    const shuffle=document.getElementById('shuffleBtn');
    if(shuffle&&shuffle.parentNode!==bottom){shuffleMark=document.createComment('desktop-shuffle-position');shuffle.before(shuffleMark);bottom.appendChild(shuffle);}
   }
