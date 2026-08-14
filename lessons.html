@@ -154,14 +154,50 @@ js:
 (function(){
     const grid=document.getElementById('grid');
     const count=document.getElementById('countDisplay');
+    const typePanel=document.getElementById('typePanel');
+
+    function getVisibleCount(){
+        if (!grid) return 0;
+        return grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length;
+    }
+
+    function getCountLabel(){
+        if (!typePanel) return 'cards';
+
+        const boxes=Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
+        const hard=boxes.find(box=>box.value==='hard');
+        if (!hard?.checked) return null;
+
+        const selected=boxes
+            .filter(box=>box.value!=='hard' && box.checked)
+            .map(box=>box.closest('label')?.textContent.trim() || box.value);
+
+        // Hard Vocabulary is an overlay on the normal Type selection.
+        // Keep the user's Type selection and describe the hard result clearly.
+        if (selected.length===1 && selected[0].toLowerCase()==='vocabulary') {
+            return 'Hard Vocabulary';
+        }
+
+        const typeName=selected.length ? selected.join(' + ') : 'Vocabulary';
+        return `Hard ${typeName} Vocabulary`;
+    }
 
     function updateCount(){
         if (!grid || !count) return;
-        const total=grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length;
-        count.textContent=`Showing ${total} ${total===1 ? 'card' : 'cards'}`;
+        const total=getVisibleCount();
+        const hardLabel=getCountLabel();
+        if (hardLabel) {
+            count.textContent=`Showing ${total} ${hardLabel}`;
+        } else {
+            count.textContent=`Showing ${total} ${total===1 ? 'card' : 'cards'}`;
+        }
     }
 
     updateCount();
     if (grid) new MutationObserver(updateCount).observe(grid,{childList:true,attributes:true,attributeFilter:['style']});
+    if (typePanel) {
+        typePanel.addEventListener('change',()=>setTimeout(updateCount,0));
+    }
+    document.addEventListener('hardVocabularyUpdated',updateCount);
 })();
 </script>
