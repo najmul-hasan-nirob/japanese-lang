@@ -1,27 +1,16 @@
 <style>
-/* Sticky site header: remove the initial gap above it on every page. */
-.page-head{
-    position:sticky;
-    top:0;
-    z-index:1000;
-    background:var(--paper);
-    padding-top:0;
-    padding-bottom:12px;
-    display: flex;
-    align-items: center;
-}
+.page-head{position:sticky;top:0;z-index:1000;background:var(--paper);padding-top:0;padding-bottom:12px;display:flex;align-items:center;}
 body{padding-top:0 !important;}
-@media (max-width:520px){
-    .page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}
-    body{padding-top:0 !important;}
-}
+@media (max-width:520px){.page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}body{padding-top:0 !important;}}
+.logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
+.logo h1{color:var(--ink);}
 </style>
 
 <div class="page-head">
-    <div class="logo">
+    <a href="{{ '/' | relative_url }}" class="logo" aria-label="Japanese Learning home">
         <div class="kanji-mark">あ数</div>
         <h1>Japanese Learning</h1>
-    </div>
+    </a>
     <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-label="Open menu"><span></span><span></span><span></span></button>
     <div class="nav" id="mobileMenuArea">
         <nav class="main-nav">
