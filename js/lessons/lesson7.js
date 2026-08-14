@@ -23,7 +23,7 @@ const lesson7 = {
       "jp": "もらいます",
       "romaji": "moraimasu",
       "en": "receive",
-      "bn": "গ্রহণ করা / পাওয়া"
+      "bn": "পাওয়া / গ্রহণ করা"
     },
     {
       "jp": "かします",
@@ -47,11 +47,11 @@ const lesson7 = {
       "jp": "ならいます",
       "romaji": "naraimasu",
       "en": "learn",
-      "bn": "শেখা"
+      "bn": "শেখা / কারও কাছ থেকে শেখা"
     },
     {
       "jp": "かけます[でんわを～]",
-      "romaji": "kakemasu[denwao～]",
+      "romaji": "kakemasu[denwa o～]",
       "en": "make [a telephone call]",
       "bn": "ফোন করা"
     },
@@ -69,7 +69,7 @@ const lesson7 = {
     },
     {
       "jp": "スプーン",
-      "romaji": "supu-n",
+      "romaji": "supūn",
       "en": "spoon",
       "bn": "চামচ"
     },
@@ -81,7 +81,7 @@ const lesson7 = {
     },
     {
       "jp": "フォーク",
-      "romaji": "fuォ-ku",
+      "romaji": "fōku",
       "en": "fork",
       "bn": "কাঁটা চামচ"
     },
@@ -105,13 +105,13 @@ const lesson7 = {
     },
     {
       "jp": "メール",
-      "romaji": "me-ru",
+      "romaji": "mēru",
       "en": "e-mail",
       "bn": "ই-মেইল"
     },
     {
       "jp": "ねんがじょう",
-      "romaji": "nengajou",
+      "romaji": "nengajō",
       "en": "New Year's greeting card",
       "bn": "নববর্ষের শুভেচ্ছা কার্ড"
     },
@@ -119,7 +119,7 @@ const lesson7 = {
       "jp": "パンチ",
       "romaji": "panchi",
       "en": "punch",
-      "bn": "ঘুষি মারা"
+      "bn": "কাগজ ছিদ্র করার যন্ত্র"
     },
     {
       "jp": "ホッチキス",
@@ -129,7 +129,7 @@ const lesson7 = {
     },
     {
       "jp": "セロテープ",
-      "romaji": "serote-pu",
+      "romaji": "serotēpu",
       "en": "Sellotape, Scotch tape, clear tape",
       "bn": "স্বচ্ছ আঠালো টেপ"
     },
@@ -153,7 +153,7 @@ const lesson7 = {
     },
     {
       "jp": "シャツ",
-      "romaji": "shiャtsu",
+      "romaji": "shatsu",
       "en": "shirt",
       "bn": "শার্ট"
     },
@@ -201,19 +201,19 @@ const lesson7 = {
     },
     {
       "jp": "おとうさん",
-      "romaji": "otousan",
+      "romaji": "otōsan",
       "en": "(someone else's) father (also used to address one's own father)",
       "bn": "বাবা"
     },
     {
       "jp": "おかあさん",
-      "romaji": "okaasan",
+      "romaji": "okāsan",
       "en": "(someone else's) mother (also used to address one's own mother)",
       "bn": "মা"
     },
     {
       "jp": "もう",
-      "romaji": "mou",
+      "romaji": "mō",
       "en": "already",
       "bn": "ইতিমধ্যে"
     },
@@ -227,13 +227,13 @@ const lesson7 = {
       "jp": "これから",
       "romaji": "korekara",
       "en": "from now on, soon",
-      "bn": "এখন থেকে / শিগগির"
+      "bn": "এখন থেকে / এখন"
     }
   ],
   "cpart": [
     {
       "jp": "[～]って すてきですね。",
-      "romaji": "[～]tte sutekidesune。",
+      "romaji": "[～]tte suteki desu ne。",
       "en": "What a nice [~]!",
       "bn": "কী সুন্দর [~]!"
     },
@@ -241,37 +241,37 @@ const lesson7 = {
       "jp": "いらっしゃい。",
       "romaji": "irasshai。",
       "en": "Do come in.",
-      "bn": "আসা / করা"
+      "bn": "এসো / আসুন / স্বাগতম"
     },
     {
       "jp": "どうぞ おあがりください。",
-      "romaji": "douzo oagarikudasai。",
+      "romaji": "dōzo oagari kudasai。",
       "en": "Won't you come in?",
-      "bn": "আসা"
+      "bn": "দয়া করে ভিতরে আসুন"
     },
     {
       "jp": "しつれいします。",
-      "romaji": "shitsureishimasu。",
+      "romaji": "shitsurei shimasu。",
       "en": "(said before entering someone's house)",
       "bn": "কারও বাড়িতে ঢোকার আগে বলা ভদ্র অভিব্যক্তি"
     },
     {
       "jp": "[～を] どうぞ。",
-      "romaji": "[～o] douzo。",
+      "romaji": "[～o] dōzo。",
       "en": "Won't you have [~]? (used when offering something)",
-      "bn": "[~] নেবেন না? / [~] গ্রহণ করবেন?"
+      "bn": "[~] নিন / গ্রহণ করুন"
     },
     {
       "jp": "いただきます。",
       "romaji": "itadakimasu。",
       "en": "Thank you. I accept. (said before eating or drinking)",
-      "bn": "ধন্যবাদ, আমি গ্রহণ করছি। / খাওয়া বা পান করার আগে বলা হয়"
+      "bn": "খাওয়া বা পান করা শুরু করার আগে বলা ভদ্র অভিব্যক্তি"
     },
     {
       "jp": "ごちそうさま[でした]。",
-      "romaji": "gochisousama[deshita]。",
+      "romaji": "gochisōsama[deshita]。",
       "en": "That was delicious. (said after eating or drinking)",
-      "bn": "সুস্বাদু"
+      "bn": "খাওয়ার পর কৃতজ্ঞতা জানানোর অভিব্যক্তি / খাবারের জন্য ধন্যবাদ"
     }
   ],
   "country": [
