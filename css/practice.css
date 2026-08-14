@@ -131,7 +131,7 @@
 }
 @media (max-width:520px){
     .lesson-choices {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
 }
 .practice-hero {
     flex-direction: column;
