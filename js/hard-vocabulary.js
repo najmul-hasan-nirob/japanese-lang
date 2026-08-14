@@ -1,8 +1,9 @@
 // =====================================================
 // Hard Vocabulary — Lessons page only
 // =====================================================
-// Starred vocabulary is stored locally and can be practiced
-// through the Type > Hard vocabulary filter.
+// IMPORTANT: "Hard vocabulary" is an OVERLAY filter.
+// It is never passed to the normal lesson type renderer.
+// This avoids the race condition that caused empty results on mobile/WebView.
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,38 +14,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const STORAGE_KEY = "japanese-lang-hard-vocabulary";
     let hardMode = false;
-    let previousTypeState = null;
-    let syncTimer = null;
+    let hardBusy = false;
+    let restoreState = null;
+    let renderTimer = null;
 
     function loadHardWords() {
         try {
-            const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            return new Set(Array.isArray(value) ? value : []);
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            return new Set(Array.isArray(data) ? data : []);
         } catch (_) {
             return new Set();
         }
     }
 
-    function saveHardWords() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords]));
-    }
-
     let hardWords = loadHardWords();
 
+    function saveHardWords() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
+    }
+
+    function normalBoxes() {
+        return Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
+            .filter(cb => cb.value !== "hard");
+    }
+
+    function getHardCheckbox() {
+        return typePanel.querySelector('input[type="checkbox"][value="hard"]');
+    }
+
     function ensureHardCheckbox() {
-        let checkbox = typePanel.querySelector('input[value="hard"]');
-        if (checkbox) return checkbox;
+        let cb = getHardCheckbox();
+        if (cb) return cb;
 
         const label = document.createElement("label");
-        checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = "hard";
-        checkbox.id = "hardVocabularyFilter";
-        label.appendChild(checkbox);
+        cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = "hard";
+        cb.id = "hardVocabularyFilter";
+        label.appendChild(cb);
         label.appendChild(document.createTextNode(" Hard vocabulary"));
         typePanel.appendChild(label);
-        bindHardCheckbox(checkbox);
-        return checkbox;
+        return cb;
     }
 
     function cardKey(card) {
@@ -82,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     saveHardWords();
                     updateStar(star, hardWords.has(key));
 
-                    if (hardMode) syncHardView();
+                    if (hardMode) scheduleHardFilter();
                 });
                 card.appendChild(star);
             }
@@ -90,110 +100,137 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function updateTypeButtonLabel() {
+    function updateTypeLabel() {
         if (!typeBtn) return;
-        const boxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
-        const selected = boxes.filter(box => box.checked);
-        if (selected.length === boxes.length) typeBtn.textContent = "All types";
-        else if (selected.length === 0) typeBtn.textContent = "None";
-        else typeBtn.textContent = selected.map(box => box.closest("label")?.textContent.trim() || box.value).join(" + ");
+        const boxes = normalBoxes();
+        const hard = getHardCheckbox();
+        const selected = boxes.filter(cb => cb.checked);
+
+        if (hard?.checked && selected.length === 0) {
+            typeBtn.textContent = "Hard vocabulary";
+        } else if (selected.length === boxes.length) {
+            typeBtn.textContent = "All types";
+        } else if (selected.length === 0) {
+            typeBtn.textContent = "None";
+        } else {
+            typeBtn.textContent = selected
+                .map(cb => cb.closest("label")?.textContent.trim() || cb.value)
+                .join(" + ");
+        }
     }
 
     function applyHardFilter() {
+        if (!hardMode) return;
         const cards = Array.from(grid.querySelectorAll(":scope > .card"));
+
         cards.forEach(card => {
             const vocab = card.querySelector(".vocabulary-back");
-            const visible = !hardMode || (vocab && hardWords.has(cardKey(card)));
-            card.style.display = visible ? "" : "none";
+            card.style.display = (vocab && hardWords.has(cardKey(card))) ? "" : "none";
         });
+
         addStars();
-        updateTypeButtonLabel();
+        updateTypeLabel();
         grid.dispatchEvent(new CustomEvent("hardVocabularyUpdated", { bubbles: true }));
     }
 
-    function syncHardView() {
-        clearTimeout(syncTimer);
-        syncTimer = setTimeout(() => {
+    function scheduleHardFilter() {
+        clearTimeout(renderTimer);
+        renderTimer = setTimeout(() => {
+            if (!hardMode) return;
             addStars();
-            if (hardMode) applyHardFilter();
-        }, 0);
+            applyHardFilter();
+        }, 30);
     }
 
-    function renderNormalVocabularyThenFilter() {
-        const hardCheckbox = ensureHardCheckbox();
-        const boxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
-        const normalBoxes = boxes.filter(box => box !== hardCheckbox);
+    function activateHardMode(cb) {
+        if (hardBusy) return;
+        hardBusy = true;
+        hardMode = true;
 
-        // IMPORTANT: the normal lesson renderer does not know that "hard"
-        // is a special filter. If it sees hard checked, it can render zero
-        // cards. Temporarily remove hard from the renderer's input, ask it to
-        // render Vocabulary, then restore Hard mode after the DOM is updated.
-        hardCheckbox.checked = false;
-        normalBoxes.forEach(box => {
-            box.checked = box.value === "vocabulary";
-        });
+        // Remember the user's normal type selection.
+        restoreState = normalBoxes().map(box => ({ value: box.value, checked: box.checked }));
 
-        const vocabularyBox = typePanel.querySelector('input[value="vocabulary"]');
-        if (vocabularyBox) {
-            vocabularyBox.dispatchEvent(new Event("change", { bubbles: true }));
+        // The normal renderer must ONLY see Vocabulary. Hard is our overlay.
+        const vocabulary = typePanel.querySelector('input[value="vocabulary"]');
+        normalBoxes().forEach(box => { box.checked = box === vocabulary; });
+        cb.checked = true;
+
+        // Let the existing renderer build ordinary vocabulary cards first.
+        if (vocabulary) {
+            vocabulary.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
-        hardCheckbox.checked = true;
-        syncHardView();
+        // Renderer is asynchronous/dynamic on some mobile browsers/WebViews.
+        setTimeout(() => {
+            addStars();
+            applyHardFilter();
+            hardBusy = false;
+        }, 50);
+        setTimeout(() => {
+            addStars();
+            applyHardFilter();
+        }, 250);
     }
 
-    function bindHardCheckbox(checkbox) {
-        if (checkbox.dataset.hardBound === "1") return;
-        checkbox.dataset.hardBound = "1";
+    function deactivateHardMode(cb) {
+        hardMode = false;
+        cb.checked = false;
 
-        checkbox.addEventListener("change", event => {
-            event.stopPropagation();
+        if (restoreState) {
+            restoreState.forEach(saved => {
+                const box = typePanel.querySelector(`input[value="${CSS.escape(saved.value)}"]`);
+                if (box) box.checked = saved.checked;
+            });
+        }
 
-            if (checkbox.checked) {
-                previousTypeState = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
-                    .filter(box => box !== checkbox)
-                    .map(box => ({ value: box.value, checked: box.checked }));
+        const vocabulary = typePanel.querySelector('input[value="vocabulary"]');
+        if (vocabulary) vocabulary.dispatchEvent(new Event("change", { bubbles: true }));
 
-                hardMode = true;
-                renderNormalVocabularyThenFilter();
-            } else {
-                hardMode = false;
-
-                if (previousTypeState) {
-                    previousTypeState.forEach(saved => {
-                        const box = typePanel.querySelector(`input[value="${CSS.escape(saved.value)}"]`);
-                        if (box) box.checked = saved.checked;
-                    });
-                }
-
-                const restoreBox = typePanel.querySelector('input[value="vocabulary"]');
-                if (restoreBox) restoreBox.dispatchEvent(new Event("change", { bubbles: true }));
-                syncHardView();
-            }
-
-            updateTypeButtonLabel();
-        });
+        restoreState = null;
+        updateTypeLabel();
     }
+
+    function handleHardChange(event) {
+        const cb = event.target;
+        if (!cb || cb.value !== "hard") return;
+
+        // This handler runs in CAPTURE phase so the normal type-filter handler
+        // never receives "hard" as one of its renderable types.
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        if (cb.checked) activateHardMode(cb);
+        else deactivateHardMode(cb);
+        updateTypeLabel();
+    }
+
+    // Capture-phase handler is the key change: Hard is an overlay, not a
+    // normal type understood by the Lesson renderer.
+    typePanel.addEventListener("change", handleHardChange, true);
 
     ensureHardCheckbox();
 
-    // If another script rebuilds the Type panel, recreate the Hard option and
-    // keep the active state. This is particularly important on mobile where
-    // WebView/browser rendering can happen at different times.
+    // If lesson-type.js rebuilds the panel, recreate the option without
+    // disturbing the active hard mode.
     const typeObserver = new MutationObserver(() => {
-        const checkbox = ensureHardCheckbox();
-        bindHardCheckbox(checkbox);
-        if (hardMode && !checkbox.checked) checkbox.checked = true;
-        updateTypeButtonLabel();
+        const cb = ensureHardCheckbox();
+        if (hardMode) {
+            cb.checked = true;
+            normalBoxes().forEach(box => {
+                if (box.value !== "vocabulary") box.checked = false;
+            });
+        }
+        updateTypeLabel();
     });
     typeObserver.observe(typePanel, { childList: true, subtree: true });
 
-    const gridObserver = new MutationObserver(mutations => {
-        if (!mutations.some(m => m.addedNodes.length || m.removedNodes.length)) return;
-        syncHardView();
+    // Any card rebuild is followed by the hard overlay.
+    const gridObserver = new MutationObserver(() => {
+        addStars();
+        if (hardMode) scheduleHardFilter();
     });
     gridObserver.observe(grid, { childList: true });
 
     addStars();
-    updateTypeButtonLabel();
+    updateTypeLabel();
 });
