@@ -8,6 +8,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("grid");
     const typePanel = document.getElementById("typePanel");
+    const typeBtn = document.getElementById("typeBtn");
     if (!grid || !typePanel) return;
 
     const STORAGE_KEY = "japanese-lang-hard-vocabulary";
@@ -40,6 +41,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const hardCheckbox = typePanel.querySelector('input[value="hard"]');
+
+    function updateTypeButtonLabel() {
+        if (!typeBtn) return;
+        const boxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
+        const selected = boxes.filter(box => box.checked);
+        if (selected.length === boxes.length) {
+            typeBtn.textContent = "All types";
+        } else if (selected.length === 0) {
+            typeBtn.textContent = "None";
+        } else {
+            typeBtn.textContent = selected
+                .map(box => box.closest("label").textContent.trim())
+                .join(" + ");
+        }
+    }
 
     function cardKey(card) {
         const front = card.querySelector(".front > div")?.textContent?.trim() || "";
@@ -112,6 +128,8 @@ document.addEventListener("DOMContentLoaded", () => {
         event.stopImmediatePropagation();
         hardMode = hardCheckbox.checked;
 
+        // The original renderer does not know about "hard". Temporarily remove
+        // it while requesting a normal render, then filter to starred cards.
         hardCheckbox.checked = false;
 
         const normalBox = typePanel.querySelector('input[type="checkbox"]:not([value="hard"])');
@@ -119,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(() => {
             hardCheckbox.checked = hardMode;
+            updateTypeButtonLabel();
             addStars();
             applyHardFilter();
         }, 0);
@@ -130,4 +149,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     addStars();
+    updateTypeButtonLabel();
 });
