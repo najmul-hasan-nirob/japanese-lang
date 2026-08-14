@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const STORAGE_KEY = "japanese-lang-hard-vocabulary";
     let hardMode = false;
+    let previousTypeState = null;
 
     function loadHardWords() {
         try {
@@ -107,7 +108,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyHardFilter() {
-        if (!hardMode) return;
+        if (!hardMode) {
+            grid.querySelectorAll(":scope > .card").forEach(card => {
+                card.style.display = "";
+            });
+            return;
+        }
+
         grid.querySelectorAll(":scope > .card").forEach(card => {
             const vocabBack = card.querySelector(".vocabulary-back");
             if (!vocabBack) {
@@ -118,34 +125,79 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function refreshHardView() {
+        // Rendering the normal vocabulary list is synchronous, but the grid
+        // mutation and star insertion are observed asynchronously. Run the
+        // filter on the next two animation frames so the freshly rendered
+        // cards are definitely present before we hide/show them.
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                addStars();
+                applyHardFilter();
+                updateTypeButtonLabel();
+            });
+        });
+    }
+
     const observer = new MutationObserver(() => {
         addStars();
-        applyHardFilter();
+        if (hardMode) applyHardFilter();
     });
     observer.observe(grid, { childList: true });
 
     hardCheckbox.addEventListener("change", event => {
         event.stopImmediatePropagation();
-        hardMode = hardCheckbox.checked;
 
-        // The original renderer does not know about "hard". Temporarily remove
-        // it while requesting a normal render, then filter to starred cards.
-        hardCheckbox.checked = false;
+        if (hardCheckbox.checked) {
+            // Remember the user's normal Type filter so leaving Hard vocabulary
+            // returns to exactly the previous selection.
+            previousTypeState = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
+                .filter(box => box !== hardCheckbox)
+                .map(box => ({ value: box.value, checked: box.checked }));
 
-        const normalBox = typePanel.querySelector('input[type="checkbox"]:not([value="hard"])');
-        if (normalBox) normalBox.dispatchEvent(new Event("change", { bubbles: true }));
+            hardMode = true;
 
-        setTimeout(() => {
-            hardCheckbox.checked = hardMode;
-            updateTypeButtonLabel();
-            addStars();
-            applyHardFilter();
-        }, 0);
+            // Hard vocabulary is a vocabulary-only view. Let the normal
+            // renderer rebuild the current lesson cards, then filter them to
+            // the starred vocabulary.
+            const normalBoxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
+                .filter(box => box !== hardCheckbox);
+            normalBoxes.forEach(box => {
+                box.checked = box.value === "vocabulary";
+            });
+
+            const vocabularyBox = typePanel.querySelector('input[value="vocabulary"]');
+            if (vocabularyBox) {
+                vocabularyBox.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+
+            refreshHardView();
+        } else {
+            hardMode = false;
+
+            // Restore the Type filter exactly as it was before Hard vocabulary
+            // was selected, then allow the normal renderer to rebuild the grid.
+            if (previousTypeState) {
+                previousTypeState.forEach(saved => {
+                    const box = typePanel.querySelector(`input[value="${CSS.escape(saved.value)}"]`);
+                    if (box) box.checked = saved.checked;
+                });
+            }
+
+            const restoreBox = typePanel.querySelector('input[value="vocabulary"]');
+            if (restoreBox) {
+                restoreBox.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+
+            refreshHardView();
+        }
+
+        updateTypeButtonLabel();
     }, true);
 
     typePanel.addEventListener("change", event => {
         if (event.target === hardCheckbox || !hardMode) return;
-        setTimeout(() => applyHardFilter(), 0);
+        refreshHardView();
     });
 
     addStars();
