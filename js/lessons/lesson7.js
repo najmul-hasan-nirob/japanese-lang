@@ -113,13 +113,13 @@ const lesson7 = {
       "jp": "ねんがじょう",
       "romaji": "nengajou",
       "en": "New Year's greeting card",
-      "bn": "বছর / নতুন"
+      "bn": "নববর্ষের শুভেচ্ছা কার্ড"
     },
     {
       "jp": "パンチ",
       "romaji": "panchi",
       "en": "punch",
-      "bn": "ছিদ্র করার পাঞ্চ মেশিন"
+      "bn": "ঘুষি মারা"
     },
     {
       "jp": "ホッチキス",
