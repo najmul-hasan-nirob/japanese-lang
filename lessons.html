@@ -161,31 +161,53 @@ js:
         return grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length;
     }
 
+    function getSelectedNormalTypes(){
+        if (!typePanel) return [];
+        return Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
+            .filter(box=>box.value!=='hard' && box.checked)
+            .map(box=>({value:box.value,label:box.closest('label')?.textContent.trim() || box.value}));
+    }
+
+    function getHardCountForCurrentCards(){
+        if (!grid) return 0;
+        return Array.from(grid.querySelectorAll(':scope > .card'))
+            .filter(card=>card.querySelector('.hard-star.active'))
+            .length;
+    }
+
     function getCountLabel(){
-        if (!typePanel) return 'cards';
+        if (!typePanel) return null;
 
         const boxes=Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
         const hard=boxes.find(box=>box.value==='hard');
         if (!hard?.checked) return null;
 
-        const selected=boxes
-            .filter(box=>box.value!=='hard' && box.checked)
-            .map(box=>box.closest('label')?.textContent.trim() || box.value);
-
-        // Hard Vocabulary is an overlay on the normal Type selection.
-        // Keep the user's Type selection and describe the hard result clearly.
-        if (selected.length===1 && selected[0].toLowerCase()==='vocabulary') {
+        const selected=getSelectedNormalTypes();
+        if (selected.length===1 && selected[0].value==='vocabulary') {
             return 'Hard Vocabulary';
         }
 
-        const typeName=selected.length ? selected.join(' + ') : 'Vocabulary';
+        const typeName=selected.length ? selected.map(item=>item.label).join(' + ') : 'Vocabulary';
         return `Hard ${typeName} Vocabulary`;
     }
 
     function updateCount(){
         if (!grid || !count) return;
+
         const total=getVisibleCount();
         const hardLabel=getCountLabel();
+
+        if (!hardLabel) {
+            const selected=getSelectedNormalTypes();
+            if (selected.length===1 && selected[0].value==='vocabulary') {
+                const hardCount=getHardCountForCurrentCards();
+                count.textContent=hardCount>0
+                    ? `Showing ${total} vocabulary + ${hardCount} hard vocabulary`
+                    : `Showing ${total} vocabulary`;
+                return;
+            }
+        }
+
         if (hardLabel) {
             count.textContent=`Showing ${total} ${hardLabel}`;
         } else {
