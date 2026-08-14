@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const STORAGE_KEY = "japanese-lang-hard-vocabulary";
     let hardMode = false;
     let previousTypeState = null;
+    let renderTimer = null;
 
     function loadHardWords() {
         try {
@@ -30,32 +31,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let hardWords = loadHardWords();
 
-    if (!typePanel.querySelector('input[value="hard"]')) {
+    // Create the filter immediately so it exists even if the normal lesson
+    // renderer has not finished initializing yet.
+    let hardCheckbox = typePanel.querySelector('input[value="hard"]');
+    if (!hardCheckbox) {
         const label = document.createElement("label");
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = "hard";
-        checkbox.id = "hardVocabularyFilter";
-        label.appendChild(checkbox);
+        hardCheckbox = document.createElement("input");
+        hardCheckbox.type = "checkbox";
+        hardCheckbox.value = "hard";
+        hardCheckbox.id = "hardVocabularyFilter";
+        label.appendChild(hardCheckbox);
         label.appendChild(document.createTextNode(" Hard vocabulary"));
         typePanel.appendChild(label);
     }
-
-    const hardCheckbox = typePanel.querySelector('input[value="hard"]');
 
     function updateTypeButtonLabel() {
         if (!typeBtn) return;
         const boxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
         const selected = boxes.filter(box => box.checked);
-        if (selected.length === boxes.length) {
-            typeBtn.textContent = "All types";
-        } else if (selected.length === 0) {
-            typeBtn.textContent = "None";
-        } else {
-            typeBtn.textContent = selected
-                .map(box => box.closest("label").textContent.trim())
-                .join(" + ");
-        }
+        if (selected.length === boxes.length) typeBtn.textContent = "All types";
+        else if (selected.length === 0) typeBtn.textContent = "None";
+        else typeBtn.textContent = selected.map(box => box.closest("label")?.textContent.trim() || box.value).join(" + ");
     }
 
     function cardKey(card) {
@@ -75,9 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addStars() {
         grid.querySelectorAll(":scope > .card").forEach(card => {
-            const vocabBack = card.querySelector(".vocabulary-back");
-            if (!vocabBack) return;
-
+            if (!card.querySelector(".vocabulary-back")) return;
             const key = cardKey(card);
             if (!key) return;
 
@@ -89,57 +83,58 @@ document.addEventListener("DOMContentLoaded", () => {
                 star.addEventListener("click", event => {
                     event.preventDefault();
                     event.stopPropagation();
-
-                    if (hardWords.has(key)) {
-                        hardWords.delete(key);
-                    } else {
-                        hardWords.add(key);
-                    }
+                    if (hardWords.has(key)) hardWords.delete(key);
+                    else hardWords.add(key);
                     saveHardWords(hardWords);
                     updateStar(star, hardWords.has(key));
-
+                    // Do not wait for a renderer or animation frame. If the
+                    // Hard view is active, update the visible grid immediately.
                     if (hardMode) applyHardFilter();
                 });
                 card.appendChild(star);
             }
-
             updateStar(star, hardWords.has(key));
         });
     }
 
     function applyHardFilter() {
-        if (!hardMode) {
-            grid.querySelectorAll(":scope > .card").forEach(card => {
-                card.style.display = "";
-            });
+        const cards = Array.from(grid.querySelectorAll(":scope > .card"));
+        cards.forEach(card => {
+            const vocab = card.querySelector(".vocabulary-back");
+            card.style.display = hardMode && (!vocab || !hardWords.has(cardKey(card))) ? "none" : "";
+        });
+        addStars();
+        updateTypeButtonLabel();
+        // Keep any existing card-count logic informed by the actual visibility.
+        grid.dispatchEvent(new CustomEvent("hardVocabularyUpdated", { bubbles: true }));
+    }
+
+    function waitForRenderedCards(callback, attempts = 30) {
+        if (grid.querySelector(":scope > .card")) {
+            callback();
             return;
         }
-
-        grid.querySelectorAll(":scope > .card").forEach(card => {
-            const vocabBack = card.querySelector(".vocabulary-back");
-            if (!vocabBack) {
-                card.style.display = "none";
-                return;
-            }
-            card.style.display = hardWords.has(cardKey(card)) ? "" : "none";
-        });
+        if (attempts <= 0) {
+            callback();
+            return;
+        }
+        setTimeout(() => waitForRenderedCards(callback, attempts - 1), 20);
     }
 
     function refreshHardView() {
-        // Rendering the normal vocabulary list is synchronous, but the grid
-        // mutation and star insertion are observed asynchronously. Run the
-        // filter on the next two animation frames so the freshly rendered
-        // cards are definitely present before we hide/show them.
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
+        clearTimeout(renderTimer);
+        renderTimer = setTimeout(() => {
+            waitForRenderedCards(() => {
                 addStars();
                 applyHardFilter();
-                updateTypeButtonLabel();
             });
-        });
+        }, 0);
     }
 
-    const observer = new MutationObserver(() => {
+    // Observe only card additions/removals. This avoids depending on mobile
+    // requestAnimationFrame timing and also avoids a MutationObserver loop.
+    const observer = new MutationObserver(mutations => {
+        if (!mutations.some(m => m.addedNodes.length || m.removedNodes.length)) return;
         addStars();
         if (hardMode) applyHardFilter();
     });
@@ -149,46 +144,34 @@ document.addEventListener("DOMContentLoaded", () => {
         event.stopImmediatePropagation();
 
         if (hardCheckbox.checked) {
-            // Remember the user's normal Type filter so leaving Hard vocabulary
-            // returns to exactly the previous selection.
             previousTypeState = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
                 .filter(box => box !== hardCheckbox)
                 .map(box => ({ value: box.value, checked: box.checked }));
 
             hardMode = true;
 
-            // Hard vocabulary is a vocabulary-only view. Let the normal
-            // renderer rebuild the current lesson cards, then filter them to
-            // the starred vocabulary.
+            // Keep the normal renderer in vocabulary mode, then apply the hard
+            // filter after its cards have actually been inserted into the DOM.
             const normalBoxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
                 .filter(box => box !== hardCheckbox);
-            normalBoxes.forEach(box => {
-                box.checked = box.value === "vocabulary";
-            });
+            normalBoxes.forEach(box => { box.checked = box.value === "vocabulary"; });
 
             const vocabularyBox = typePanel.querySelector('input[value="vocabulary"]');
-            if (vocabularyBox) {
-                vocabularyBox.dispatchEvent(new Event("change", { bubbles: true }));
-            }
-
+            if (vocabularyBox) vocabularyBox.dispatchEvent(new Event("change", { bubbles: true }));
             refreshHardView();
         } else {
             hardMode = false;
 
-            // Restore the Type filter exactly as it was before Hard vocabulary
-            // was selected, then allow the normal renderer to rebuild the grid.
             if (previousTypeState) {
                 previousTypeState.forEach(saved => {
-                    const box = typePanel.querySelector(`input[value="${CSS.escape(saved.value)}"]`);
+                    const box = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
+                        .find(input => input.value === saved.value);
                     if (box) box.checked = saved.checked;
                 });
             }
 
             const restoreBox = typePanel.querySelector('input[value="vocabulary"]');
-            if (restoreBox) {
-                restoreBox.dispatchEvent(new Event("change", { bubbles: true }));
-            }
-
+            if (restoreBox) restoreBox.dispatchEvent(new Event("change", { bubbles: true }));
             refreshHardView();
         }
 
