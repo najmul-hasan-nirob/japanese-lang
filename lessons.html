@@ -35,6 +35,7 @@ js:
   - /js/lesson-controls.js
   - /js/lesson1-webp.js
   - /js/lesson-illustrations.js
+  - /js/hard-vocabulary.js
 ---
 
 <div class="toolbar">
@@ -96,6 +97,39 @@ js:
 .front .lesson-illustration{ display:none !important; }
 .back .lesson-illustration{ display:flex; }
 
+/* Hard vocabulary star — top-left, opposite the speaker button */
+.hard-star{
+    position:absolute;
+    top:8px;
+    left:8px;
+    z-index:5;
+    width:30px;
+    height:30px;
+    padding:0;
+    border:0;
+    background:transparent;
+    color:inherit;
+    font-size:25px;
+    line-height:30px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:.72;
+    transition:transform .15s ease, opacity .15s ease;
+}
+
+.hard-star:hover,
+.hard-star:focus-visible{
+    opacity:1;
+    transform:scale(1.08);
+    outline:none;
+}
+
+.hard-star.active{
+    opacity:1;
+}
+
 @media (max-width:520px){
     .grid{grid-template-columns:repeat(2,1fr);}
     .lesson-illustration{
@@ -103,6 +137,14 @@ js:
     }
     .card:has(.lesson-illustration){
         min-height:230px;
+    }
+    .hard-star{
+        top:6px;
+        left:6px;
+        width:28px;
+        height:28px;
+        font-size:23px;
+        line-height:28px;
     }
 }
 </style>
@@ -114,11 +156,11 @@ js:
 
     function updateCount(){
         if (!grid || !count) return;
-        const total=grid.querySelectorAll(':scope > .card').length;
+        const total=grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length;
         count.textContent=`Showing ${total} ${total===1 ? 'card' : 'cards'}`;
     }
 
     updateCount();
-    if (grid) new MutationObserver(updateCount).observe(grid,{childList:true});
+    if (grid) new MutationObserver(updateCount).observe(grid,{childList:true,attributes:true,attributeFilter:['style']});
 })();
 </script>
