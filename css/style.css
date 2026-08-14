@@ -109,3 +109,10 @@ body.dark .speaker-btn:hover{
     background:transparent !important;
     color:transparent !important;
 }
+@media (min-width:520px){
+#theme{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+}
+}
