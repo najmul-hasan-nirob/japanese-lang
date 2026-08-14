@@ -78,8 +78,6 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
     padding:0;
     border:none;
     border-radius:0;
-    background:transparent !important;
-    color:#fff !important;
     font-size:0;
     line-height:1;
     display:flex;
@@ -93,8 +91,6 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
 }
 
 .speaker-btn:hover{
-    background:transparent !important;
-    color:transparent !important;
     transform:none !important;
 }
 
@@ -106,8 +102,7 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
 
 body.dark .speaker-btn,
 body.dark .speaker-btn:hover{
-    background:transparent !important;
-    color:transparent !important;
+
 }
 @media (min-width:520px){
 #theme{
