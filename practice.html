@@ -1,0 +1,86 @@
+---
+layout: default
+title: Japanese Practice
+css: /css/practice.css
+js:
+  - /js/main.js
+  - /js/lessons/lesson1.js
+  - /js/lessons/lesson2.js
+  - /js/lessons/lesson3.js
+  - /js/lessons/lesson4.js
+  - /js/lessons/lesson5.js
+  - /js/lessons/lesson6.js
+  - /js/lessons/lesson7.js
+  - /js/lessons/lesson8.js
+  - /js/lessons/lesson9.js
+  - /js/lessons/lesson10.js
+  - /js/lessons/lesson11.js
+  - /js/lessons/lesson12.js
+  - /js/lessons/lesson13.js
+  - /js/lessons/lesson14.js
+  - /js/lessons/lesson15.js
+  - /js/lessons/lesson16.js
+  - /js/lessons/lesson17.js
+  - /js/lessons/lesson18.js
+  - /js/lessons/lesson19.js
+  - /js/lessons/lesson20.js
+  - /js/lessons/lesson21.js
+  - /js/lessons/lesson22.js
+  - /js/lessons/lesson23.js
+  - /js/lessons/lesson24.js
+  - /js/lessons/lesson25.js
+  - /js/lessons.js
+  - /js/practice.js
+---
+
+<main class="practice-page">
+    <section class="practice-hero">
+        <div>
+            <span class="eyebrow">Active Recall</span>
+            <h2>🧠 Practice</h2>
+            <p>Try to remember the Japanese before revealing the answer.</p>
+        </div>
+        <div class="practice-stats">
+            <div><strong id="dueCount">0</strong><span>Due</span></div>
+            <div><strong id="newCount">0</strong><span>New</span></div>
+            <div><strong id="hardCount">0</strong><span>Hard</span></div>
+        </div>
+    </section>
+
+    <section id="practiceStart" class="practice-panel">
+        <h3>Review your vocabulary</h3>
+        <p id="startSummary">Loading your vocabulary…</p>
+        <button id="startPractice" class="practice-primary" type="button">Start Review</button>
+    </section>
+
+    <section id="practiceCard" class="practice-card-panel" hidden>
+        <div class="practice-progress"><span id="progressText">1 / 1</span><span id="progressBar"><i></i></span></div>
+        <div class="recall-card">
+            <div class="recall-front">
+                <span class="practice-lesson" id="practiceLesson"></span>
+                <div class="practice-japanese" id="practiceJapanese"></div>
+                <button id="practiceSpeak" class="practice-speak" type="button" aria-label="Play pronunciation">🔊</button>
+                <button id="showAnswer" class="practice-primary" type="button">Show Answer</button>
+            </div>
+            <div id="practiceAnswer" class="recall-answer" hidden>
+                <span class="practice-romaji" id="practiceRomaji"></span>
+                <div id="practiceIllustration" class="practice-illustration"></div>
+                <span class="practice-english" id="practiceEnglish"></span>
+                <span class="practice-bangla" id="practiceBangla"></span>
+            </div>
+        </div>
+        <div id="ratingButtons" class="rating-buttons" hidden>
+            <button data-rating="again" type="button"><strong>Again</strong><small>10 min</small></button>
+            <button data-rating="hard" type="button"><strong>Hard</strong><small>1 day</small></button>
+            <button data-rating="good" type="button"><strong>Good</strong><small>3 days</small></button>
+            <button data-rating="easy" type="button"><strong>Easy</strong><small>7 days</small></button>
+        </div>
+    </section>
+
+    <section id="practiceDone" class="practice-panel" hidden>
+        <div class="done-icon">🎉</div>
+        <h3>Review complete!</h3>
+        <p id="doneSummary"></p>
+        <button id="restartPractice" class="practice-primary" type="button">Practice Again</button>
+    </section>
+</main>
