@@ -1,1 +1,155 @@
-.practice-page{max-width:var(--layout-width);margin:0 auto;padding:18px 16px 80px}.practice-hero{display:flex;justify-content:space-between;gap:24px;align-items:center;margin-bottom:18px}.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;opacity:.65}.practice-hero h2{margin:4px 0;font-size:2rem}.practice-hero p{margin:0;opacity:.72}.practice-stats{display:flex;gap:8px}.practice-stats div,.practice-stat-button{min-width:76px;padding:10px 12px;text-align:center;border:1px solid rgba(127,127,127,.2);border-radius:12px;background:var(--paper,#fff);color:inherit}.practice-stat-button{font:inherit;cursor:pointer}.practice-stats strong,.practice-stats span{display:block}.practice-stats strong{font-size:1.35rem}.practice-stats span{font-size:.72rem;opacity:.65}.practice-stat-button:hover{border-color:currentColor}.practice-panel{max-width:620px;margin:30px auto;padding:28px;text-align:center;border:1px solid rgba(127,127,127,.2);border-radius:18px;background:var(--paper,#fff)}.practice-panel h3{margin-top:0}.practice-primary{border:0;border-radius:10px;padding:12px 22px;font-weight:700;cursor:pointer;background:var(--ink,#222);color:var(--paper,#fff)}.practice-filters{max-width: var(--layout-width);text-align:left}.practice-filter-head{display:flex;justify-content:space-between;gap:15px;align-items:center}.practice-filter-head h3{margin-bottom:5px}.practice-filter-head p{margin:0;opacity:.7;font-size:.9rem}.practice-filter-actions{display:flex;gap:6px}.practice-filter-actions button{border:1px solid rgba(127,127,127,.25);background:transparent;color:inherit;border-radius:8px;padding:7px 12px;cursor:pointer}.lesson-choices{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:18px}.lesson-choice{display:flex;align-items:center;gap:7px;padding:9px 10px;border<|fim_middle|>round
+.practice-page {
+    max-width: var(--layout-width);
+    margin: 0 auto;
+    padding: 18px 16px 80px
+}
+
+.practice-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 18px
+}
+
+.eyebrow {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    opacity: .65
+}
+
+.practice-hero h2 {
+    margin: 4px 0;
+    font-size: 2rem
+}
+
+.practice-hero p {
+    margin: 0;
+    opacity: .72
+}
+
+.practice-stats {
+    display: flex;
+    gap: 8px
+}
+
+.practice-stats div,
+.practice-stat-button {
+    min-width: 76px;
+    padding: 10px 12px;
+    text-align: center;
+    border: 1px solid rgba(127, 127, 127, .2);
+    border-radius: 12px;
+    background: var(--paper, #fff);
+    color: inherit
+}
+
+.practice-stat-button {
+    font: inherit;
+    cursor: pointer;
+    flex-direction: column;
+}
+
+.practice-stats strong,
+.practice-stats span {
+    display: block
+}
+
+.practice-stats strong {
+    font-size: 1.35rem
+}
+
+.practice-stats span {
+    font-size: .72rem;
+    opacity: .65
+}
+
+.practice-stat-button:hover {
+    border-color: currentColor
+}
+
+.practice-panel {
+    max-width: 620px;
+    margin: 30px auto;
+    padding: 28px;
+    text-align: center;
+    border: 1px solid rgba(127, 127, 127, .2);
+    border-radius: 18px;
+    background: var(--paper, #fff)
+}
+
+.practice-panel h3 {
+    margin-top: 0
+}
+
+.practice-primary {
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--ink, #222);
+    color: var(--paper, #fff);
+    margin-top: 15px;
+}
+
+.practice-filters {
+    max-width: var(--layout-width);
+    text-align: left
+}
+
+.practice-filter-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    align-items: center
+}
+
+.practice-filter-head h3 {
+    margin-bottom: 5px
+}
+
+.practice-filter-head p {
+    margin: 0;
+    opacity: .7;
+    font-size: .9rem
+}
+
+.practice-filter-actions {
+    display: flex;
+    gap: 6px
+}
+
+.practice-filter-actions button {
+    border: 1px solid rgba(127, 127, 127, .25);
+    background: transparent;
+    color: inherit;
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer
+}
+@media (max-width:520px){
+    .lesson-choices {
+    grid-template-columns: repeat(2, 1fr);
+}
+.practice-hero {
+    flex-direction: column;
+}
+.practice-stats {
+    width: 100%;
+}
+}
+.lesson-choices {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 18px
+}
+
+.lesson-choice {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 10px;
+    border<|fim_middle|>round
