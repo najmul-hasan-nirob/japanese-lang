@@ -98,10 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     else hardWords.add(key);
                     saveHardWords();
                     updateStar(star, hardWords.has(key));
-
-                    // Always notify the count display, not only when Hard mode
-                    // is active. This keeps "21 vocabulary + 2 hard vocabulary"
-                    // live while using the normal Vocabulary filter.
                     notifyHardVocabularyUpdated();
 
                     if (hardMode) scheduleHardFilter();
@@ -110,6 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             updateStar(star, hardWords.has(key));
         });
+
+        // Cards can be rebuilt after a page refresh. Re-read localStorage-backed
+        // star state into the DOM, then notify the count display after the stars
+        // actually exist. This makes the hard count survive a refresh.
+        notifyHardVocabularyUpdated();
     }
 
     function updateTypeLabel() {
@@ -158,7 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hardBusy = true;
         hardMode = true;
 
-        // Remember exactly what the user had selected in Type.
         restoreState = normalBoxes().map(box => ({
             value: box.value,
             checked: box.checked
@@ -203,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         restoreState = null;
         updateTypeLabel();
+        addStars();
     }
 
     function handleHardChange(event) {
