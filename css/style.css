@@ -79,7 +79,7 @@ select:hover{border-color:var(--vermilion);}select:focus-visible{outline:2px sol
     border:none;
     border-radius:0;
     background:transparent !important;
-    color:transparent !important;
+    color:#fff !important;
     font-size:0;
     line-height:1;
     display:flex;
