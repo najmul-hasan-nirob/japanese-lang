@@ -9,9 +9,7 @@
 // =====================================================
 (function () {
     function findSpeaker(card) {
-        return card.querySelector(
-            '.speaker-btn, .speak-btn, .pronunciation-btn, [aria-label="Play pronunciation"], [aria-label*="pronunciation" i]'
-        );
+        return card.querySelector('.speaker-btn, .speak-btn, .pronunciation-btn, [aria-label="Play pronunciation"], [aria-label*="pronunciation" i]');
     }
 
     function makeVisibleSpeaker(speaker) {
@@ -25,8 +23,6 @@
     function setupCard(card) {
         if (!card) return;
 
-        // Already converted: make sure a speaker added later is moved into
-        // the topbar instead of being left inside the card content.
         let inner = card.querySelector(':scope > .lesson-card-inner');
         let bar = inner?.querySelector(':scope > .lesson-card-topbar');
         let content = inner?.querySelector(':scope > .lesson-card-content');
@@ -34,7 +30,6 @@
         if (!inner) {
             inner = document.createElement('div');
             inner.className = 'lesson-card-inner';
-
             while (card.firstChild) inner.appendChild(card.firstChild);
             card.appendChild(inner);
         }
@@ -52,20 +47,20 @@
             inner.appendChild(content);
         }
 
-        // Controls can be created by other Lesson scripts after this script.
-        // Move them into the topbar whenever they appear.
         const star = inner.querySelector(':scope > .hard-star');
         const number = inner.querySelector(':scope > .lesson-card-number');
         const speaker = findSpeaker(inner);
 
-        if (star) bar.appendChild(star);
-        if (number) bar.appendChild(number);
+        if (star && star.parentElement !== bar) bar.appendChild(star);
+        if (number && number.parentElement !== bar) bar.appendChild(number);
         if (speaker && speaker.parentElement !== bar) bar.appendChild(speaker);
 
-        // Everything in the inner wrapper that isn't the topbar/content belongs
-        // to the card content (normally .front and .back).
+        // Move only the actual flip faces into the content wrapper.
         Array.from(inner.children).forEach(child => {
-            if (child !== bar && child !== content) content.appendChild(child);
+            if (child !== bar && child !== content &&
+                (child.classList.contains('front') || child.classList.contains('back'))) {
+                content.appendChild(child);
+            }
         });
 
         if (speaker) makeVisibleSpeaker(speaker);
@@ -78,53 +73,67 @@
         const style = document.createElement('style');
         style.id = 'lesson-card-structure-styles';
         style.textContent = `
-.lesson-card-inner {
+/* Keep the complete structure inside the exact card box. */
+.card.lesson-card-structured {
     position:relative;
+    overflow:hidden;
+    border-radius:var(--radius);
+}
+
+.lesson-card-inner {
+    position:absolute;
+    inset:0;
     width:100%;
     height:100%;
-    min-height:100%;
-    display:flex;
-    flex-direction:column;
+    overflow:hidden;
+    border-radius:inherit;
     box-sizing:border-box;
 }
 
+/* The topbar is physically inside the card, never outside its edges. */
 .lesson-card-topbar {
-    position:relative;
-    flex:0 0 38px;
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
     width:100%;
-    min-height:38px;
+    height:42px;
     display:grid;
     grid-template-columns:1fr auto 1fr;
     align-items:center;
     justify-items:center;
     box-sizing:border-box;
-    z-index:20;
+    z-index:50;
     pointer-events:none;
 }
 
 .lesson-card-content {
-    position:relative;
-    flex:1 1 auto;
-    min-height:0;
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    box-sizing:border-box;
-    padding:8px 12px 14px;
-}
-
-.lesson-card-content > .front,
-.lesson-card-content > .back {
+    position:absolute;
+    inset:0;
     width:100%;
     height:100%;
+    box-sizing:border-box;
+    overflow:hidden;
+    pointer-events:none;
+}
+
+/* Keep the existing card faces and their border/radius. Extra top padding
+   gives the content breathing room below the control bar. */
+.lesson-card-content > .front,
+.lesson-card-content > .back {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    box-sizing:border-box;
+    padding-top:50px !important;
+    padding-bottom:14px;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     text-align:center;
-    box-sizing:border-box;
+    pointer-events:auto;
 }
 
 .lesson-card-topbar .hard-star,
@@ -139,8 +148,17 @@
     pointer-events:auto;
 }
 
-.lesson-card-topbar .hard-star { grid-column:1; justify-self:start; margin-left:8px !important; }
-.lesson-card-topbar .lesson-card-number { grid-column:2; justify-self:center; }
+.lesson-card-topbar .hard-star {
+    grid-column:1;
+    justify-self:start;
+    margin-left:8px !important;
+}
+
+.lesson-card-topbar .lesson-card-number {
+    grid-column:2;
+    justify-self:center;
+}
+
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
@@ -154,9 +172,16 @@
 }
 
 @media (max-width:520px) {
-    .lesson-card-topbar { flex-basis:34px; min-height:34px; }
-    .lesson-card-content { padding:6px 8px 12px; }
+    .lesson-card-topbar { height:38px; }
+
+    .lesson-card-content > .front,
+    .lesson-card-content > .back {
+        padding-top:44px !important;
+        padding-bottom:10px;
+    }
+
     .lesson-card-topbar .hard-star { margin-left:5px !important; }
+
     .lesson-card-topbar .speaker-btn,
     .lesson-card-topbar .speak-btn,
     .lesson-card-topbar .pronunciation-btn { margin-right:5px !important; }
@@ -176,11 +201,7 @@
         injectStyles();
         setupAll(grid);
 
-        const observer = new MutationObserver(() => {
-            // Other Lesson scripts rebuild cards and add the star/number/speaker
-            // asynchronously. Re-run after their DOM mutations settle.
-            setTimeout(() => setupAll(grid), 0);
-        });
+        const observer = new MutationObserver(() => setTimeout(() => setupAll(grid), 0));
         observer.observe(grid, { childList: true, subtree: true });
     }
 
