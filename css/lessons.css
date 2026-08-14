@@ -5,6 +5,10 @@
     min-height:150px;
     perspective:1000px;
     cursor:pointer;
+    box-sizing:border-box;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    transition:border-color .25s ease, box-shadow .25s ease;
 }
 
 .inner{
@@ -17,7 +21,10 @@
 
 .card.flipped .inner{ transform:rotateY(180deg); }
 
-@media (prefers-reduced-motion:reduce){ .inner{ transition:none; } }
+@media (prefers-reduced-motion:reduce){
+    .inner{ transition:none; }
+    .card{ transition:none; }
+}
 
 .front,
 .back{
@@ -34,7 +41,7 @@
     line-height:1.4;
     word-break:break-word;
     backface-visibility:hidden;
-    border:1px solid var(--paper-line);
+    border:1px solid transparent;
     box-shadow:var(--shadow);
     overflow-y:auto;
 }
@@ -55,14 +62,16 @@
     font-size:13.5px;
     font-weight:400;
     transform:rotateY(180deg);
-    border-color:var(--indigo-deep);
+    border-color:transparent;
 }
 .back .bangla{
     color: #59cb75
 }
 
-.card:hover .front,
-.card:hover .back{ border-color:var(--vermilion); }
+/* The complete card, including the topbar, gets the hover transition. */
+.card:hover{
+    border-color:var(--vermilion);
+}
 
 .card.grammar .front{ color:var(--vermilion); }
 body.dark .card.grammar .front{ color:var(--vermilion); }
