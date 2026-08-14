@@ -1,8 +1,8 @@
 // =====================================================
 // Hard Vocabulary — Lessons page only
 // =====================================================
-// Saves starred vocabulary in localStorage so the list survives
-// refreshes and can be practiced later.
+// Starred vocabulary is stored locally and can be practiced
+// through the Type > Hard vocabulary filter.
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -14,51 +14,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const STORAGE_KEY = "japanese-lang-hard-vocabulary";
     let hardMode = false;
     let previousTypeState = null;
-    let renderTimer = null;
+    let syncTimer = null;
 
     function loadHardWords() {
         try {
-            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            return new Set(Array.isArray(saved) ? saved : []);
+            const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            return new Set(Array.isArray(value) ? value : []);
         } catch (_) {
             return new Set();
         }
     }
 
-    function saveHardWords(set) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+    function saveHardWords() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords]));
     }
 
     let hardWords = loadHardWords();
 
-    // Create the filter immediately so it exists even if the normal lesson
-    // renderer has not finished initializing yet.
-    let hardCheckbox = typePanel.querySelector('input[value="hard"]');
-    if (!hardCheckbox) {
+    function ensureHardCheckbox() {
+        let checkbox = typePanel.querySelector('input[value="hard"]');
+        if (checkbox) return checkbox;
+
         const label = document.createElement("label");
-        hardCheckbox = document.createElement("input");
-        hardCheckbox.type = "checkbox";
-        hardCheckbox.value = "hard";
-        hardCheckbox.id = "hardVocabularyFilter";
-        label.appendChild(hardCheckbox);
+        checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = "hard";
+        checkbox.id = "hardVocabularyFilter";
+        label.appendChild(checkbox);
         label.appendChild(document.createTextNode(" Hard vocabulary"));
         typePanel.appendChild(label);
-    }
-
-    function updateTypeButtonLabel() {
-        if (!typeBtn) return;
-        const boxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
-        const selected = boxes.filter(box => box.checked);
-        if (selected.length === boxes.length) typeBtn.textContent = "All types";
-        else if (selected.length === 0) typeBtn.textContent = "None";
-        else typeBtn.textContent = selected.map(box => box.closest("label")?.textContent.trim() || box.value).join(" + ");
+        bindHardCheckbox(checkbox);
+        return checkbox;
     }
 
     function cardKey(card) {
         const front = card.querySelector(".front > div")?.textContent?.trim() || "";
-        const back = card.querySelector(".romaji")?.textContent?.trim() || "";
+        const romaji = card.querySelector(".romaji")?.textContent?.trim() || "";
         const english = card.querySelector(".english")?.textContent?.trim() || "";
-        return [front, back, english].join("|");
+        return [front, romaji, english].join("|");
     }
 
     function updateStar(star, active) {
@@ -66,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         star.classList.toggle("active", active);
         star.setAttribute("aria-pressed", String(active));
         star.setAttribute("aria-label", active ? "Remove from hard vocabulary" : "Mark as hard vocabulary");
-        star.setAttribute("title", active ? "Remove from hard vocabulary" : "Hard vocabulary");
+        star.title = active ? "Remove from hard vocabulary" : "Hard vocabulary";
     }
 
     function addStars() {
@@ -83,13 +76,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 star.addEventListener("click", event => {
                     event.preventDefault();
                     event.stopPropagation();
+
                     if (hardWords.has(key)) hardWords.delete(key);
                     else hardWords.add(key);
-                    saveHardWords(hardWords);
+                    saveHardWords();
                     updateStar(star, hardWords.has(key));
-                    // Do not wait for a renderer or animation frame. If the
-                    // Hard view is active, update the visible grid immediately.
-                    if (hardMode) applyHardFilter();
+
+                    if (hardMode) syncHardView();
                 });
                 card.appendChild(star);
             }
@@ -97,91 +90,109 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function updateTypeButtonLabel() {
+        if (!typeBtn) return;
+        const boxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
+        const selected = boxes.filter(box => box.checked);
+        if (selected.length === boxes.length) typeBtn.textContent = "All types";
+        else if (selected.length === 0) typeBtn.textContent = "None";
+        else typeBtn.textContent = selected.map(box => box.closest("label")?.textContent.trim() || box.value).join(" + ");
+    }
+
     function applyHardFilter() {
         const cards = Array.from(grid.querySelectorAll(":scope > .card"));
         cards.forEach(card => {
             const vocab = card.querySelector(".vocabulary-back");
-            card.style.display = hardMode && (!vocab || !hardWords.has(cardKey(card))) ? "none" : "";
+            const visible = !hardMode || (vocab && hardWords.has(cardKey(card)));
+            card.style.display = visible ? "" : "none";
         });
         addStars();
         updateTypeButtonLabel();
-        // Keep any existing card-count logic informed by the actual visibility.
         grid.dispatchEvent(new CustomEvent("hardVocabularyUpdated", { bubbles: true }));
     }
 
-    function waitForRenderedCards(callback, attempts = 30) {
-        if (grid.querySelector(":scope > .card")) {
-            callback();
-            return;
-        }
-        if (attempts <= 0) {
-            callback();
-            return;
-        }
-        setTimeout(() => waitForRenderedCards(callback, attempts - 1), 20);
-    }
-
-    function refreshHardView() {
-        clearTimeout(renderTimer);
-        renderTimer = setTimeout(() => {
-            waitForRenderedCards(() => {
-                addStars();
-                applyHardFilter();
-            });
+    function syncHardView() {
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => {
+            addStars();
+            if (hardMode) applyHardFilter();
         }, 0);
     }
 
-    // Observe only card additions/removals. This avoids depending on mobile
-    // requestAnimationFrame timing and also avoids a MutationObserver loop.
-    const observer = new MutationObserver(mutations => {
-        if (!mutations.some(m => m.addedNodes.length || m.removedNodes.length)) return;
-        addStars();
-        if (hardMode) applyHardFilter();
-    });
-    observer.observe(grid, { childList: true });
+    function renderNormalVocabularyThenFilter() {
+        const hardCheckbox = ensureHardCheckbox();
+        const boxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'));
+        const normalBoxes = boxes.filter(box => box !== hardCheckbox);
 
-    hardCheckbox.addEventListener("change", event => {
-        event.stopImmediatePropagation();
+        // IMPORTANT: the normal lesson renderer does not know that "hard"
+        // is a special filter. If it sees hard checked, it can render zero
+        // cards. Temporarily remove hard from the renderer's input, ask it to
+        // render Vocabulary, then restore Hard mode after the DOM is updated.
+        hardCheckbox.checked = false;
+        normalBoxes.forEach(box => {
+            box.checked = box.value === "vocabulary";
+        });
 
-        if (hardCheckbox.checked) {
-            previousTypeState = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
-                .filter(box => box !== hardCheckbox)
-                .map(box => ({ value: box.value, checked: box.checked }));
-
-            hardMode = true;
-
-            // Keep the normal renderer in vocabulary mode, then apply the hard
-            // filter after its cards have actually been inserted into the DOM.
-            const normalBoxes = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
-                .filter(box => box !== hardCheckbox);
-            normalBoxes.forEach(box => { box.checked = box.value === "vocabulary"; });
-
-            const vocabularyBox = typePanel.querySelector('input[value="vocabulary"]');
-            if (vocabularyBox) vocabularyBox.dispatchEvent(new Event("change", { bubbles: true }));
-            refreshHardView();
-        } else {
-            hardMode = false;
-
-            if (previousTypeState) {
-                previousTypeState.forEach(saved => {
-                    const box = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
-                        .find(input => input.value === saved.value);
-                    if (box) box.checked = saved.checked;
-                });
-            }
-
-            const restoreBox = typePanel.querySelector('input[value="vocabulary"]');
-            if (restoreBox) restoreBox.dispatchEvent(new Event("change", { bubbles: true }));
-            refreshHardView();
+        const vocabularyBox = typePanel.querySelector('input[value="vocabulary"]');
+        if (vocabularyBox) {
+            vocabularyBox.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
-        updateTypeButtonLabel();
-    }, true);
+        hardCheckbox.checked = true;
+        syncHardView();
+    }
 
-    typePanel.addEventListener("change", event => {
-        if (event.target === hardCheckbox || !hardMode) return;
-        refreshHardView();
+    function bindHardCheckbox(checkbox) {
+        if (checkbox.dataset.hardBound === "1") return;
+        checkbox.dataset.hardBound = "1";
+
+        checkbox.addEventListener("change", event => {
+            event.stopPropagation();
+
+            if (checkbox.checked) {
+                previousTypeState = Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
+                    .filter(box => box !== checkbox)
+                    .map(box => ({ value: box.value, checked: box.checked }));
+
+                hardMode = true;
+                renderNormalVocabularyThenFilter();
+            } else {
+                hardMode = false;
+
+                if (previousTypeState) {
+                    previousTypeState.forEach(saved => {
+                        const box = typePanel.querySelector(`input[value="${CSS.escape(saved.value)}"]`);
+                        if (box) box.checked = saved.checked;
+                    });
+                }
+
+                const restoreBox = typePanel.querySelector('input[value="vocabulary"]');
+                if (restoreBox) restoreBox.dispatchEvent(new Event("change", { bubbles: true }));
+                syncHardView();
+            }
+
+            updateTypeButtonLabel();
+        });
+    }
+
+    ensureHardCheckbox();
+
+    // If another script rebuilds the Type panel, recreate the Hard option and
+    // keep the active state. This is particularly important on mobile where
+    // WebView/browser rendering can happen at different times.
+    const typeObserver = new MutationObserver(() => {
+        const checkbox = ensureHardCheckbox();
+        bindHardCheckbox(checkbox);
+        if (hardMode && !checkbox.checked) checkbox.checked = true;
+        updateTypeButtonLabel();
     });
+    typeObserver.observe(typePanel, { childList: true, subtree: true });
+
+    const gridObserver = new MutationObserver(mutations => {
+        if (!mutations.some(m => m.addedNodes.length || m.removedNodes.length)) return;
+        syncHardView();
+    });
+    gridObserver.observe(grid, { childList: true });
 
     addStars();
     updateTypeButtonLabel();
