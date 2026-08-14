@@ -135,8 +135,8 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
 
 /* Lesson 1 visual memory illustration — BACK CARD ONLY. */
 .lesson-illustration{
-    width:64px;
-    height:64px;
+    width:70px;
+    height:70px;
     flex:0 0 64px;
     display:flex;
     align-items:center;
@@ -150,8 +150,8 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
 }
 
 .lesson-illustration svg{
-    width:48px;
-    height:48px;
+    width:70px;
+    height:70px;
     display:block;
 }
 
