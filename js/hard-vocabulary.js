@@ -32,6 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
     }
 
+    function notifyHardVocabularyUpdated() {
+        document.dispatchEvent(new CustomEvent("hardVocabularyUpdated"));
+    }
+
     function normalBoxes() {
         return Array.from(typePanel.querySelectorAll('input[type="checkbox"]'))
             .filter(cb => cb.value !== "hard");
@@ -95,6 +99,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     saveHardWords();
                     updateStar(star, hardWords.has(key));
 
+                    // Always notify the count display, not only when Hard mode
+                    // is active. This keeps "21 vocabulary + 2 hard vocabulary"
+                    // live while using the normal Vocabulary filter.
+                    notifyHardVocabularyUpdated();
+
                     if (hardMode) scheduleHardFilter();
                 });
                 card.appendChild(star);
@@ -155,9 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
             checked: box.checked
         }));
 
-        // Hard is only an overlay. Keep every normal Type checkbox exactly
-        // as the user selected it. Temporarily uncheck only the Hard box so
-        // the normal renderer does not see an unknown "hard" type.
         cb.checked = false;
 
         const selected = selectedNormalBoxes();
@@ -167,8 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
             renderTrigger.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
-        // Restore the visible Hard checkbox after the normal renderer has
-        // rendered using the original Type selection.
         cb.checked = true;
 
         setTimeout(() => {
@@ -205,8 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const cb = event.target;
         if (!cb || cb.value !== "hard") return;
 
-        // Capture phase prevents the normal renderer from receiving the
-        // special "hard" checkbox as a normal card type.
         event.stopPropagation();
         event.stopImmediatePropagation();
 
@@ -219,8 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ensureHardCheckbox();
 
-    // If lesson-type.js or another script rebuilds the panel, recreate the
-    // Hard option without changing the user's normal Type selections.
     const typeObserver = new MutationObserver(() => {
         const cb = ensureHardCheckbox();
         if (hardMode) cb.checked = true;
