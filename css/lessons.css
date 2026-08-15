@@ -133,7 +133,7 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     line-height:1.5;
 }
 
-/* Lesson 1 visual memory illustration — BACK CARD ONLY. */
+/* Lesson visual memory illustration — BACK CARD ONLY. */
 .lesson-illustration{
     width:70px;
     height:70px;
@@ -155,16 +155,40 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     display:block;
 }
 
-/* Each lesson visual is intentionally appended to .back, never .front. */
 .front .lesson-illustration{ display:none !important; }
 
-/* Mobile: keep all three lesson controls in one fixed bottom bar. */
+/* Reset control */
+.lesson-reset-btn{
+    width:100%;
+    min-height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px 12px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:var(--paper-cell);
+    color:var(--ink);
+    font-size:21px;
+    line-height:1;
+    cursor:pointer;
+    transition:transform .2s ease, border-color .25s ease, background-color .25s ease;
+}
+
+.lesson-reset-btn:hover,
+.lesson-reset-btn:focus-visible{
+    border-color:var(--vermilion);
+    transform:translateY(-1px);
+    outline:none;
+}
+
+/* Each field takes only the width it needs; toolbar remains horizontal on desktop. */
 .mobile-bottom-controls{
     display:none;
 }
 
 @media only screen and (max-width:520px) {
-    .front{ font-size:18px; text-align: center;}
+    .front{ font-size:18px; text-align:center; }
     .back{ font-size:16px; }
     .vocabulary-back .romaji,
     .vocabulary-back .english,
@@ -191,13 +215,12 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
         z-index:9999;
         display:flex;
         align-items:stretch;
-        gap:0;
         width:100%;
         padding:5px 5px calc(5px + env(safe-area-inset-bottom));
         background:var(--paper-cell);
         border-top:1px solid var(--paper-line);
         box-shadow:0 -4px 14px rgba(36,31,24,.12);
-        gap: 5px;
+        gap:5px;
     }
 
     .mobile-bottom-controls > button,
@@ -210,9 +233,27 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
         border-radius:6px;
     }
 
-    .mobile-bottom-controls > .abacus{
+    .mobile-bottom-controls .lesson-reset-btn{
+        font-size:22px;
+        padding:6px;
+    }
+
+    .mobile-bottom-controls .romaji-toggle{
+        font-size:0;
+    }
+
+    /* Mobile Shuffle is icon-only. */
+    .mobile-bottom-controls #shuffleBtn{
+        font-size:0;
+        display:flex;
+        align-items:center;
         justify-content:center;
-        padding:7px 8px;
+    }
+
+    .mobile-bottom-controls #shuffleBtn::before{
+        content:'🔀';
+        font-size:20px;
+        line-height:1;
     }
 
     .mobile-bottom-controls .rod{
