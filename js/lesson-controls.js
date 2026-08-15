@@ -11,7 +11,12 @@
     let resetButton = null;
     let mobileQuery = null;
 
-    const icon = id => '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="assets/lesson-control-icons.svg#icon-' + id + '"></use></svg>';
+    const ICONS = {
+        romaji: '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7M7.5 5v14M4 19h7M14 5l6 14M20 5l-6 14"/></svg>',
+        flip: '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"/></svg>',
+        shuffle: '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3c4 0 6 10 10 10h3M17 14l3 3-3 3M4 17h3c1.5 0 2.5-1.5 3.5-3M14 10c1-1.5 2-3 3-3h3M17 4l3 3-3 3"/></svg>',
+        reset: '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.7-4L3 10M3 5v5h5M4 13a8 8 0 0 0 14.7 4L21 14M21 19v-5h-5"/></svg>'
+    };
 
     function getCards() { return Array.from(document.querySelectorAll("#grid .card")); }
 
@@ -22,13 +27,13 @@
         direction.setAttribute("aria-pressed", String(showBack));
         direction.setAttribute("aria-label", showBack ? "Show all cards Front" : "Show all cards Back");
         direction.setAttribute("title", showBack ? "Show Front" : "Show Back");
-        direction.innerHTML = icon('flip');
+        direction.innerHTML = ICONS.flip;
     }
 
     function updateRomajiUI() {
         const button = document.getElementById("backRomajiToggle");
         if (!button) return;
-        button.innerHTML = icon('romaji') + '<span class="lesson-control-label"> Romaji: ' + (showBackRomaji ? 'ON' : 'OFF') + '</span>';
+        button.innerHTML = ICONS.romaji + '<span class="lesson-control-label"> Romaji: ' + (showBackRomaji ? 'ON' : 'OFF') + '</span>';
         button.setAttribute("aria-pressed", String(showBackRomaji));
         button.setAttribute("aria-label", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
     }
@@ -59,7 +64,7 @@
         resetButton.className = "lesson-reset-btn";
         resetButton.setAttribute("aria-label", "Reset lesson cards and return to top");
         resetButton.setAttribute("title", "Reset cards and return to top");
-        resetButton.innerHTML = icon('reset');
+        resetButton.innerHTML = ICONS.reset;
         resetButton.addEventListener("click", function (event) {
             event.preventDefault(); event.stopPropagation(); resetLessons();
         });
@@ -107,7 +112,7 @@
         mobileBar.appendChild(direction);
         mobileBar.appendChild(shuffleButton);
         mobileBar.appendChild(createResetButton());
-        shuffleButton.innerHTML = icon('shuffle');
+        shuffleButton.innerHTML = ICONS.shuffle;
         shuffleButton.setAttribute("aria-label", "Shuffle");
         shuffleButton.setAttribute("title", "Shuffle");
         updateRomajiUI(); updateSwitchUI();
@@ -117,7 +122,7 @@
         const shuffleButton = document.getElementById("shuffleBtn");
         if (!shuffleButton) return;
         const isMobile = mobileQuery ? mobileQuery.matches : window.matchMedia("(max-width:520px)").matches;
-        shuffleButton.innerHTML = icon('shuffle') + (isMobile ? '' : '<span class="lesson-control-label"> Shuffle</span>');
+        shuffleButton.innerHTML = ICONS.shuffle + (isMobile ? '' : '<span class="lesson-control-label"> Shuffle</span>');
         shuffleButton.setAttribute("aria-label", "Shuffle");
         if (isMobile) shuffleButton.setAttribute("title", "Shuffle"); else shuffleButton.removeAttribute("title");
     }
