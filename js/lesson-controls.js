@@ -2,9 +2,9 @@
 // Lessons page controls
 // =====================================================
 // Front / Back, Back Romaji, and Reset controls.
+// Control order: Romaji → Front/Back → Shuffle → Reset.
 // Reset returns every card to Front and scrolls to the top
-// without reloading the page. On mobile it lives beside
-// Shuffle in the existing sticky bottom controls.
+// without reloading the page.
 // =====================================================
 
 (function () {
@@ -20,31 +20,25 @@
 
     function updateSwitchUI() {
         const direction = document.getElementById("direction");
-        const leftLabel = document.getElementById("directionLeftLabel");
-        const rightLabel = document.getElementById("directionRightLabel");
-
         if (!direction) return;
 
         direction.classList.toggle("right", showBack);
         direction.setAttribute("aria-pressed", String(showBack));
+        direction.setAttribute("aria-label", showBack ? "Show all cards Front" : "Show all cards Back");
+        direction.setAttribute("title", showBack ? "Show Front" : "Show Back");
 
-        if (leftLabel) {
-            leftLabel.textContent = "Front";
-            leftLabel.classList.toggle("active", !showBack);
-        }
-
-        if (rightLabel) {
-            rightLabel.textContent = "Back";
-            rightLabel.classList.toggle("active", showBack);
-        }
+        // The control is intentionally icon-only.
+        direction.textContent = "↔";
     }
 
     function updateRomajiUI() {
         const button = document.getElementById("backRomajiToggle");
         if (!button) return;
 
+        // Keep the Romaji text visible on desktop and mobile.
         button.textContent = showBackRomaji ? "Romaji: ON" : "Romaji: OFF";
         button.setAttribute("aria-pressed", String(showBackRomaji));
+        button.setAttribute("aria-label", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
     }
 
     function applyCardState() {
@@ -71,12 +65,9 @@
     }
 
     function resetLessons() {
-        // Reset the visual study state only. Do not reload or change filters.
         showBack = false;
         updateSwitchUI();
         applyCardState();
-
-        // Return to the very top of the Lessons page.
         window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }
 
@@ -100,35 +91,46 @@
         return resetButton;
     }
 
-    function ensureDesktopReset() {
+    function getField(element) {
+        return element ? element.closest(".field") : null;
+    }
+
+    function ensureDesktopOrder() {
+        const toolbar = document.querySelector(".toolbar");
         const romajiButton = document.getElementById("backRomajiToggle");
-        if (!romajiButton) return;
+        const direction = document.getElementById("direction");
+        const shuffleButton = document.getElementById("shuffleBtn");
+        if (!toolbar || !romajiButton || !direction || !shuffleButton) return;
 
-        const button = createResetButton();
-        const field = romajiButton.closest(".field");
+        const romajiField = getField(romajiButton);
+        const directionField = getField(direction);
+        const shuffleField = getField(shuffleButton);
+        if (!romajiField || !directionField || !shuffleField) return;
 
-        if (field && field.parentElement) {
-            // Keep Reset immediately after the Romaji control on desktop.
-            let resetField = document.getElementById("lessonResetField");
-            if (!resetField) {
-                resetField = document.createElement("div");
-                resetField.id = "lessonResetField";
-                resetField.className = "field lesson-reset-field";
-                const label = document.createElement("label");
-                label.innerHTML = "&nbsp;";
-                resetField.appendChild(label);
-                resetField.appendChild(button);
-                field.parentElement.insertBefore(resetField, field.nextSibling);
-            } else if (button.parentElement !== resetField) {
-                resetField.appendChild(button);
-            }
+        const reset = createResetButton();
+        let resetField = document.getElementById("lessonResetField");
+        if (!resetField) {
+            resetField = document.createElement("div");
+            resetField.id = "lessonResetField";
+            resetField.className = "field lesson-reset-field";
+            const label = document.createElement("label");
+            label.innerHTML = "&nbsp;";
+            resetField.appendChild(label);
+            resetField.appendChild(reset);
         }
+
+        // Exact desktop order: Romaji → Front/Back → Shuffle → Reset.
+        toolbar.appendChild(romajiField);
+        toolbar.appendChild(directionField);
+        toolbar.appendChild(shuffleField);
+        toolbar.appendChild(resetField);
     }
 
     function ensureMobileControls() {
         const shuffleButton = document.getElementById("shuffleBtn");
         const romajiButton = document.getElementById("backRomajiToggle");
-        if (!shuffleButton || !romajiButton) return;
+        const direction = document.getElementById("direction");
+        if (!shuffleButton || !romajiButton || !direction) return;
 
         let mobileBar = document.querySelector(".mobile-bottom-controls");
         if (!mobileBar) {
@@ -140,16 +142,20 @@
 
         const button = createResetButton();
 
-        // Keep mobile order: Shuffle → Reset → Romaji.
-        if (shuffleButton.parentElement !== mobileBar) mobileBar.appendChild(shuffleButton);
-        if (button.parentElement !== mobileBar) mobileBar.appendChild(button);
-        if (romajiButton.parentElement !== mobileBar) mobileBar.appendChild(romajiButton);
-
+        // Exact mobile order: Romaji → Front/Back → Shuffle → Reset.
+        mobileBar.appendChild(romajiButton);
+        mobileBar.appendChild(direction);
         mobileBar.appendChild(shuffleButton);
         mobileBar.appendChild(button);
-        mobileBar.appendChild(romajiButton);
 
-        updateShuffleMobileLabel();
+        // Mobile Shuffle is icon-only; Romaji keeps its text.
+        shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || "🔀 Shuffle";
+        shuffleButton.textContent = "🔀";
+        shuffleButton.setAttribute("aria-label", "Shuffle");
+        shuffleButton.setAttribute("title", "Shuffle");
+
+        updateRomajiUI();
+        updateSwitchUI();
     }
 
     function updateShuffleMobileLabel() {
@@ -158,7 +164,7 @@
 
         const isMobile = mobileQuery ? mobileQuery.matches : window.matchMedia("(max-width:520px)").matches;
         if (isMobile) {
-            shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || shuffleButton.textContent.trim();
+            shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || "🔀 Shuffle";
             shuffleButton.textContent = "🔀";
             shuffleButton.setAttribute("aria-label", "Shuffle");
             shuffleButton.setAttribute("title", "Shuffle");
@@ -171,9 +177,14 @@
 
     function syncResponsiveControls() {
         const isMobile = mobileQuery ? mobileQuery.matches : window.matchMedia("(max-width:520px)").matches;
-        if (isMobile) ensureMobileControls();
-        else ensureDesktopReset();
+        if (isMobile) {
+            ensureMobileControls();
+        } else {
+            ensureDesktopOrder();
+        }
         updateShuffleMobileLabel();
+        updateRomajiUI();
+        updateSwitchUI();
     }
 
     function init() {
@@ -183,12 +194,9 @@
 
         if (!direction || !grid) return;
 
-        direction.setAttribute("aria-label", "Show all lesson cards front or back");
-
         if (direction.__lessonCardsHandler) {
             direction.removeEventListener("click", direction.__lessonCardsHandler);
         }
-
         direction.__lessonCardsHandler = function (event) {
             event.preventDefault();
             toggleAllCards();
@@ -198,7 +206,6 @@
         if (direction.__lessonCardsKeyHandler) {
             direction.removeEventListener("keydown", direction.__lessonCardsKeyHandler);
         }
-
         direction.__lessonCardsKeyHandler = function (event) {
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
@@ -230,6 +237,7 @@
         if (observer) observer.disconnect();
         observer = new MutationObserver(() => {
             if (showBack || !showBackRomaji) applyCardState();
+            syncResponsiveControls();
         });
         observer.observe(grid, { childList: true });
     }
