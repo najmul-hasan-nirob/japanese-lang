@@ -331,7 +331,7 @@ select:focus-visible {
 button {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
-    padding: 9px 16px;
+    padding: 5px 15px;
     border: 1px solid var(--paper-line);
     border-radius: 6px;
     background: transparent;
