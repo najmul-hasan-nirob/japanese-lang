@@ -68,7 +68,6 @@
     color: #59cb75
 }
 
-/* The complete card, including the topbar, gets the hover transition. */
 .card:hover{
     border-color:var(--vermilion);
 }
@@ -95,7 +94,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
 
 .back .lesson-tag{ color:rgba(247,242,231,.65); }
 
-/* Each field takes only the width it needs; the toolbar fills the row. */
 .field{
     display:flex;
     flex-direction:column;
@@ -105,7 +103,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     flex:1 0 auto;
 }
 
-/* Vocabulary flip-back: Romaji → English → Bangla */
 .vocabulary-back{
     align-items:center;
     justify-content:center;
@@ -133,7 +130,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     line-height:1.5;
 }
 
-/* Lesson visual memory illustration — BACK CARD ONLY. */
 .lesson-illustration{
     width:70px;
     height:70px;
@@ -157,7 +153,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
 
 .front .lesson-illustration{ display:none !important; }
 
-/* Reset control */
 .lesson-reset-btn{
     width:100%;
     min-height:38px;
@@ -182,9 +177,17 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     outline:none;
 }
 
-/* Each field takes only the width it needs; toolbar remains horizontal on desktop. */
 .mobile-bottom-controls{
     display:none;
+}
+
+/* Lesson toolbar icons use the same logo accent color. */
+#backRomajiToggle,
+#direction,
+#shuffleBtn,
+#lessonResetBtn,
+.mobile-bottom-controls > button{
+    color:var(--vermilion) !important;
 }
 
 @media only screen and (max-width:520px) {
@@ -242,7 +245,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
         font-size:20px;
     }
 
-    /* Mobile Shuffle is icon-only. */
     .mobile-bottom-controls #shuffleBtn{
         font-size:0;
         display:flex;
