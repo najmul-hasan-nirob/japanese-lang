@@ -239,7 +239,7 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     }
 
     .mobile-bottom-controls .romaji-toggle{
-        font-size:0;
+        font-size:19px;
     }
 
     /* Mobile Shuffle is icon-only. */

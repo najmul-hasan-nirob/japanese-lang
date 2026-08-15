@@ -26,7 +26,7 @@
     function updateRomajiUI() {
         const button = document.getElementById("backRomajiToggle");
         if (!button) return;
-        button.textContent = showBackRomaji ? "🔡 Romaji: ON" : "🔡 Romaji: OFF";
+        button.textContent = showBackRomaji ? "🔡" : "🈳";
         button.setAttribute("aria-pressed", String(showBackRomaji));
         button.setAttribute("aria-label", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
     }
