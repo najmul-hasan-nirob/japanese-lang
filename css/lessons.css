@@ -181,13 +181,30 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     display:none;
 }
 
-/* Lesson toolbar icons use the same logo accent color. */
+/* Lesson toolbar icons: inline SVGs inherit the logo accent color. */
 #backRomajiToggle,
 #direction,
 #shuffleBtn,
 #lessonResetBtn,
 .mobile-bottom-controls > button{
     color:var(--vermilion) !important;
+}
+
+.lesson-control-svg{
+    width:20px !important;
+    height:20px !important;
+    flex:0 0 20px;
+    display:inline-block;
+    vertical-align:middle;
+    fill:none !important;
+    stroke:currentColor !important;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.lesson-control-label{
+    color:inherit;
 }
 
 @media only screen and (max-width:520px) {
@@ -246,16 +263,9 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     }
 
     .mobile-bottom-controls #shuffleBtn{
-        font-size:0;
         display:flex;
         align-items:center;
         justify-content:center;
-    }
-
-    .mobile-bottom-controls #shuffleBtn::before{
-        content:'🔀';
-        font-size:20px;
-        line-height:1;
     }
 
     .mobile-bottom-controls .rod{
