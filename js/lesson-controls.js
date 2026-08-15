@@ -39,24 +39,33 @@
         button.setAttribute("title", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
     }
 
-    function applyCardState() {
+    // Only update Romaji visibility. Do NOT touch card flip classes here.
+    // This preserves individually flipped cards as well as the global flip state.
+    function applyRomajiVisibility() {
         getCards().forEach(card => {
-            card.classList.toggle("flipped", showBack);
             const romaji = card.querySelector(".vocabulary-back .romaji");
             if (romaji) romaji.style.display = showBackRomaji ? "" : "none";
         });
     }
 
-    function toggleAllCards() { showBack = !showBack; updateSwitchUI(); applyCardState(); }
+    function applyCardState() {
+        getCards().forEach(card => {
+            card.classList.toggle("flipped", showBack);
+        });
+        applyRomajiVisibility();
+    }
+
+    function toggleAllCards() {
+        showBack = !showBack;
+        updateSwitchUI();
+        applyCardState();
+    }
 
     function toggleBackRomaji() {
-        // Changing Romaji must never change the current Front/Back state.
-        const currentFlipState = showBack;
+        // Romaji is an independent setting. Never reset or alter Front/Back.
         showBackRomaji = !showBackRomaji;
-        showBack = currentFlipState;
         updateRomajiUI();
-        applyCardState();
-        updateSwitchUI();
+        applyRomajiVisibility();
     }
 
     function resetLessons() {
