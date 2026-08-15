@@ -1,15 +1,18 @@
 // =====================================================
 // Lessons page controls
 // =====================================================
-// 1. Front / Back switch: flips all lesson cards.
-// 2. Back Romaji switch: hides/shows only the .romaji line
-//    on vocabulary backs. It does not affect the card face.
+// Front / Back, Back Romaji, and Reset controls.
+// Reset returns every card to Front and scrolls to the top
+// without reloading the page. On mobile it lives beside
+// Shuffle in the existing sticky bottom controls.
 // =====================================================
 
 (function () {
     let showBack = false;
     let showBackRomaji = true;
     let observer = null;
+    let resetButton = null;
+    let mobileQuery = null;
 
     function getCards() {
         return Array.from(document.querySelectorAll("#grid .card"));
@@ -67,6 +70,112 @@
         applyCardState();
     }
 
+    function resetLessons() {
+        // Reset the visual study state only. Do not reload or change filters.
+        showBack = false;
+        updateSwitchUI();
+        applyCardState();
+
+        // Return to the very top of the Lessons page.
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }
+
+    function createResetButton() {
+        if (resetButton && document.contains(resetButton)) return resetButton;
+
+        resetButton = document.createElement("button");
+        resetButton.type = "button";
+        resetButton.id = "lessonResetBtn";
+        resetButton.className = "lesson-reset-btn";
+        resetButton.setAttribute("aria-label", "Reset lesson cards and return to top");
+        resetButton.setAttribute("title", "Reset cards and return to top");
+        resetButton.textContent = "↻";
+
+        resetButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            resetLessons();
+        });
+
+        return resetButton;
+    }
+
+    function ensureDesktopReset() {
+        const romajiButton = document.getElementById("backRomajiToggle");
+        if (!romajiButton) return;
+
+        const button = createResetButton();
+        const field = romajiButton.closest(".field");
+
+        if (field && field.parentElement) {
+            // Keep Reset immediately after the Romaji control on desktop.
+            let resetField = document.getElementById("lessonResetField");
+            if (!resetField) {
+                resetField = document.createElement("div");
+                resetField.id = "lessonResetField";
+                resetField.className = "field lesson-reset-field";
+                const label = document.createElement("label");
+                label.innerHTML = "&nbsp;";
+                resetField.appendChild(label);
+                resetField.appendChild(button);
+                field.parentElement.insertBefore(resetField, field.nextSibling);
+            } else if (button.parentElement !== resetField) {
+                resetField.appendChild(button);
+            }
+        }
+    }
+
+    function ensureMobileControls() {
+        const shuffleButton = document.getElementById("shuffleBtn");
+        const romajiButton = document.getElementById("backRomajiToggle");
+        if (!shuffleButton || !romajiButton) return;
+
+        let mobileBar = document.querySelector(".mobile-bottom-controls");
+        if (!mobileBar) {
+            mobileBar = document.createElement("div");
+            mobileBar.className = "mobile-bottom-controls";
+            mobileBar.setAttribute("aria-label", "Lesson controls");
+            document.body.appendChild(mobileBar);
+        }
+
+        const button = createResetButton();
+
+        // Keep mobile order: Shuffle → Reset → Romaji.
+        if (shuffleButton.parentElement !== mobileBar) mobileBar.appendChild(shuffleButton);
+        if (button.parentElement !== mobileBar) mobileBar.appendChild(button);
+        if (romajiButton.parentElement !== mobileBar) mobileBar.appendChild(romajiButton);
+
+        mobileBar.appendChild(shuffleButton);
+        mobileBar.appendChild(button);
+        mobileBar.appendChild(romajiButton);
+
+        updateShuffleMobileLabel();
+    }
+
+    function updateShuffleMobileLabel() {
+        const shuffleButton = document.getElementById("shuffleBtn");
+        if (!shuffleButton) return;
+
+        const isMobile = mobileQuery ? mobileQuery.matches : window.matchMedia("(max-width:520px)").matches;
+        if (isMobile) {
+            shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || shuffleButton.textContent.trim();
+            shuffleButton.textContent = "🔀";
+            shuffleButton.setAttribute("aria-label", "Shuffle");
+            shuffleButton.setAttribute("title", "Shuffle");
+        } else {
+            shuffleButton.textContent = shuffleButton.dataset.desktopText || "🔀 Shuffle";
+            shuffleButton.setAttribute("aria-label", "Shuffle");
+            shuffleButton.removeAttribute("title");
+        }
+    }
+
+    function syncResponsiveControls() {
+        const isMobile = mobileQuery ? mobileQuery.matches : window.matchMedia("(max-width:520px)").matches;
+        if (isMobile) ensureMobileControls();
+        else ensureDesktopReset();
+        updateShuffleMobileLabel();
+    }
+
     function init() {
         const direction = document.getElementById("direction");
         const grid = document.getElementById("grid");
@@ -109,12 +218,15 @@
             romajiButton.addEventListener("click", romajiButton.__handler);
         }
 
+        mobileQuery = window.matchMedia("(max-width:520px)");
+        if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", syncResponsiveControls);
+        else if (mobileQuery.addListener) mobileQuery.addListener(syncResponsiveControls);
+
         updateSwitchUI();
         updateRomajiUI();
         applyCardState();
+        syncResponsiveControls();
 
-        // lesson-filter.js rebuilds #grid when filters/order change.
-        // Preserve both the Front/Back state and Romaji visibility.
         if (observer) observer.disconnect();
         observer = new MutationObserver(() => {
             if (showBack || !showBackRomaji) applyCardState();
