@@ -11,6 +11,14 @@
     let resetButton = null;
     let mobileQuery = null;
 
+    const ICONS = {
+        romajiOn: '<span class="lesson-control-icon" aria-hidden="true">AB</span>',
+        romajiOff: '<span class="lesson-control-icon" aria-hidden="true">A/B</span>',
+        direction: '<span class="lesson-control-icon lesson-flip-icon" aria-hidden="true">↕</span>',
+        shuffle: '<span class="lesson-control-icon" aria-hidden="true">⤨</span>',
+        reset: '<span class="lesson-control-icon" aria-hidden="true">↻</span>'
+    };
+
     function getCards() { return Array.from(document.querySelectorAll("#grid .card")); }
 
     function updateSwitchUI() {
@@ -20,14 +28,13 @@
         direction.setAttribute("aria-pressed", String(showBack));
         direction.setAttribute("aria-label", showBack ? "Show all cards Front" : "Show all cards Back");
         direction.setAttribute("title", showBack ? "Show Front" : "Show Back");
-        direction.textContent = "🔃";
-        direction.style.setProperty("font-size", "20px", "important");
+        direction.innerHTML = ICONS.direction;
     }
 
     function updateRomajiUI() {
         const button = document.getElementById("backRomajiToggle");
         if (!button) return;
-        button.textContent = showBackRomaji ? "🔡" : "🈳";
+        button.innerHTML = ICONS.romajiOn + '<span class="lesson-control-label"> Romaji: ' + (showBackRomaji ? 'ON' : 'OFF') + '</span>';
         button.setAttribute("aria-pressed", String(showBackRomaji));
         button.setAttribute("aria-label", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
     }
@@ -58,7 +65,7 @@
         resetButton.className = "lesson-reset-btn";
         resetButton.setAttribute("aria-label", "Reset lesson cards and return to top");
         resetButton.setAttribute("title", "Reset cards and return to top");
-        resetButton.textContent = "🔄";
+        resetButton.innerHTML = ICONS.reset;
         resetButton.addEventListener("click", function (event) {
             event.preventDefault(); event.stopPropagation(); resetLessons();
         });
@@ -106,8 +113,8 @@
         mobileBar.appendChild(direction);
         mobileBar.appendChild(shuffleButton);
         mobileBar.appendChild(createResetButton());
-        shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || "🔀 Shuffle";
-        shuffleButton.textContent = "🔀";
+        shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || "Shuffle";
+        shuffleButton.innerHTML = ICONS.shuffle;
         shuffleButton.setAttribute("aria-label", "Shuffle");
         shuffleButton.setAttribute("title", "Shuffle");
         updateRomajiUI(); updateSwitchUI();
@@ -118,12 +125,12 @@
         if (!shuffleButton) return;
         const isMobile = mobileQuery ? mobileQuery.matches : window.matchMedia("(max-width:520px)").matches;
         if (isMobile) {
-            shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || "🔀 Shuffle";
-            shuffleButton.textContent = "🔀";
+            shuffleButton.dataset.desktopText = shuffleButton.dataset.desktopText || "Shuffle";
+            shuffleButton.innerHTML = ICONS.shuffle;
             shuffleButton.setAttribute("aria-label", "Shuffle");
             shuffleButton.setAttribute("title", "Shuffle");
         } else {
-            shuffleButton.textContent = shuffleButton.dataset.desktopText || "🔀 Shuffle";
+            shuffleButton.innerHTML = ICONS.shuffle + '<span class="lesson-control-label"> Shuffle</span>';
             shuffleButton.setAttribute("aria-label", "Shuffle");
             shuffleButton.removeAttribute("title");
         }
