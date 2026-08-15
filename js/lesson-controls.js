@@ -21,6 +21,7 @@
         direction.setAttribute("aria-label", showBack ? "Show all cards Front" : "Show all cards Back");
         direction.setAttribute("title", showBack ? "Show Front" : "Show Back");
         direction.textContent = "🔃";
+        direction.style.setProperty("font-size", "20px", "important");
     }
 
     function updateRomajiUI() {
