@@ -33,9 +33,10 @@
     function updateRomajiUI() {
         const button = document.getElementById("backRomajiToggle");
         if (!button) return;
-        button.innerHTML = ICONS.romaji + '<span class="lesson-control-label"> Romaji: ' + (showBackRomaji ? 'ON' : 'OFF') + '</span>';
+        button.innerHTML = ICONS.romaji;
         button.setAttribute("aria-pressed", String(showBackRomaji));
         button.setAttribute("aria-label", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
+        button.setAttribute("title", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
     }
 
     function applyCardState() {
