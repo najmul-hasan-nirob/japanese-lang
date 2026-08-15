@@ -48,7 +48,16 @@
     }
 
     function toggleAllCards() { showBack = !showBack; updateSwitchUI(); applyCardState(); }
-    function toggleBackRomaji() { showBackRomaji = !showBackRomaji; updateRomajiUI(); applyCardState(); }
+
+    function toggleBackRomaji() {
+        // Changing Romaji must never change the current Front/Back state.
+        const currentFlipState = showBack;
+        showBackRomaji = !showBackRomaji;
+        showBack = currentFlipState;
+        updateRomajiUI();
+        applyCardState();
+        updateSwitchUI();
+    }
 
     function resetLessons() {
         showBack = false;
@@ -139,8 +148,12 @@
         const grid = document.getElementById("grid");
         const romajiButton = document.getElementById("backRomajiToggle");
         if (!direction || !grid) return;
-        direction.onclick = function (event) { event.preventDefault(); toggleAllCards(); };
-        if (romajiButton) romajiButton.onclick = function (event) { event.preventDefault(); toggleBackRomaji(); };
+        direction.onclick = function (event) { event.preventDefault(); event.stopPropagation(); toggleAllCards(); };
+        if (romajiButton) romajiButton.onclick = function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            toggleBackRomaji();
+        };
         mobileQuery = window.matchMedia("(max-width:520px)");
         if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", syncResponsiveControls);
         else if (mobileQuery.addListener) mobileQuery.addListener(syncResponsiveControls);
