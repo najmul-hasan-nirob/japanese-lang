@@ -16,37 +16,21 @@
     let syncTimer = null;
     let lastSnapshot = "";
 
-    function get(key, fallback) {
-        try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
-        catch (_) { return fallback; }
-    }
-    function set(key, value) {
-        try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
-    }
-
-    function snapshot() {
-        return JSON.stringify({
-            hard: get(HARD_KEY, []),
-            sr: get(SR_KEY, {}),
-            lessons: get(PRACTICE_KEY, [])
-        });
-    }
+    function get(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (_) { return fallback; } }
+    function set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
+    function snapshot() { return JSON.stringify({ hard: get(HARD_KEY, []), sr: get(SR_KEY, {}), lessons: get(PRACTICE_KEY, []) }); }
 
     async function pullCloud(userId) {
         if (!client || !userId) return;
         const { data, error } = await client.from(TABLE).select("hard_vocabulary,spaced_repetition,practice_lessons,updated_at").eq("user_id", userId).maybeSingle();
         if (error) { console.warn("Japanese Lang cloud sync:", error.message); return; }
         if (!data) return;
-
         const localHard = new Set(get(HARD_KEY, []));
-        const cloudHard = Array.isArray(data.hard_vocabulary) ? data.hard_vocabulary : [];
-        cloudHard.forEach(v => localHard.add(v));
+        (Array.isArray(data.hard_vocabulary) ? data.hard_vocabulary : []).forEach(v => localHard.add(v));
         set(HARD_KEY, Array.from(localHard));
-
         const localSR = get(SR_KEY, {});
         const cloudSR = data.spaced_repetition && typeof data.spaced_repetition === "object" ? data.spaced_repetition : {};
         set(SR_KEY, { ...localSR, ...cloudSR });
-
         const cloudLessons = Array.isArray(data.practice_lessons) ? data.practice_lessons : [];
         if (cloudLessons.length) set(PRACTICE_KEY, cloudLessons);
         lastSnapshot = snapshot();
@@ -58,44 +42,20 @@
         const snap = snapshot();
         if (!force && snap === lastSnapshot) return;
         const payload = JSON.parse(snap);
-        const { error } = await client.from(TABLE).upsert({
-            user_id: userId,
-            hard_vocabulary: payload.hard,
-            spaced_repetition: payload.sr,
-            practice_lessons: payload.lessons,
-            updated_at: new Date().toISOString()
-        }, { onConflict: "user_id" });
+        const { error } = await client.from(TABLE).upsert({ user_id: userId, hard_vocabulary: payload.hard, spaced_repetition: payload.sr, practice_lessons: payload.lessons, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
         if (error) { console.warn("Japanese Lang cloud sync:", error.message); return; }
         lastSnapshot = snap;
         window.dispatchEvent(new CustomEvent("japaneseLangCloudSaved"));
     }
 
-    function startPolling(userId) {
-        clearInterval(syncTimer);
-        syncTimer = setInterval(() => pushCloud(userId), 1500);
-    }
-
-    function stopPolling() {
-        clearInterval(syncTimer);
-        syncTimer = null;
-    }
+    function startPolling(userId) { clearInterval(syncTimer); syncTimer = setInterval(() => pushCloud(userId), 1500); }
+    function stopPolling() { clearInterval(syncTimer); syncTimer = null; }
 
     function createAuthUI() {
         if (document.getElementById("jlCloudAuth")) return;
         const wrap = document.createElement("div");
         wrap.id = "jlCloudAuth";
-        wrap.innerHTML = `
-          <button id="jlCloudButton" type="button" aria-label="Cloud account">☁️</button>
-          <div id="jlCloudPanel" hidden>
-            <strong>Cloud Sync</strong>
-            <span id="jlCloudStatus">Not signed in</span>
-            <input id="jlEmail" type="email" placeholder="Email" autocomplete="email">
-            <input id="jlPassword" type="password" placeholder="Password" autocomplete="current-password">
-            <button id="jlSignIn" type="button">Sign in</button>
-            <button id="jlSignUp" type="button">Create account</button>
-            <button id="jlSignOut" type="button" hidden>Sign out</button>
-            <small id="jlCloudMessage"></small>
-          </div>`;
+        wrap.innerHTML = `<button id="jlCloudButton" type="button" aria-label="Cloud account">☁️</button><div id="jlCloudPanel" hidden><strong>Cloud Sync</strong><span id="jlCloudStatus">Not signed in</span><input id="jlEmail" type="email" placeholder="Email" autocomplete="email"><input id="jlPassword" type="password" placeholder="Password" autocomplete="current-password"><button id="jlSignIn" type="button">Sign in</button><button id="jlSignUp" type="button">Create account</button><button id="jlSignOut" type="button" hidden>Sign out</button><small id="jlCloudMessage"></small></div>`;
         document.body.appendChild(wrap);
 
         const style = document.createElement("style");
@@ -108,8 +68,8 @@
           #jlCloudPanel input::placeholder{color:var(--ink-soft,#7a705e)}
           #jlCloudStatus,#jlCloudMessage{font-size:12px;color:var(--ink-soft,#7a705e)}
           @media (max-width:520px){
-            #jlCloudAuth{position:static;left:auto;bottom:auto;width:100%;z-index:auto;grid-column:1/-1}
-            #jlCloudButton{width:100%;height:42px;border-radius:6px;box-shadow:none;font-size:16px}
+            #jlCloudAuth{position:static;left:auto;bottom:auto;width:auto;z-index:auto;grid-column:auto;margin:0}
+            #jlCloudButton{width:100%;height:42px;border-radius:6px;box-shadow:none;font-size:16px;min-width:0}
             #jlCloudPanel{position:absolute;left:12px;right:12px;bottom:auto;top:calc(100% + 6px);width:auto;z-index:10001}
             #jlCloudAuth.jl-mobile-open #jlCloudPanel{display:flex}
           }
@@ -118,15 +78,7 @@
 
         const button = document.getElementById("jlCloudButton");
         const panel = document.getElementById("jlCloudPanel");
-        button.onclick = (e) => {
-            e.stopPropagation();
-            if (window.innerWidth <= 520) {
-                wrap.classList.toggle("jl-mobile-open");
-                panel.hidden = !wrap.classList.contains("jl-mobile-open");
-            } else {
-                panel.hidden = !panel.hidden;
-            }
-        };
+        button.onclick = (e) => { e.stopPropagation(); if (window.innerWidth <= 520) { wrap.classList.toggle("jl-mobile-open"); panel.hidden = !wrap.classList.contains("jl-mobile-open"); } else panel.hidden = !panel.hidden; };
         document.getElementById("jlSignIn").onclick = () => auth(false);
         document.getElementById("jlSignUp").onclick = () => auth(true);
         document.getElementById("jlSignOut").onclick = async () => { await client.auth.signOut(); };
@@ -134,24 +86,17 @@
         function placeAuth() {
             const mobile = window.innerWidth <= 520;
             const nav = document.querySelector(".main-nav");
-            if (mobile && nav && wrap.parentNode !== nav) {
-                nav.appendChild(wrap);
-            } else if (!mobile && wrap.parentNode !== document.body) {
-                document.body.appendChild(wrap);
-            }
-            if (!mobile) {
-                wrap.classList.remove("jl-mobile-open");
-                panel.hidden = true;
-            }
+            const theme = document.getElementById("theme");
+            if (mobile && nav) {
+                // Put Cloud immediately after the Dark/Light button in the hamburger menu.
+                if (theme && theme.parentNode === nav) theme.after(wrap);
+                else if (wrap.parentNode !== nav) nav.appendChild(wrap);
+            } else if (!mobile && wrap.parentNode !== document.body) document.body.appendChild(wrap);
+            if (!mobile) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; }
         }
         placeAuth();
         window.addEventListener("resize", placeAuth);
-        document.addEventListener("click", (e) => {
-            if (window.innerWidth <= 520 && !wrap.contains(e.target)) {
-                wrap.classList.remove("jl-mobile-open");
-                panel.hidden = true;
-            }
-        });
+        document.addEventListener("click", (e) => { if (window.innerWidth <= 520 && !wrap.contains(e.target)) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; } });
     }
 
     async function auth(signUp) {
@@ -159,9 +104,7 @@
         const password = document.getElementById("jlPassword").value;
         const msg = document.getElementById("jlCloudMessage");
         if (!email || !password) { msg.textContent = "Enter email and password."; return; }
-        const result = signUp
-            ? await client.auth.signUp({ email, password })
-            : await client.auth.signInWithPassword({ email, password });
+        const result = signUp ? await client.auth.signUp({ email, password }) : await client.auth.signInWithPassword({ email, password });
         msg.textContent = result.error ? result.error.message : (signUp ? "Account created. Check your email if confirmation is enabled." : "Signed in.");
     }
 
@@ -181,17 +124,8 @@
         createAuthUI();
         const { data } = await client.auth.getSession();
         updateUI(data.session);
-        if (data.session?.user) {
-            await pullCloud(data.session.user.id);
-            startPolling(data.session.user.id);
-        }
-        client.auth.onAuthStateChange(async (_event, session) => {
-            updateUI(session);
-            if (session?.user) {
-                await pullCloud(session.user.id);
-                startPolling(session.user.id);
-            } else stopPolling();
-        });
+        if (data.session?.user) { await pullCloud(data.session.user.id); startPolling(data.session.user.id); }
+        client.auth.onAuthStateChange(async (_event, session) => { updateUI(session); if (session?.user) { await pullCloud(session.user.id); startPolling(session.user.id); } else stopPolling(); });
     }
 
     document.addEventListener("DOMContentLoaded", init);
