@@ -70,6 +70,7 @@ js:
     <section id="practiceCard" class="practice-card-panel" hidden>
         <div class="practice-progress"><span id="progressText">1 / 1</span><span id="progressBar"><i></i></span></div>
         <div class="recall-card">
+            <button id="hardStar" class="hard-review-star" type="button" aria-label="Remove from Hard vocabulary" title="Remove from Hard vocabulary">★</button>
             <div class="recall-front">
                 <span class="practice-lesson" id="practiceLesson"></span>
                 <div class="practice-japanese" id="practiceJapanese"></div>
@@ -82,6 +83,10 @@ js:
                 <span class="practice-english" id="practiceEnglish"></span>
                 <span class="practice-bangla" id="practiceBangla"></span>
             </div>
+        </div>
+        <div class="review-navigation" aria-label="Review navigation">
+            <button id="previousReview" class="review-nav-button" type="button" aria-label="Previous card" title="Previous card">←</button>
+            <button id="nextReview" class="review-nav-button" type="button" aria-label="Next card" title="Next card">→</button>
         </div>
         <div id="ratingButtons" class="rating-buttons" hidden>
             <button data-rating="again" type="button"><strong>Again</strong><small>10 min</small></button>
@@ -98,3 +103,22 @@ js:
         <button id="restartPractice" class="practice-primary" type="button">Practice Again</button>
     </section>
 </main>
+
+<style>
+/* Hard-review card controls: scoped to Practice only. */
+#practiceCard.practice-card-panel{position:relative;max-width:760px;margin:32px auto 80px;padding:10px 0 20px;}
+#practiceCard .recall-card{position:relative;min-height:360px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:54px 42px 38px;border:1px solid rgba(127,127,127,.22);border-radius:24px;background:var(--paper,#fff);color:var(--ink,#222);box-shadow:0 18px 50px rgba(0,0,0,.12);text-align:center;}
+#practiceCard .hard-review-star{position:absolute;top:16px;right:18px;z-index:3;width:42px;height:42px;border:1px solid rgba(127,127,127,.2);border-radius:50%;background:transparent;color:var(--accent,#e56f3f);font-size:25px;line-height:1;cursor:pointer;transition:transform .15s ease,opacity .15s ease,background .15s ease;}
+#practiceCard .hard-review-star:hover{transform:scale(1.08);background:rgba(127,127,127,.08);}
+#practiceCard .hard-review-star.removed{color:var(--ink-soft,#888);opacity:.55;}
+#practiceCard .review-navigation{display:flex;justify-content:space-between;align-items:center;margin:14px 0 0;}
+#practiceCard .review-nav-button{width:52px;height:52px;border:1px solid rgba(127,127,127,.22);border-radius:50%;background:var(--paper,#fff);color:var(--ink,#222);font-size:28px;line-height:1;cursor:pointer;box-shadow:0 5px 18px rgba(0,0,0,.08);}
+#practiceCard .review-nav-button:disabled{opacity:.28;cursor:not-allowed;box-shadow:none;}
+#practiceCard .practice-progress{margin-bottom:12px;}
+@media(max-width:520px){
+  #practiceCard.practice-card-panel{margin:20px auto 72px;padding:6px 0 14px;}
+  #practiceCard .recall-card{min-height:330px;padding:50px 22px 28px;border-radius:20px;}
+  #practiceCard .hard-review-star{top:12px;right:12px;width:40px;height:40px;}
+  #practiceCard .review-nav-button{width:48px;height:48px;font-size:25px;}
+}
+</style>
