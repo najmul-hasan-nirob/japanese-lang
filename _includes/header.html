@@ -39,6 +39,13 @@ body{padding-top:0 !important;}
   .multiselect-panel.open input[type="checkbox"]{
     touch-action:pan-y;
   }
+
+  /* When a filter is open at the very top of the document, stop the
+     browser from treating a downward swipe as pull-to-refresh. */
+  html:has(.multiselect-panel.open),
+  body:has(.multiselect-panel.open){
+    overscroll-behavior-y:none;
+  }
 }
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
