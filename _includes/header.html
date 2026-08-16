@@ -5,39 +5,16 @@ body{padding-top:0 !important;}
   .page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}
   body{padding-top:0 !important;}
   html,body{overscroll-behavior-y:none;}
-  /* Global header menu: natural height only. Page-specific filters remain outside it. */
   #mobileMenuArea{height:auto !important;max-height:none !important;overflow:visible !important;}
   #mobileMenuArea .main-nav{height:auto !important;max-height:none !important;overflow:visible !important;}
-  /* Keep page-specific filters visible directly below the sticky header. */
-  .toolbar{
-    display:grid !important;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:8px;
-    margin:0 auto 14px;
-    padding:10px;
-    width:100%;
-    max-width:var(--layout-width);
-    align-items:end;
-  }
+  .toolbar{display:grid !important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:0 auto 14px;padding:10px;width:100%;max-width:var(--layout-width);align-items:end;}
   .toolbar .field{min-width:0;width:100%;}
   .toolbar .field.filter-field:nth-child(3){grid-column:1 / -1;}
   .toolbar .field label{display:block;margin-bottom:4px;}
-  .toolbar .multiselect-btn,
-  .toolbar select{width:100%;min-width:0;}
-  .toolbar .shuffle-btn,
-  .toolbar .romaji-toggle{width:100%;}
-  /* The open list is the only nested scroll surface. Edge gestures are handled by JS below. */
-  .multiselect-panel.open{
-    touch-action:pan-y;
-    overscroll-behavior-y:contain;
-    -webkit-overflow-scrolling:touch;
-    overflow-y:auto;
-    overflow-x:hidden;
-  }
-  .multiselect-panel.open label,
-  .multiselect-panel.open input[type="checkbox"]{
-    touch-action:pan-y;
-  }
+  .toolbar .multiselect-btn,.toolbar select{width:100%;min-width:0;}
+  .toolbar .shuffle-btn,.toolbar .romaji-toggle{width:100%;}
+  .multiselect-panel.open{touch-action:pan-y;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;overflow-y:auto;overflow-x:hidden;}
+  .multiselect-panel.open label,.multiselect-panel.open input[type="checkbox"]{touch-action:pan-y;}
 }
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
@@ -73,9 +50,7 @@ function initMobileMenu(){
  function move(){
   if(moved||innerWidth>520)return;
   const shuffle=document.getElementById('shuffleBtn');
-  if(toolbar&&shuffle&&shuffle.parentNode!==bottom){
-   shuffleMark=document.createComment('desktop-shuffle-position');shuffle.before(shuffleMark);bottom.appendChild(shuffle);
-  }
+  if(toolbar&&shuffle&&shuffle.parentNode!==bottom){shuffleMark=document.createComment('desktop-shuffle-position');shuffle.before(shuffleMark);bottom.appendChild(shuffle);}
   const romaji=document.getElementById('backRomajiToggle');
   if(romaji&&romaji.parentNode!==bottom){romajiMark=document.createComment('desktop-romaji-position');romaji.before(romajiMark);bottom.appendChild(romaji);}
   if(direction&&direction.parentNode!==bottom){directionMark=document.createComment('desktop-direction-position');direction.before(directionMark);direction.classList.add('mobile-bottom-direction');bottom.appendChild(direction);}
@@ -84,10 +59,8 @@ function initMobileMenu(){
  }
  function restore(){
   if(!moved)return;
-  const shuffle=document.getElementById('shuffleBtn');
-  if(shuffle&&shuffleMark&&shuffleMark.parentNode){shuffle.remove();shuffleMark.after(shuffle);}if(shuffleMark){shuffleMark.remove();shuffleMark=null;}
-  const romaji=document.getElementById('backRomajiToggle');
-  if(romaji&&romajiMark&&romajiMark.parentNode){romaji.remove();romajiMark.after(romaji);}if(romajiMark){romajiMark.remove();romajiMark=null;}
+  const shuffle=document.getElementById('shuffleBtn');if(shuffle&&shuffleMark&&shuffleMark.parentNode){shuffle.remove();shuffleMark.after(shuffle);}if(shuffleMark){shuffleMark.remove();shuffleMark=null;}
+  const romaji=document.getElementById('backRomajiToggle');if(romaji&&romajiMark&&romajiMark.parentNode){romaji.remove();romajiMark.after(romaji);}if(romajiMark){romajiMark.remove();romajiMark=null;}
   if(direction&&directionMark&&directionMark.parentNode){direction.remove();direction.classList.remove('mobile-bottom-direction');directionMark.after(direction);}if(directionMark){directionMark.remove();directionMark=null;}
   moved=false;
  }
@@ -100,38 +73,33 @@ function initMobileMenu(){
  addEventListener('resize',()=>{sync();if(innerWidth>520)close();});
 }
 
-/*
- * Keep an open multi-select from handing an edge swipe to the page.
- * At the top, a downward swipe would otherwise become Chrome's pull-to-refresh.
- * At the bottom, an upward swipe would otherwise chain into the page.
- * We only prevent the gesture when the panel itself is at the corresponding edge.
- */
-function initMultiselectEdgeGuard(){
+function nudgeFromTop(){
  if(window.innerWidth>520)return;
- document.querySelectorAll('.multiselect-panel').forEach(panel=>{
-  if(panel.dataset.edgeGuard==='1')return;
-  panel.dataset.edgeGuard='1';
-  let startY=0;
-  panel.addEventListener('touchstart',function(e){
-   if(e.touches.length===1)startY=e.touches[0].clientY;
-  },{passive:true});
-  panel.addEventListener('touchmove',function(e){
-   if(e.touches.length!==1)return;
-   const currentY=e.touches[0].clientY;
-   const deltaY=currentY-startY;
-   const atTop=panel.scrollTop<=0;
-   const atBottom=panel.scrollTop+panel.clientHeight>=panel.scrollHeight-1;
-   /* Finger moving down at top = pull-to-refresh direction. */
-   if(deltaY>0&&atTop){e.preventDefault();return;}
-   /* Finger moving up at bottom = upward scroll chaining direction. */
-   if(deltaY<0&&atBottom){e.preventDefault();}
-  },{passive:false});
+ if(window.scrollY<=0){
+  window.scrollTo(0,10);
+ }
+}
+
+function initMultiselectTopNudge(){
+ if(window.innerWidth>520)return;
+ document.addEventListener('click',function(e){
+  const button=e.target.closest('.multiselect-btn');
+  if(!button)return;
+  const panel=button.parentElement?.querySelector('.multiselect-panel');
+  if(!panel)return;
+  setTimeout(function(){
+   if(panel.classList.contains('open'))nudgeFromTop();
+  },0);
  });
+ document.addEventListener('touchstart',function(e){
+  const panel=e.target.closest('.multiselect-panel.open');
+  if(panel&&window.scrollY<=0)nudgeFromTop();
+ },{passive:true});
 }
 
 function init(){
  initMobileMenu();
- initMultiselectEdgeGuard();
+ initMultiselectTopNudge();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
