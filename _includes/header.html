@@ -7,6 +7,25 @@ body{padding-top:0 !important;}
   /* Global header menu: natural height only. Page-specific filters remain outside it. */
   #mobileMenuArea{height:auto !important;max-height:none !important;overflow:visible !important;}
   #mobileMenuArea .main-nav{height:auto !important;max-height:none !important;overflow:visible !important;}
+
+  /* Keep page-specific filters visible directly below the sticky header. */
+  .toolbar{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:8px;
+    margin:0 auto 14px;
+    padding:10px;
+    width:100%;
+    max-width:var(--layout-width);
+    align-items:end;
+  }
+  .toolbar .field{min-width:0;width:100%;}
+  .toolbar .field.filter-field:nth-child(3){grid-column:1 / -1;}
+  .toolbar .field label{display:block;margin-bottom:4px;}
+  .toolbar .multiselect-btn,
+  .toolbar select{width:100%;min-width:0;}
+  .toolbar .shuffle-btn,
+  .toolbar .romaji-toggle{width:100%;}
 }
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
