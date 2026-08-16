@@ -26,7 +26,7 @@ body{padding-top:0 !important;}
   .toolbar select{width:100%;min-width:0;}
   .toolbar .shuffle-btn,
   .toolbar .romaji-toggle{width:100%;}
-  /* Multi-select panels remain independently scrollable. */
+  /* The open list is the only nested scroll surface. Edge gestures are handled by JS below. */
   .multiselect-panel.open{
     touch-action:pan-y;
     overscroll-behavior-y:contain;
@@ -99,6 +99,40 @@ function initMobileMenu(){
  document.addEventListener('click',e=>{if(innerWidth<=520&&!e.target.closest('.page-head'))close();});
  addEventListener('resize',()=>{sync();if(innerWidth>520)close();});
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initMobileMenu);else initMobileMenu();
+
+/*
+ * Keep an open multi-select from handing an edge swipe to the page.
+ * At the top, a downward swipe would otherwise become Chrome's pull-to-refresh.
+ * At the bottom, an upward swipe would otherwise chain into the page.
+ * We only prevent the gesture when the panel itself is at the corresponding edge.
+ */
+function initMultiselectEdgeGuard(){
+ if(window.innerWidth>520)return;
+ document.querySelectorAll('.multiselect-panel').forEach(panel=>{
+  if(panel.dataset.edgeGuard==='1')return;
+  panel.dataset.edgeGuard='1';
+  let startY=0;
+  panel.addEventListener('touchstart',function(e){
+   if(e.touches.length===1)startY=e.touches[0].clientY;
+  },{passive:true});
+  panel.addEventListener('touchmove',function(e){
+   if(e.touches.length!==1)return;
+   const currentY=e.touches[0].clientY;
+   const deltaY=currentY-startY;
+   const atTop=panel.scrollTop<=0;
+   const atBottom=panel.scrollTop+panel.clientHeight>=panel.scrollHeight-1;
+   /* Finger moving down at top = pull-to-refresh direction. */
+   if(deltaY>0&&atTop){e.preventDefault();return;}
+   /* Finger moving up at bottom = upward scroll chaining direction. */
+   if(deltaY<0&&atBottom){e.preventDefault();}
+  },{passive:false});
+ });
+}
+
+function init(){
+ initMobileMenu();
+ initMultiselectEdgeGuard();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
