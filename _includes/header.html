@@ -4,10 +4,10 @@ body{padding-top:0 !important;}
 @media (max-width:520px){
   .page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}
   body{padding-top:0 !important;}
+  html,body{overscroll-behavior-y:none;}
   /* Global header menu: natural height only. Page-specific filters remain outside it. */
   #mobileMenuArea{height:auto !important;max-height:none !important;overflow:visible !important;}
   #mobileMenuArea .main-nav{height:auto !important;max-height:none !important;overflow:visible !important;}
-
   /* Keep page-specific filters visible directly below the sticky header. */
   .toolbar{
     display:grid !important;
@@ -26,8 +26,7 @@ body{padding-top:0 !important;}
   .toolbar select{width:100%;min-width:0;}
   .toolbar .shuffle-btn,
   .toolbar .romaji-toggle{width:100%;}
-
-  /* Keep a multi-select panel as the only scroll owner while it is open. */
+  /* Multi-select panels remain independently scrollable. */
   .multiselect-panel.open{
     touch-action:pan-y;
     overscroll-behavior-y:contain;
@@ -38,13 +37,6 @@ body{padding-top:0 !important;}
   .multiselect-panel.open label,
   .multiselect-panel.open input[type="checkbox"]{
     touch-action:pan-y;
-  }
-
-  /* When a filter is open at the very top of the document, stop the
-     browser from treating a downward swipe as pull-to-refresh. */
-  html:has(.multiselect-panel.open),
-  body:has(.multiselect-panel.open){
-    overscroll-behavior-y:none;
   }
 }
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
