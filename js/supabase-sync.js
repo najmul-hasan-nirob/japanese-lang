@@ -25,14 +25,13 @@
         const { data, error } = await client.from(TABLE).select("hard_vocabulary,spaced_repetition,practice_lessons,updated_at").eq("user_id", userId).maybeSingle();
         if (error) { console.warn("Japanese Lang cloud sync:", error.message); return; }
         if (!data) return;
-        const localHard = new Set(get(HARD_KEY, []));
-        (Array.isArray(data.hard_vocabulary) ? data.hard_vocabulary : []).forEach(v => localHard.add(v));
-        set(HARD_KEY, Array.from(localHard));
-        const localSR = get(SR_KEY, {});
-        const cloudSR = data.spaced_repetition && typeof data.spaced_repetition === "object" ? data.spaced_repetition : {};
-        set(SR_KEY, { ...localSR, ...cloudSR });
-        const cloudLessons = Array.isArray(data.practice_lessons) ? data.practice_lessons : [];
-        if (cloudLessons.length) set(PRACTICE_KEY, cloudLessons);
+
+        // Cloud is authoritative when there are no local changes waiting to be uploaded.
+        // This also allows removals from Hard vocabulary to sync across devices.
+        if (Array.isArray(data.hard_vocabulary)) set(HARD_KEY, data.hard_vocabulary);
+        if (data.spaced_repetition && typeof data.spaced_repetition === "object") set(SR_KEY, data.spaced_repetition);
+        if (Array.isArray(data.practice_lessons)) set(PRACTICE_KEY, data.practice_lessons);
+
         lastSnapshot = snapshot();
         window.dispatchEvent(new CustomEvent("japaneseLangCloudLoaded"));
     }
@@ -48,7 +47,18 @@
         window.dispatchEvent(new CustomEvent("japaneseLangCloudSaved"));
     }
 
-    function startPolling(userId) { clearInterval(syncTimer); syncTimer = setInterval(() => pushCloud(userId), 1500); }
+    async function syncUser(userId) {
+        if (!client || !userId) return;
+        // If this page/device changed local data, upload it first.
+        // Otherwise fetch the latest cloud data so changes made on another page/device appear automatically.
+        if (snapshot() !== lastSnapshot) await pushCloud(userId);
+        else await pullCloud(userId);
+    }
+
+    function startPolling(userId) {
+        clearInterval(syncTimer);
+        syncTimer = setInterval(() => syncUser(userId), 1500);
+    }
     function stopPolling() { clearInterval(syncTimer); syncTimer = null; }
 
     function createAuthUI() {
@@ -65,6 +75,7 @@
           #jlCloudPanel{position:absolute;left:0;bottom:52px;width:250px;padding:14px;border-radius:14px;background:var(--paper-cell,#fffdf8);color:var(--ink,#241f18);box-shadow:0 10px 35px rgba(0,0,0,.2);border:1px solid var(--paper-line,#d9d2c3);display:flex;flex-direction:column;gap:8px}
           #jlCloudPanel[hidden]{display:none}
           #jlCloudPanel input,#jlCloudPanel button:not(#jlCloudButton){box-sizing:border-box;width:100%;padding:8px;border-radius:8px;border:1px solid var(--paper-line,#d9d2c3);background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit}
+          #jlCloudPanel input{font-size:16px;}
           #jlCloudPanel input::placeholder{color:var(--ink-soft,#7a705e)}
           #jlCloudStatus,#jlCloudMessage{font-size:12px;color:var(--ink-soft,#7a705e)}
           @media (max-width:520px){
@@ -88,8 +99,10 @@
             const nav = document.querySelector(".main-nav");
             const theme = document.getElementById("theme");
             if (mobile && nav) {
-                // Put Cloud immediately after the Dark/Light button in the hamburger menu.
-                if (theme && theme.parentNode === nav) theme.after(wrap);
+                // Only move the auth control when it is not already immediately after Theme.
+                // This is important on mobile: opening the keyboard can resize the viewport.
+                // Re-inserting the focused wrapper would otherwise blur the input and close the keyboard.
+                if (theme && theme.parentNode === nav && wrap.previousElementSibling !== theme) theme.after(wrap);
                 else if (wrap.parentNode !== nav) nav.appendChild(wrap);
             } else if (!mobile && wrap.parentNode !== document.body) document.body.appendChild(wrap);
             if (!mobile) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; }
@@ -125,7 +138,7 @@
         const { data } = await client.auth.getSession();
         updateUI(data.session);
         if (data.session?.user) { await pullCloud(data.session.user.id); startPolling(data.session.user.id); }
-        client.auth.onAuthStateChange(async (_event, session) => { updateUI(session); if (session?.user) { await pullCloud(session.user.id); startPolling(session.user.id); } else stopPolling(); });
+        client.auth.onAuthStateChange(async (_event, session) => { updateUI(session); if (session?.user) { await pullCloud(session.user.id); startPolling(session.user.user.id); } else stopPolling(); });
     }
 
     document.addEventListener("DOMContentLoaded", init);
