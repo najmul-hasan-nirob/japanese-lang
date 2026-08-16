@@ -4,10 +4,9 @@ body{padding-top:0 !important;}
 @media (max-width:520px){
   .page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}
   body{padding-top:0 !important;}
-  /* Keep the hamburger itself as the single scroll area. Page filters stay with their page. */
-  #mobileMenuArea{max-height:calc(100dvh - 60px);overflow-y:auto !important;overflow-x:hidden;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;}
-  #mobileMenuArea .main-nav{overflow:visible !important;max-height:none !important;height:auto !important;}
-  #mobileMenuArea .main-nav > *{overscroll-behavior:inherit;}
+  /* Global header menu: natural height only. Page-specific filters remain outside it. */
+  #mobileMenuArea{height:auto !important;max-height:none !important;overflow:visible !important;}
+  #mobileMenuArea .main-nav{height:auto !important;max-height:none !important;overflow:visible !important;}
 }
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
