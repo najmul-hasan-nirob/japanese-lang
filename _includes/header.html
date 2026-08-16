@@ -26,6 +26,19 @@ body{padding-top:0 !important;}
   .toolbar select{width:100%;min-width:0;}
   .toolbar .shuffle-btn,
   .toolbar .romaji-toggle{width:100%;}
+
+  /* Keep a multi-select panel as the only scroll owner while it is open. */
+  .multiselect-panel.open{
+    touch-action:pan-y;
+    overscroll-behavior-y:contain;
+    -webkit-overflow-scrolling:touch;
+    overflow-y:auto;
+    overflow-x:hidden;
+  }
+  .multiselect-panel.open label,
+  .multiselect-panel.open input[type="checkbox"]{
+    touch-action:pan-y;
+  }
 }
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
