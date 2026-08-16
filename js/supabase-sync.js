@@ -58,7 +58,13 @@
           #jlCloudPanel input{font-size:16px}
           #jlCloudPanel input::placeholder{color:var(--ink-soft,#7a705e)}
           #jlCloudStatus,#jlCloudMessage{font-size:12px;color:var(--ink-soft,#7a705e)}
-          @media (max-width:520px){#jlCloudAuth{position:static;left:auto;bottom:auto;width:auto;z-index:auto;grid-column:auto;margin:0}#jlCloudButton{width:100%;height:42px;border-radius:6px;box-shadow:none;font-size:16px;min-width:0}#jlCloudPanel{position:absolute;left:12px;right:12px;bottom:auto;top:calc(100% + 6px);width:auto;z-index:10001}#jlCloudAuth.jl-mobile-open #jlCloudPanel{display:flex}}
+          @media (max-width:520px){
+            #jlCloudAuth{position:static;left:auto;bottom:auto;width:auto;z-index:auto;grid-column:auto;margin:0}
+            #jlCloudButton{width:100%;height:42px;border-radius:6px;box-shadow:none;font-size:16px;min-width:0}
+            #jlCloudPanel{position:absolute;left:12px;right:12px;bottom:auto;top:calc(100% + 6px);width:auto;z-index:10001;max-height:calc(100dvh - 110px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(14px + env(safe-area-inset-bottom));scroll-padding-bottom:24px}
+            #jlCloudPanel input,#jlCloudPanel button:not(#jlCloudButton){min-height:42px}
+            #jlCloudAuth.jl-mobile-open #jlCloudPanel{display:flex}
+          }
         `;
         document.head.appendChild(style);
         const button = document.getElementById("jlCloudButton"), panel = document.getElementById("jlCloudPanel");
