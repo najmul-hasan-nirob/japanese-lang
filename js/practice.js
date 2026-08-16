@@ -98,6 +98,7 @@
     document.addEventListener("DOMContentLoaded",()=>{
         if(!document.getElementById("practiceCard"))return;
         renderLessonChoices();updateStats();
+        window.addEventListener("japaneseLangCloudLoaded",()=>{ updateStats(); });
         document.getElementById("startPractice").addEventListener("click",()=>{practiceMode="due";start();});
         document.getElementById("hardPractice").addEventListener("click",()=>{practiceMode="hard";updateStats();start();});
         document.getElementById("restartPractice").addEventListener("click",start);
