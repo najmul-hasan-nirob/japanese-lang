@@ -4,12 +4,13 @@ body{padding-top:0 !important;}
 @media (max-width:520px){
   .page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}
   body{padding-top:0 !important;}
+  body.mobile-menu-open{overflow:hidden !important;overscroll-behavior:none;}
   .main-nav .mobile-menu-filter:nth-of-type(n){min-width:0;}
   .main-nav .mobile-menu-filter-0,.main-nav .mobile-menu-filter-1{width:calc(50% - 4px)!important;flex:0 0 calc(50% - 4px)!important;box-sizing:border-box;grid-column:auto!important;grid-column-start:auto!important;grid-column-end:auto!important;}
   .main-nav .mobile-menu-filter-0 select,.main-nav .mobile-menu-filter-1 select{width:100%;}
   .main-nav .mobile-menu-filter-0 + .mobile-menu-filter-1{margin-left:0;}
-  /* Keep the entire hamburger menu scrollable when the mobile keyboard or a small viewport is present. */
-  #mobileMenuArea{max-height:calc(100dvh - 58px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;}
+  /* The hamburger panel itself is the only scroll container. Lock the page behind it so edge-swipes cannot trigger pull-to-refresh/reload. */
+  #mobileMenuArea{max-height:calc(100dvh - 58px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior-y:contain;overscroll-behavior-x:none;scrollbar-width:thin;}
   #mobileMenuArea::-webkit-scrollbar{width:5px;}
   #mobileMenuArea::-webkit-scrollbar-thumb{background:var(--paper-line,#3a3a3a);border-radius:10px;}
   #mobileMenuArea::-webkit-scrollbar-track{background:transparent;}
