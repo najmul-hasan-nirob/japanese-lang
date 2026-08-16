@@ -286,20 +286,4 @@ body{
     .mobile-bottom-controls .abacus.right .bead{
         transform:translate(22px,-50%);
     }
-
-    /* Keep filter dropdowns in the page's normal scroll flow on mobile.
-       This prevents the lesson list from becoming a nested scroll container. */
-    .multiselect-panel.open{
-        position:relative;
-        top:auto;
-        left:auto;
-        right:auto;
-        width:100%;
-        max-height:none;
-        overflow:visible;
-        -webkit-overflow-scrolling:auto;
-        overscroll-behavior:initial;
-    }
 }
-
-.lesson-card-inner { padding-top: 42px !important; }
