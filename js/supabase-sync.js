@@ -38,14 +38,11 @@
         if (error) { console.warn("Japanese Lang cloud sync:", error.message); return; }
         if (!data) return;
 
-        // Merge hard vocabulary so local additions are never silently lost.
         const localHard = new Set(get(HARD_KEY, []));
         const cloudHard = Array.isArray(data.hard_vocabulary) ? data.hard_vocabulary : [];
         cloudHard.forEach(v => localHard.add(v));
         set(HARD_KEY, Array.from(localHard));
 
-        // Cloud SR is the source of truth for existing review records, while
-        // preserving any local records that the cloud does not yet know.
         const localSR = get(SR_KEY, {});
         const cloudSR = data.spaced_repetition && typeof data.spaced_repetition === "object" ? data.spaced_repetition : {};
         set(SR_KEY, { ...localSR, ...cloudSR });
@@ -103,21 +100,58 @@
 
         const style = document.createElement("style");
         style.textContent = `
-          #jlCloudAuth{position:fixed;right:14px;bottom:14px;z-index:99999;font-family:inherit}
-          #jlCloudButton{width:42px;height:42px;border:1px solid rgba(127,127,127,.35);border-radius:50%;background:var(--card-bg,#fff);cursor:pointer;font-size:19px}
-          #jlCloudPanel{position:absolute;right:0;bottom:52px;width:250px;padding:14px;border-radius:14px;background:var(--card-bg,#fff);box-shadow:0 10px 35px rgba(0,0,0,.2);border:1px solid rgba(127,127,127,.25);display:flex;flex-direction:column;gap:8px}
+          #jlCloudAuth{position:fixed;left:14px;bottom:14px;z-index:99999;font-family:inherit}
+          #jlCloudButton{width:42px;height:42px;border:1px solid var(--paper-line,#d9d2c3);border-radius:50%;background:var(--paper-cell,#fffdf8);color:var(--ink,#241f18);cursor:pointer;font-size:19px;box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.12))}
+          #jlCloudPanel{position:absolute;left:0;bottom:52px;width:250px;padding:14px;border-radius:14px;background:var(--paper-cell,#fffdf8);color:var(--ink,#241f18);box-shadow:0 10px 35px rgba(0,0,0,.2);border:1px solid var(--paper-line,#d9d2c3);display:flex;flex-direction:column;gap:8px}
           #jlCloudPanel[hidden]{display:none}
-          #jlCloudPanel input,#jlCloudPanel button:not(#jlCloudButton){box-sizing:border-box;width:100%;padding:8px;border-radius:8px;border:1px solid rgba(127,127,127,.35);font:inherit}
-          #jlCloudStatus,#jlCloudMessage{font-size:12px;opacity:.8}
+          #jlCloudPanel input,#jlCloudPanel button:not(#jlCloudButton){box-sizing:border-box;width:100%;padding:8px;border-radius:8px;border:1px solid var(--paper-line,#d9d2c3);background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit}
+          #jlCloudPanel input::placeholder{color:var(--ink-soft,#7a705e)}
+          #jlCloudStatus,#jlCloudMessage{font-size:12px;color:var(--ink-soft,#7a705e)}
+          @media (max-width:520px){
+            #jlCloudAuth{position:static;left:auto;bottom:auto;width:100%;z-index:auto;grid-column:1/-1}
+            #jlCloudButton{width:100%;height:42px;border-radius:6px;box-shadow:none;font-size:16px}
+            #jlCloudPanel{position:absolute;left:12px;right:12px;bottom:auto;top:calc(100% + 6px);width:auto;z-index:10001}
+            #jlCloudAuth.jl-mobile-open #jlCloudPanel{display:flex}
+          }
         `;
         document.head.appendChild(style);
 
-        document.getElementById("jlCloudButton").onclick = () => {
-            const p = document.getElementById("jlCloudPanel"); p.hidden = !p.hidden;
+        const button = document.getElementById("jlCloudButton");
+        const panel = document.getElementById("jlCloudPanel");
+        button.onclick = (e) => {
+            e.stopPropagation();
+            if (window.innerWidth <= 520) {
+                wrap.classList.toggle("jl-mobile-open");
+                panel.hidden = !wrap.classList.contains("jl-mobile-open");
+            } else {
+                panel.hidden = !panel.hidden;
+            }
         };
         document.getElementById("jlSignIn").onclick = () => auth(false);
         document.getElementById("jlSignUp").onclick = () => auth(true);
         document.getElementById("jlSignOut").onclick = async () => { await client.auth.signOut(); };
+
+        function placeAuth() {
+            const mobile = window.innerWidth <= 520;
+            const nav = document.querySelector(".main-nav");
+            if (mobile && nav && wrap.parentNode !== nav) {
+                nav.appendChild(wrap);
+            } else if (!mobile && wrap.parentNode !== document.body) {
+                document.body.appendChild(wrap);
+            }
+            if (!mobile) {
+                wrap.classList.remove("jl-mobile-open");
+                panel.hidden = true;
+            }
+        }
+        placeAuth();
+        window.addEventListener("resize", placeAuth);
+        document.addEventListener("click", (e) => {
+            if (window.innerWidth <= 520 && !wrap.contains(e.target)) {
+                wrap.classList.remove("jl-mobile-open");
+                panel.hidden = true;
+            }
+        });
     }
 
     async function auth(signUp) {
