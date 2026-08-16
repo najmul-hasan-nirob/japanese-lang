@@ -1,7 +1,14 @@
 <style>
 .page-head{position:sticky;top:0;z-index:1000;background:var(--paper);padding-top:0;padding-bottom:12px;display:flex;align-items:center;}
 body{padding-top:0 !important;}
-@media (max-width:520px){.page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}body{padding-top:0 !important;}}
+@media (max-width:520px){
+  .page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}
+  body{padding-top:0 !important;}
+  /* One vertical scroll owner for the entire open hamburger menu. */
+  #mobileMenuArea{max-height:calc(100dvh - 60px);overflow-y:auto !important;overflow-x:hidden;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;}
+  #mobileMenuArea .main-nav{overflow:visible !important;max-height:none !important;height:auto !important;}
+  #mobileMenuArea .main-nav > *{overscroll-behavior:inherit;}
+}
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
 </style>
