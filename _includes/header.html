@@ -1,7 +1,7 @@
 <style>
 .page-head{position:sticky;top:0;z-index:1000;background:var(--paper);padding-top:0;padding-bottom:12px;display:flex;align-items:center;}
 body{padding-top:0 !important;}
-@media (max-width:520px){.page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}body{padding-top:0 !important;}}
+@media (max-width:520px){.page-head{padding-top:5px;padding-bottom:10px;padding-left:10px;}body{padding-top:0 !important;}.main-nav .mobile-menu-filter:nth-of-type(n){min-width:0;}.main-nav .mobile-menu-filter-0,.main-nav .mobile-menu-filter-1{width:calc(50% - 4px);box-sizing:border-box;}.main-nav .mobile-menu-filter-0 select,.main-nav .mobile-menu-filter-1 select{width:100%;}.main-nav .mobile-menu-filter-0 + .mobile-menu-filter-1{margin-left:0;}}
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
 </style>
@@ -37,7 +37,7 @@ function initMobileMenu(){
   if(moved||innerWidth>520)return;
   if(toolbar){
    filters=Array.from(toolbar.querySelectorAll(':scope > .field')).filter(f=>!f.querySelector('#shuffleBtn')&&!f.querySelector('#backRomajiToggle'));
-   filters.forEach(f=>{const m=document.createComment('desktop-filter-position');f.before(m);f.classList.add('mobile-menu-filter');mainNav.appendChild(f);filterMarks.push(m);});
+   filters.forEach((f,i)=>{const m=document.createComment('desktop-filter-position');f.before(m);f.classList.add('mobile-menu-filter','mobile-menu-filter-'+i);mainNav.appendChild(f);filterMarks.push(m);});
    const shuffle=document.getElementById('shuffleBtn');
    if(shuffle&&shuffle.parentNode!==bottom){shuffleMark=document.createComment('desktop-shuffle-position');shuffle.before(shuffleMark);bottom.appendChild(shuffle);}
   }
@@ -49,7 +49,7 @@ function initMobileMenu(){
  }
  function restore(){
   if(!moved)return;
-  filters.forEach((f,i)=>{f.classList.remove('mobile-menu-filter');const m=filterMarks[i];if(m&&m.parentNode)m.after(f);});filterMarks.forEach(m=>m.remove());filters=[];filterMarks=[];
+  filters.forEach((f,i)=>{f.classList.remove('mobile-menu-filter','mobile-menu-filter-'+i);const m=filterMarks[i];if(m&&m.parentNode)m.after(f);});filterMarks.forEach(m=>m.remove());filters=[];filterMarks=[];
   const shuffle=document.getElementById('shuffleBtn');if(shuffle&&shuffleMark&&shuffleMark.parentNode){shuffle.remove();shuffleMark.after(shuffle);}if(shuffleMark){shuffleMark.remove();shuffleMark=null;}
   const romaji=document.getElementById('backRomajiToggle');if(romaji&&romajiMark&&romajiMark.parentNode){romaji.remove();romajiMark.after(romaji);}if(romajiMark){romajiMark.remove();romajiMark=null;}
   if(direction&&directionMark&&directionMark.parentNode){direction.remove();direction.classList.remove('mobile-bottom-direction');directionMark.after(direction);}if(directionMark){directionMark.remove();directionMark=null;}
