@@ -303,6 +303,7 @@ body { padding-top: 0 !important; }
     .directionFilterField label, .shuffle-field label, .romaji-field label { display:none; }
 }
 
+
 @media (min-width:520px) {
     #theme{
     position: fixed;
