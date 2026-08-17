@@ -506,3 +506,9 @@ button {
         display:none;
     }
 }
+
+
+.page-head {
+    padding-top: 15px !important;
+    padding-bottom: 25px !important;
+}
