@@ -66,6 +66,15 @@
             const kind=btn.dataset.rating;small.textContent=times[kind]||"";
         });
     }
+    function updateLessonSelectionSummary(){
+        const summary=document.getElementById("lessonSelectionSummary");
+        if(!summary)return;
+        const total=allLessonKeys().length;
+        if(!selectedLessons.length){summary.textContent="No lessons selected";return;}
+        if(total && selectedLessons.length===total){summary.textContent=`All ${total} lessons selected`;return;}
+        if(selectedLessons.length===1){summary.textContent=lessonLabel(selectedLessons[0]);return;}
+        summary.textContent=`${selectedLessons.length} lessons selected`;
+    }
     function updateStats(){
         const due=dueItems().length,fresh=newItems().length,hard=hardItems().length;
         document.getElementById("dueCount").textContent=due;document.getElementById("newCount").textContent=fresh;document.getElementById("hardCount").textContent=hard;
@@ -74,11 +83,13 @@
         const labels=selectedLessons.length===allLessonKeys().length?"all lessons":selectedLessons.map(key=>lessonLabel(key)).join(", ");
         if(practiceMode==="hard")summary.textContent=hard?`${hard} hard ${hard===1?"word":"words"} from ${labels} are ready to practice.`:`No saved hard vocabulary in ${labels}.`;
         else summary.textContent=due?`${due} vocabulary ${due===1?"card is":"cards are"} ready for review from ${labels}.`:`No reviews are due right now in ${labels}. You have ${fresh} new ${fresh===1?"word":"words"}.`;
+        updateLessonSelectionSummary();
     }
     function renderLessonChoices(){
         const container=document.getElementById("lessonChoices");if(!container)return;const keys=allLessonKeys();
         container.innerHTML=keys.map(key=>{const checked=selectedLessons.includes(key)?" checked":"";return `<label class="lesson-choice"><input type="checkbox" value="${key}"${checked}><span>${lessonLabel(key)}</span></label>`;}).join("");
         container.querySelectorAll("input[type=checkbox]").forEach(input=>input.addEventListener("change",()=>{selectedLessons=Array.from(container.querySelectorAll("input:checked")).map(box=>box.value);saveLessonSelection();updateStats();}));
+        updateLessonSelectionSummary();
     }
     function renderCard(){
         const item=queue[index];
@@ -149,6 +160,15 @@
         if(!document.getElementById("practiceCard"))return;
         renderLessonChoices();updateStats();
         window.addEventListener("japaneseLangCloudLoaded",()=>{ state=loadState();updateStats(); });
+        const lessonToggle=document.getElementById("lessonToggle"),lessonWrap=document.getElementById("lessonChoicesWrap");
+        if(lessonToggle&&lessonWrap){
+            lessonToggle.addEventListener("click",()=>{
+                const willOpen=lessonWrap.hidden;
+                lessonWrap.hidden=!willOpen;
+                lessonToggle.setAttribute("aria-expanded",String(willOpen));
+                lessonToggle.classList.toggle("open",willOpen);
+            });
+        }
         document.getElementById("startPractice").addEventListener("click",()=>{practiceMode="due";start();});
         document.getElementById("hardPractice").addEventListener("click",()=>{practiceMode="hard";updateStats();start();});
         document.getElementById("restartPractice").addEventListener("click",start);
