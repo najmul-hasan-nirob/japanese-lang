@@ -1,9 +1,13 @@
-// Spaced-repetition Practice — local device + cloud sync via Supabase.
+// Adaptive spaced-repetition Practice — local device + cloud sync via Supabase.
 (() => {
     const STORAGE = "japanese-lang-spaced-repetition-v1";
     const HARD_STORAGE = "japanese-lang-hard-vocabulary";
     const LESSON_FILTER_STORAGE = "japanese-lang-practice-lessons-v1";
-    const intervals = { again: 10 * 60 * 1000, hard: 24 * 60 * 60 * 1000, good: 3 * 24 * 60 * 60 * 1000, easy: 7 * 24 * 60 * 60 * 1000 };
+    const LEARNING_AGAIN = 10 * 60 * 1000;
+    const MIN_HARD = 1;
+    const MIN_GOOD = 3;
+    const MIN_EASY = 7;
+    const MAX_INTERVAL = 3650;
     let state = loadState(), queue = [], index = 0, answered = 0, practiceMode = "due";
     let selectedLessons = loadLessonSelection();
 
@@ -25,7 +29,43 @@
     function dueItems(){const t=Date.now();return selectedItems(allVocabulary()).filter(item=>{const r=state[item.id];return !r||!r.nextReview||r.nextReview<=t;});}
     function newItems(){return selectedItems(allVocabulary()).filter(item=>!state[item.id]?.repetitions);}
     function hardItems(){const h=hardWords();return selectedItems(allVocabulary()).filter(item=>h.has(item.cardKey));}
-    function getRecord(item){if(!state[item.id])state[item.id]={interval:0,repetitions:0,correct:0,incorrect:0,nextReview:0};return state[item.id];}
+    function getRecord(item){
+        if(!state[item.id])state[item.id]={interval:0,repetitions:0,correct:0,incorrect:0,lapses:0,ease:2.5,nextReview:0};
+        const r=state[item.id];
+        if(typeof r.ease!=="number"||r.ease<1.3)r.ease=2.5;
+        if(typeof r.interval!=="number"||r.interval<0)r.interval=0;
+        if(typeof r.repetitions!=="number")r.repetitions=0;
+        if(typeof r.lapses!=="number")r.lapses=0;
+        return r;
+    }
+    function clampInterval(days){return Math.min(MAX_INTERVAL,Math.max(0,days));}
+    function formatInterval(msOrDays, compact=false){
+        if(typeof msOrDays==="number" && msOrDays < 1){
+            const minutes=Math.max(1,Math.round(msOrDays*24*60));
+            return `${minutes} min`;
+        }
+        const days=typeof msOrDays==="number"?msOrDays:0;
+        if(days<1)return "10 min";
+        if(days<30)return `${Math.max(1,Math.round(days))} day${Math.round(days)===1?"":"s"}`;
+        if(days<365){const months=Math.max(1,Math.round(days/30));return `${months} mo`+ (months===1?"":"s");}
+        const years=Math.max(1,Math.round(days/365));return `${years} yr`+(years===1?"":"s");
+    }
+    function previewIntervals(item){
+        const r=getRecord(item),old=Number(r.interval)||0,ease=Number(r.ease)||2.5;
+        return {
+            again:"10 min",
+            hard:formatInterval(Math.max(MIN_HARD,old?old*0.8:MIN_HARD)),
+            good:formatInterval(Math.max(MIN_GOOD,old?old*ease:MIN_GOOD)),
+            easy:formatInterval(Math.max(MIN_EASY,old?old*ease*1.3:MIN_EASY))
+        };
+    }
+    function updateRatingLabels(item){
+        const times=previewIntervals(item);
+        document.querySelectorAll("#ratingButtons button").forEach(btn=>{
+            const small=btn.querySelector("small");if(!small)return;
+            const kind=btn.dataset.rating;small.textContent=times[kind]||"";
+        });
+    }
     function updateStats(){
         const due=dueItems().length,fresh=newItems().length,hard=hardItems().length;
         document.getElementById("dueCount").textContent=due;document.getElementById("newCount").textContent=fresh;document.getElementById("hardCount").textContent=hard;
@@ -63,6 +103,7 @@
             star.setAttribute("aria-label",saved?"Remove from Hard vocabulary":"This card is not in Hard vocabulary");
             star.title=saved?"Remove from Hard vocabulary":"Not saved as Hard";
         }
+        updateRatingLabels(item);
         const previous=document.getElementById("previousReview"),next=document.getElementById("nextReview");
         if(previous)previous.disabled=index<=0;
         if(next)next.disabled=index>=queue.length-1;
@@ -71,10 +112,19 @@
     function showAnswer(){document.getElementById("practiceAnswer").hidden=false;document.getElementById("showAnswer").hidden=true;document.getElementById("ratingButtons").hidden=false;}
     function rate(kind){
         const item=queue[index];if(!item)return;
-        const r=getRecord(item),old=r.interval||0;r.repetitions=(r.repetitions||0)+1;
-        if(kind==="again"){r.incorrect=(r.incorrect||0)+1;r.interval=intervals.again;}
-        else{r.correct=(r.correct||0)+1;if(kind==="hard")r.interval=Math.max(intervals.hard,old?Math.floor(old*1.3):intervals.hard);if(kind==="good")r.interval=Math.max(intervals.good,old?old*2:intervals.good);if(kind==="easy")r.interval=Math.max(intervals.easy,old?old*3:intervals.easy);}
-        r.nextReview=Date.now()+r.interval;saveState();answered++;index++;renderCard();
+        const r=getRecord(item),old=Number(r.interval)||0,ease=Number(r.ease)||2.5;
+        r.lastReviewed=Date.now();
+        if(kind==="again"){
+            r.incorrect=(r.incorrect||0)+1;r.lapses=(r.lapses||0)+1;r.repetitions=0;r.interval=0;r.ease=Math.max(1.3,ease-0.2);r.nextReview=Date.now()+LEARNING_AGAIN;
+        } else if(kind==="hard"){
+            r.correct=(r.correct||0)+1;r.repetitions=(r.repetitions||0)+1;r.ease=Math.max(1.3,ease-0.15);r.interval=clampInterval(Math.max(MIN_HARD,old?old*0.8:MIN_HARD));r.nextReview=Date.now()+r.interval*86400000;
+        } else if(kind==="good"){
+            r.correct=(r.correct||0)+1;r.repetitions=(r.repetitions||0)+1;r.ease=Math.max(1.3,ease);r.interval=clampInterval(Math.max(MIN_GOOD,old?old*r.ease:MIN_GOOD));r.nextReview=Date.now()+r.interval*86400000;
+        } else if(kind==="easy"){
+            r.correct=(r.correct||0)+1;r.repetitions=(r.repetitions||0)+1;r.ease=Math.min(3.5,ease+0.15);r.interval=clampInterval(Math.max(MIN_EASY,old?old*r.ease*1.3:MIN_EASY));r.nextReview=Date.now()+r.interval*86400000;
+        }
+        saveState();answered++;index++;renderCard();updateStats();
+        window.dispatchEvent(new CustomEvent("japaneseLangPracticeChanged"));
     }
     function removeFromHard(){
         const item=queue[index];if(!item)return;
@@ -98,7 +148,7 @@
     document.addEventListener("DOMContentLoaded",()=>{
         if(!document.getElementById("practiceCard"))return;
         renderLessonChoices();updateStats();
-        window.addEventListener("japaneseLangCloudLoaded",()=>{ updateStats(); });
+        window.addEventListener("japaneseLangCloudLoaded",()=>{ state=loadState();updateStats(); });
         document.getElementById("startPractice").addEventListener("click",()=>{practiceMode="due";start();});
         document.getElementById("hardPractice").addEventListener("click",()=>{practiceMode="hard";updateStats();start();});
         document.getElementById("restartPractice").addEventListener("click",start);
