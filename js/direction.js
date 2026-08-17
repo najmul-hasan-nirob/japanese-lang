@@ -5,9 +5,38 @@
 // Front = all cards show their front.
 // Back  = all cards show their back.
 // Individual cards can still be clicked independently.
+//
+// Desktop: place the Front / Back switch in the page filter
+// toolbar instead of the global header.
+// Mobile: the header script moves it to the bottom controls.
 // =====================================================
 
 (function () {
+    function moveToDesktopToolbar() {
+        if (window.innerWidth <= 520) return;
+
+        const direction = document.getElementById("direction");
+        const toolbar = document.querySelector(".toolbar");
+        if (!direction || !toolbar) return;
+
+        // Already inside the filter area.
+        if (direction.closest(".direction-filter-field")) return;
+
+        let field = document.getElementById("directionFilterField");
+        if (!field) {
+            field = document.createElement("div");
+            field.id = "directionFilterField";
+            field.className = "field direction-filter-field";
+
+            const label = document.createElement("label");
+            label.textContent = "Cards";
+            field.appendChild(label);
+        }
+
+        field.appendChild(direction);
+        toolbar.appendChild(field);
+    }
+
     function initDirectionSwitch() {
         const direction = document.getElementById("direction");
         const leftLabel = document.getElementById("directionLeftLabel");
@@ -46,8 +75,7 @@
             applyState();
         }
 
-        // Capture phase prevents the old page-specific Kana/Romaji or
-        // reading/number handlers from running.
+        // Capture phase prevents old page-specific handlers from running.
         direction.addEventListener("click", function (event) {
             event.preventDefault();
             event.stopImmediatePropagation();
@@ -64,9 +92,10 @@
 
         updateUI();
         applyState();
+        moveToDesktopToolbar();
 
-        // Filters, order and lesson changes rebuild the grid. If Back is
-        // active, newly created cards must remain on their back as well.
+        // Filters/order changes rebuild the grid. If Back is active,
+        // newly created cards must remain on their back as well.
         const observer = new MutationObserver(() => {
             if (showBack) applyState();
         });
