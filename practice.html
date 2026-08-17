@@ -48,17 +48,25 @@ js:
     </section>
 
     <section class="practice-filters practice-panel">
-        <div class="practice-filter-head">
-            <div>
-                <h3>Choose lessons</h3>
-                <p>Select one or more lessons to include in your practice.</p>
+        <button id="lessonToggle" class="practice-filter-toggle" type="button" aria-expanded="false" aria-controls="lessonChoices">
+            <span class="practice-filter-toggle-text">
+                <strong>Choose lessons</strong>
+                <small id="lessonSelectionSummary">All lessons selected</small>
+            </span>
+            <span class="practice-filter-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div id="lessonChoicesWrap" class="lesson-choices-wrap" hidden>
+            <div class="practice-filter-head">
+                <div>
+                    <p>Select one or more lessons to include in your practice.</p>
+                </div>
+                <div class="practice-filter-actions">
+                    <button id="selectAllLessons" type="button">All</button>
+                    <button id="clearLessons" type="button">Clear</button>
+                </div>
             </div>
-            <div class="practice-filter-actions">
-                <button id="selectAllLessons" type="button">All</button>
-                <button id="clearLessons" type="button">Clear</button>
-            </div>
+            <div id="lessonChoices" class="lesson-choices" aria-label="Lessons to practice"></div>
         </div>
-        <div id="lessonChoices" class="lesson-choices" aria-label="Lessons to practice"></div>
     </section>
 
     <section id="practiceStart" class="practice-panel">
