@@ -4,54 +4,42 @@
 
 const themeBtn=document.getElementById("theme");
 
-if(localStorage.getItem("theme")==="dark"){
-    document.body.classList.add("dark");
-    themeBtn.textContent="☀️";
-}
-
-themeBtn.addEventListener("click",()=>{
-
-    document.body.classList.toggle("dark");
-
-    if(document.body.classList.contains("dark")){
-        localStorage.setItem("theme","dark");
+if(themeBtn){
+    if(localStorage.getItem("theme")==="dark"){
+        document.body.classList.add("dark");
         themeBtn.textContent="☀️";
-    }else{
-        localStorage.setItem("theme","light");
-        themeBtn.textContent="🌙";
     }
 
-});
+    themeBtn.addEventListener("click",()=>{
+        document.body.classList.toggle("dark");
+
+        if(document.body.classList.contains("dark")){
+            localStorage.setItem("theme","dark");
+            themeBtn.textContent="☀️";
+        }else{
+            localStorage.setItem("theme","light");
+            themeBtn.textContent="🌙";
+        }
+    });
+}
 
 // =====================================================
 // Shared: Japanese pronunciation
 // =====================================================
-// Android WebView does not expose the browser Web Speech
-// synthesis API. When the app provides the AndroidTTS
-// bridge, use native Android TextToSpeech first. Normal
-// browsers continue using the existing Web Speech API.
-// =====================================================
 
 function speakJapanese(text){
-
     if(!text) return;
 
     const japaneseText = String(text).trim();
     if(!japaneseText) return;
 
-    // Native Android TTS bridge (used by the WebView app).
-    // Keep this first so Android does not depend on
-    // window.speechSynthesis, which WebView may not support.
     if(window.AndroidTTS && typeof window.AndroidTTS.speak === "function"){
         try{
             window.AndroidTTS.speak(japaneseText);
             return;
-        }catch(e){
-            // Fall through to browser TTS if the bridge fails.
-        }
+        }catch(e){}
     }
 
-    // Normal browser pronunciation.
     if(!window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") return;
 
     const utter = new SpeechSynthesisUtterance(japaneseText);
@@ -71,17 +59,13 @@ function speakJapanese(text){
     }else{
         applyVoiceAndSpeak();
     }
-
 }
 
-// Strips example-sentence numbering (①②③...) before speaking
 function cleanForSpeech(text){
     if(!text) return "";
     return String(text).replace(/[①-⑳]/g, "").trim();
 }
 
-// Grammar "pattern" entries (e.g. "N₁は N₂です") aren't real
-// speakable sentences - skip the speaker button for those.
 function isSpeakableJapanese(text){
     if(!text) return false;
     return !/[₀-₉]/.test(text);
@@ -99,3 +83,175 @@ function createSpeakerButton(text){
     });
     return btn;
 }
+
+// =====================================================
+// Shared header / mobile controls
+// =====================================================
+
+(function(){
+    const MOBILE_ICONS={
+        flip:'<svg class="mobile-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"/></svg>',
+        shuffle:'<svg class="mobile-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3c4 0 6 10 10 10h3M17 14l3 3-3 3M4 17h3c1.5 0 2.5-1.5 3.5-3M14 10c1-1.5 2-3 3-3h3M17 4l3 3-3 3"/></svg>'
+    };
+
+    function applySharedMobileIcons(){
+        if(window.innerWidth>520) return;
+
+        const direction=document.getElementById('direction');
+        if(direction){
+            direction.innerHTML=MOBILE_ICONS.flip;
+            direction.setAttribute('aria-label',direction.classList.contains('right')?'Show all cards Front':'Show all cards Back');
+            direction.setAttribute('title',direction.classList.contains('right')?'Show Front':'Show Back');
+        }
+
+        const shuffle=document.getElementById('shuffleBtn');
+        if(shuffle){
+            shuffle.innerHTML=MOBILE_ICONS.shuffle;
+            shuffle.setAttribute('aria-label','Shuffle');
+            shuffle.setAttribute('title','Shuffle');
+        }
+    }
+
+    function restoreSharedMobileIcons(){
+        if(window.innerWidth<=520) return;
+
+        const direction=document.getElementById('direction');
+        if(direction && !document.body.classList.contains('mobile-menu-open')){
+            direction.innerHTML='<span class="abacus-label left active" id="directionLeftLabel">Front</span><div class="rod"><div class="bead" id="bead"></div></div><span class="abacus-label right" id="directionRightLabel">Back</span>';
+        }
+
+        const shuffle=document.getElementById('shuffleBtn');
+        if(shuffle && !shuffle.closest('.mobile-bottom-controls')) shuffle.innerHTML='🔀 Shuffle';
+    }
+
+    function initMobileMenu(){
+        const toggle=document.getElementById('mobileMenuToggle');
+        const nav=document.getElementById('mobileMenuArea');
+        const toolbar=document.querySelector('.toolbar');
+        if(!toggle || !nav) return;
+
+        const direction=document.getElementById('direction');
+        let bottom=document.querySelector('.mobile-bottom-controls');
+        let directionMark=null,shuffleMark=null,romajiMark=null,moved=false;
+
+        if(!bottom){
+            bottom=document.createElement('div');
+            bottom.className='mobile-bottom-controls';
+            document.body.appendChild(bottom);
+        }
+
+        function move(){
+            if(moved || window.innerWidth>520) return;
+
+            const shuffle=document.getElementById('shuffleBtn');
+            if(toolbar && shuffle && shuffle.parentNode!==bottom){
+                shuffleMark=document.createComment('desktop-shuffle-position');
+                shuffle.before(shuffleMark);
+                bottom.appendChild(shuffle);
+            }
+
+            const romaji=document.getElementById('backRomajiToggle');
+            if(romaji && romaji.parentNode!==bottom){
+                romajiMark=document.createComment('desktop-romaji-position');
+                romaji.before(romajiMark);
+                bottom.appendChild(romaji);
+            }
+
+            if(direction && direction.parentNode!==bottom){
+                directionMark=document.createComment('desktop-direction-position');
+                direction.before(directionMark);
+                direction.classList.add('mobile-bottom-direction');
+                bottom.appendChild(direction);
+            }
+
+            if(bottom.parentNode!==document.body) document.body.appendChild(bottom);
+            applySharedMobileIcons();
+            moved=true;
+        }
+
+        function restore(){
+            if(!moved) return;
+
+            const shuffle=document.getElementById('shuffleBtn');
+            if(shuffle && shuffleMark && shuffleMark.parentNode){ shuffle.remove(); shuffleMark.after(shuffle); }
+            if(shuffleMark){ shuffleMark.remove(); shuffleMark=null; }
+
+            const romaji=document.getElementById('backRomajiToggle');
+            if(romaji && romajiMark && romajiMark.parentNode){ romaji.remove(); romajiMark.after(romaji); }
+            if(romajiMark){ romajiMark.remove(); romajiMark=null; }
+
+            if(direction && directionMark && directionMark.parentNode){
+                direction.remove();
+                direction.classList.remove('mobile-bottom-direction');
+                directionMark.after(direction);
+            }
+            if(directionMark){ directionMark.remove(); directionMark=null; }
+
+            restoreSharedMobileIcons();
+            moved=false;
+        }
+
+        function sync(){ window.innerWidth<=520 ? move() : restore(); }
+        function close(){
+            document.body.classList.remove('mobile-menu-open');
+            toggle.classList.remove('open');
+            toggle.setAttribute('aria-expanded','false');
+        }
+
+        sync();
+
+        toggle.addEventListener('click',e=>{
+            e.stopPropagation();
+            sync();
+            const open=document.body.classList.toggle('mobile-menu-open');
+            toggle.classList.toggle('open',open);
+            toggle.setAttribute('aria-expanded',String(open));
+            applySharedMobileIcons();
+        });
+
+        nav.addEventListener('click',e=>{
+            if(window.innerWidth<=520 && e.target.closest('a')) close();
+        });
+
+        document.addEventListener('click',e=>{
+            if(window.innerWidth<=520 && !e.target.closest('.page-head')) close();
+        });
+
+        window.addEventListener('resize',()=>{
+            sync();
+            if(window.innerWidth>520) close();
+        });
+    }
+
+    function nudgeFromTop(){
+        if(window.innerWidth>520) return;
+        if(window.scrollY<=0) window.scrollTo(0,10);
+    }
+
+    function initMultiselectTopNudge(){
+        if(window.innerWidth>520) return;
+
+        document.addEventListener('click',function(e){
+            const button=e.target.closest('.multiselect-btn');
+            if(!button) return;
+            const panel=button.parentElement?.querySelector('.multiselect-panel');
+            if(!panel) return;
+            setTimeout(function(){
+                if(panel.classList.contains('open')) nudgeFromTop();
+            },0);
+        });
+
+        document.addEventListener('touchstart',function(e){
+            const panel=e.target.closest('.multiselect-panel.open');
+            if(panel && window.scrollY<=0) nudgeFromTop();
+        },{passive:true});
+    }
+
+    function init(){
+        initMobileMenu();
+        initMultiselectTopNudge();
+    }
+
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+    else init();
+})();
