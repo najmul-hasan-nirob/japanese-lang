@@ -15,6 +15,49 @@ body{padding-top:0 !important;}
   .toolbar .shuffle-btn,.toolbar .romaji-toggle{width:100%;}
   .multiselect-panel.open{touch-action:pan-y;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;overflow-y:auto;overflow-x:hidden;}
   .multiselect-panel.open label,.multiselect-panel.open input[type="checkbox"]{touch-action:pan-y;}
+
+  /* Use the same clean icon-only sticky controls as the Lessons page everywhere. */
+  .mobile-bottom-controls{
+    align-items:stretch;
+  }
+  .mobile-bottom-controls > button,
+  .mobile-bottom-controls > .abacus{
+    flex:1 1 0;
+    width:auto;
+    min-width:0;
+    min-height:44px;
+    margin:0;
+    padding:6px;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    color:var(--vermilion) !important;
+  }
+  .mobile-bottom-controls > .abacus{
+    cursor:pointer;
+  }
+  .mobile-bottom-controls > .abacus .abacus-label,
+  .mobile-bottom-controls > .abacus .rod{
+    display:none !important;
+  }
+  .mobile-bottom-controls .mobile-control-icon,
+  .mobile-bottom-controls .lesson-control-svg{
+    width:20px !important;
+    height:20px !important;
+    flex:0 0 20px;
+    display:inline-block;
+    vertical-align:middle;
+    fill:none !important;
+    stroke:currentColor !important;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .mobile-bottom-controls .lesson-control-label{
+    display:none !important;
+  }
 }
 .logo{display:flex;gap:15px;align-items:center;text-decoration:none;color:inherit;}
 .logo h1{color:var(--ink);}
@@ -41,6 +84,37 @@ body{padding-top:0 !important;}
 </div>
 <script>
 (function(){
+const MOBILE_ICONS={
+ flip:'<svg class="mobile-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"/></svg>',
+ shuffle:'<svg class="mobile-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3c4 0 6 10 10 10h3M17 14l3 3-3 3M4 17h3c1.5 0 2.5-1.5 3.5-3M14 10c1-1.5 2-3 3-3h3M17 4l3 3-3 3"/></svg>'
+};
+
+function applySharedMobileIcons(){
+ if(window.innerWidth>520)return;
+ const direction=document.getElementById('direction');
+ if(direction){
+  direction.innerHTML=MOBILE_ICONS.flip;
+  direction.setAttribute('aria-label',direction.classList.contains('right')?'Show all cards Front':'Show all cards Back');
+  direction.setAttribute('title',direction.classList.contains('right')?'Show Front':'Show Back');
+ }
+ const shuffle=document.getElementById('shuffleBtn');
+ if(shuffle){
+  shuffle.innerHTML=MOBILE_ICONS.shuffle;
+  shuffle.setAttribute('aria-label','Shuffle');
+  shuffle.setAttribute('title','Shuffle');
+ }
+}
+
+function restoreSharedMobileIcons(){
+ if(window.innerWidth<=520)return;
+ const direction=document.getElementById('direction');
+ if(direction && !document.body.classList.contains('mobile-menu-open')){
+  direction.innerHTML='<span class="abacus-label left active" id="directionLeftLabel">Front</span><div class="rod"><div class="bead" id="bead"></div></div><span class="abacus-label right" id="directionRightLabel">Back</span>';
+ }
+ const shuffle=document.getElementById('shuffleBtn');
+ if(shuffle && !shuffle.closest('.mobile-bottom-controls')) shuffle.innerHTML='🔀 Shuffle';
+}
+
 function initMobileMenu(){
  const toggle=document.getElementById('mobileMenuToggle'),nav=document.getElementById('mobileMenuArea'),toolbar=document.querySelector('.toolbar');
  if(!toggle||!nav)return;
@@ -55,6 +129,7 @@ function initMobileMenu(){
   if(romaji&&romaji.parentNode!==bottom){romajiMark=document.createComment('desktop-romaji-position');romaji.before(romajiMark);bottom.appendChild(romaji);}
   if(direction&&direction.parentNode!==bottom){directionMark=document.createComment('desktop-direction-position');direction.before(directionMark);direction.classList.add('mobile-bottom-direction');bottom.appendChild(direction);}
   if(bottom.parentNode!==document.body)document.body.appendChild(bottom);
+  applySharedMobileIcons();
   moved=true;
  }
  function restore(){
@@ -62,12 +137,13 @@ function initMobileMenu(){
   const shuffle=document.getElementById('shuffleBtn');if(shuffle&&shuffleMark&&shuffleMark.parentNode){shuffle.remove();shuffleMark.after(shuffle);}if(shuffleMark){shuffleMark.remove();shuffleMark=null;}
   const romaji=document.getElementById('backRomajiToggle');if(romaji&&romajiMark&&romajiMark.parentNode){romaji.remove();romajiMark.after(romaji);}if(romajiMark){romajiMark.remove();romajiMark=null;}
   if(direction&&directionMark&&directionMark.parentNode){direction.remove();direction.classList.remove('mobile-bottom-direction');directionMark.after(direction);}if(directionMark){directionMark.remove();directionMark=null;}
+  restoreSharedMobileIcons();
   moved=false;
  }
  function sync(){innerWidth<=520?move():restore();}
  function close(){document.body.classList.remove('mobile-menu-open');toggle.classList.remove('open');toggle.setAttribute('aria-expanded','false');}
  sync();
- toggle.addEventListener('click',e=>{e.stopPropagation();sync();const open=document.body.classList.toggle('mobile-menu-open');toggle.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));});
+ toggle.addEventListener('click',e=>{e.stopPropagation();sync();const open=document.body.classList.toggle('mobile-menu-open');toggle.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));applySharedMobileIcons();});
  nav.addEventListener('click',e=>{if(innerWidth<=520&&e.target.closest('a'))close();});
  document.addEventListener('click',e=>{if(innerWidth<=520&&!e.target.closest('.page-head'))close();});
  addEventListener('resize',()=>{sync();if(innerWidth>520)close();});
