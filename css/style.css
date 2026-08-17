@@ -263,16 +263,7 @@ button { font-family:'JetBrains Mono',monospace; font-size:13px; padding:8px 15p
 /* Shared header/mobile behavior moved out of _includes/header.html */
 body { padding-top: 0 !important; }
 
-@media (min-width:520px) {
-    #theme{
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-}
-}
-
 @media (max-width:520px) {
-    }
     body { padding: 8px 12px 100px; }
     .page-head { display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; margin-bottom:20px; padding:5px 0 10px 10px; }
     .logo { align-items:center; gap:10px; }
