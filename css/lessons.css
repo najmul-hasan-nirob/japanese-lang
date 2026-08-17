@@ -286,4 +286,11 @@ body{
     .mobile-bottom-controls .abacus.right .bead{
         transform:translate(22px,-50%);
     }
+    
+}
+
+.recall-answer{
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px
 }

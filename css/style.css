@@ -190,7 +190,7 @@ select:focus-visible {
     gap: 10px;
     cursor: pointer;
     user-select: none;
-    padding: 7px 14px;
+    padding: 10px 14px;
     border: 1px solid var(--paper-line);
     border-radius: 6px;
     background: var(--paper-cell);
@@ -502,3 +502,7 @@ button {
         border-top: 1px solid var(--paper-line);
         box-shadow: 0 -3px 12px rgba(36, 31, 24, .12);
     }
+    .directionFilterField label, .shuffle-field label, .romaji-field label{
+        display:none;
+    }
+}
