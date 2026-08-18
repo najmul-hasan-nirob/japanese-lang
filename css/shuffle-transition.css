@@ -1,0 +1,21 @@
+/* Shared shuffle transition */
+.grid.shuffle-transition > .card {
+    animation: shuffleCardTransition .42s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+@keyframes shuffleCardTransition {
+    0% {
+        opacity: .35;
+        transform: translateY(8px) scale(.985);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .grid.shuffle-transition > .card {
+        animation: none;
+    }
+}
