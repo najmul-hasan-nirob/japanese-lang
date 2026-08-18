@@ -36,16 +36,23 @@ js:
         </div>
     </div>
 
+    <div class="field direction-filter-field">
+        <label>Front / Back</label>
+        <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show Kana or Romaji first">
+            <span class="abacus-label left active">Kana</span>
+            <div class="rod"><div class="bead"></div></div>
+            <span class="abacus-label right">Romaji</span>
+        </div>
+    </div>
+
     <div class="field shuffle-field">
-        <label>Suffle</label>
+        <label>Shuffle</label>
         <button id="shuffleBtn" class="shuffle-btn" type="button">🔀 Shuffle</button>
     </div>
 
 </div>
 <div class="count-display" id="countDisplay" aria-live="polite"></div>
 <div class="grid" id="grid"></div>
-
-
 
 <script>
 (function(){
