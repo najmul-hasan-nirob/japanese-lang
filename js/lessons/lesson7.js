@@ -98,7 +98,7 @@ const lesson7 = {
       "bn": "ব্যক্তিগত কম্পিউটার"
     },
     {
-      "jp": "けいたい[でんわ]",
+      "jp": "けいたい[でんわ] or ケータイ",
       "romaji": "keitai[denwa]",
       "en": "mobile phone, cell phone",
       "bn": "মোবাইল ফোন"
