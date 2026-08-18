@@ -33,7 +33,6 @@
 
 /* ---------- GRID ---------- */
 
-
 .card{
 
     position:relative;
@@ -167,3 +166,34 @@
     width: 24.1%;
 
 }
+
+/* ---------- FRONT / BACK ---------- */
+
+.abacus{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    user-select:none;
+    padding:10px 14px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:var(--paper-cell);
+    transition:border-color .2s ease;
+}
+
+.abacus:hover{ border-color:var(--vermilion); }
+.abacus:focus-visible{ outline:2px solid var(--vermilion); outline-offset:2px; }
+.abacus-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    transition:color .2s ease,font-weight .2s ease;
+}
+.abacus-label.active{ color:var(--vermilion); font-weight:600; }
+.rod{ position:relative; width:52px; height:3px; background:var(--ink-soft); border-radius:2px; }
+.bead{ position:absolute; top:50%; left:0; width:20px; height:20px; border-radius:50%; background:var(--vermilion); box-shadow:0 1px 4px rgba(0,0,0,.25); transform:translate(0,-50%); transition:transform .28s cubic-bezier(.5,-.3,.5,1.3); }
+.abacus.right .bead{ transform:translate(32px,-50%); }
+.direction-filter-field .abacus{ min-width:154px; justify-content:center; }
+
+@media (prefers-reduced-motion:reduce){ .bead{ transition:none; } }
