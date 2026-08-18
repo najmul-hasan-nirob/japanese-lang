@@ -39,12 +39,13 @@
         button.setAttribute("title", showBackRomaji ? "Romaji: ON" : "Romaji: OFF");
     }
 
-    // Only update Romaji visibility. Do NOT touch card flip classes here.
-    // This preserves individually flipped cards as well as the global flip state.
+    // Romaji is an independent setting. Hide/show every Romaji element
+    // rendered by lesson cards, regardless of which card type it belongs to.
     function applyRomajiVisibility() {
         getCards().forEach(card => {
-            const romaji = card.querySelector(".vocabulary-back .romaji");
-            if (romaji) romaji.style.display = showBackRomaji ? "" : "none";
+            card.querySelectorAll(".romaji").forEach(romaji => {
+                romaji.style.display = showBackRomaji ? "" : "none";
+            });
         });
     }
 
@@ -62,7 +63,6 @@
     }
 
     function toggleBackRomaji() {
-        // Romaji is an independent setting. Never reset or alter Front/Back.
         showBackRomaji = !showBackRomaji;
         updateRomajiUI();
         applyRomajiVisibility();
