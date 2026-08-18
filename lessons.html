@@ -47,8 +47,7 @@ js:
 <div class="toolbar">
     <div class="field filter-field">
         <label id="lessonLabel">Lesson</label>
-        <button type="button" class="multiselect-btn" id="lessonBtn" aria-haspopup="true" aria-expanded="false">Lesson
-            1</button>
+        <button type="button" class="multiselect-btn" id="lessonBtn" aria-haspopup="true" aria-expanded="false">Lesson 1</button>
         <div class="multiselect-panel" id="lessonPanel"></div>
     </div>
     <div class="field filter-field">
@@ -60,8 +59,7 @@ js:
     </div>
     <div class="field filter-field">
         <label id="typeLabel">Type</label>
-        <button type="button" class="multiselect-btn" id="typeBtn" aria-haspopup="true"
-            aria-expanded="false">Vocabulary</button>
+        <button type="button" class="multiselect-btn" id="typeBtn" aria-haspopup="true" aria-expanded="false">Vocabulary</button>
         <div class="multiselect-panel" id="typePanel">
             <label><input type="checkbox" value="vocabulary" checked> Vocabulary</label>
             <label><input type="checkbox" value="cpart"> C part</label>
@@ -70,12 +68,16 @@ js:
         </div>
     </div>
     <div class="field shuffle-field">
-        <label>Suffle</label>
+        <label>Shuffle</label>
         <button id="shuffleBtn" class="shuffle-btn" type="button">🔀 Shuffle</button>
     </div>
     <div class="field romaji-field">
         <label>Romaji</label>
         <button id="backRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true">Romaji: ON</button>
+    </div>
+    <div class="field direction-field">
+        <label>Front / Back</label>
+        <button id="direction" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back"></button>
     </div>
 </div>
 
