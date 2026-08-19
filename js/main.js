@@ -91,12 +91,12 @@ if(themeBtn){
         const style=document.createElement('style');
         style.textContent=`
           .screen-wake-field button{cursor:pointer;display:flex;align-items:center;justify-content:center;}
-          .screen-wake-icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+          .screen-wake-icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;}
           .screen-wake-field button[aria-pressed="true"]{font-weight:700;}
           @media(max-width:520px){
             .mobile-bottom-controls .screen-wake-field{width:auto;flex:1;min-width:0;}
             .mobile-bottom-controls .screen-wake-field label{display:none;}
-            .mobile-bottom-controls .screen-wake-field button{width:100%;min-width:0;white-space:nowrap;}
+            .mobile-bottom-controls .screen-wake-field button{width:100%;min-width:0;height:100%;padding:0;border:0;background:transparent;box-shadow:none;white-space:nowrap;}
             .mobile-bottom-controls .screen-wake-icon{width:22px;height:22px;}
           }
         `;
