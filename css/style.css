@@ -259,7 +259,7 @@ button {
     justify-content: center;
 }
 
-.count-display { max-width: 980px; margin: 0 auto 20px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); letter-spacing: .04em; }
+.count-display { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft); letter-spacing: .04em; }
 
 /* Front / back control */
 .abacus { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; padding: 10px 14px; border: 1px solid var(--paper-line); border-radius: 6px; background: var(--paper-cell); transition: border-color .2s ease; }
@@ -279,6 +279,9 @@ button {
 
 /* Mobile CSS - max 520px */
 @media (max-width: 520px) {
+    .logic h2{
+    font-size: 15px;
+}
     body { padding: 8px 12px 100px; overscroll-behavior-y: none; }
     .page-head { display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; margin-bottom: 20px; padding: 5px 0 10px 10px; }
     .logo { align-items: center; gap: 10px; }
@@ -326,6 +329,6 @@ button {
     justify-content: space-between;
     gap: 10px;
 }
-.logic h1{
-    font-size: 25px;
+.logic h2{
+    font-size: 18px;
 }
