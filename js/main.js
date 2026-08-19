@@ -24,6 +24,102 @@ if(themeBtn){
 }
 
 // =====================================================
+// Screen Wake Lock — keep display awake while studying
+// =====================================================
+(function(){
+    const STORAGE_KEY="japanese-lang-screen-awake";
+    let wakeLock=null;
+    let button=null;
+    let field=null;
+
+    function isEnabled(){ return localStorage.getItem(STORAGE_KEY)==="on"; }
+
+    async function requestWakeLock(){
+        if(!('wakeLock' in navigator)) return false;
+        try{
+            wakeLock=await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release',()=>{
+                wakeLock=null;
+                updateButton();
+            });
+            return true;
+        }catch(e){
+            wakeLock=null;
+            return false;
+        }
+    }
+
+    async function releaseWakeLock(){
+        if(wakeLock){
+            try{ await wakeLock.release(); }catch(e){}
+            wakeLock=null;
+        }
+    }
+
+    async function applyState(){
+        if(isEnabled()){
+            const ok=await requestWakeLock();
+            if(!ok) localStorage.setItem(STORAGE_KEY,"off");
+        }else{
+            await releaseWakeLock();
+        }
+        updateButton();
+    }
+
+    function updateButton(){
+        if(!button) return;
+        const on=isEnabled();
+        button.textContent=on?"☀️ Always On":"🌙 Normal";
+        button.setAttribute('aria-pressed',String(on));
+        button.title=on?'Screen stays awake while this page is active':'Allow normal screen timeout';
+    }
+
+    function createControl(){
+        if(document.getElementById('screenWakeField')) return;
+        const toolbar=document.querySelector('.toolbar');
+        if(!toolbar) return;
+
+        field=document.createElement('div');
+        field.className='field screen-wake-field';
+        field.id='screenWakeField';
+        field.innerHTML='<label>Screen</label><button id="screenWakeToggle" type="button" aria-pressed="false">🌙 Normal</button>';
+        toolbar.appendChild(field);
+        button=field.querySelector('#screenWakeToggle');
+
+        const style=document.createElement('style');
+        style.textContent=`
+          .screen-wake-field button{cursor:pointer;}
+          .screen-wake-field button[aria-pressed="true"]{font-weight:700;}
+          @media(max-width:520px){
+            .mobile-bottom-controls .screen-wake-field{width:auto;flex:1;min-width:0;}
+            .mobile-bottom-controls .screen-wake-field label{display:none;}
+            .mobile-bottom-controls .screen-wake-field button{width:100%;min-width:0;white-space:nowrap;}
+          }
+        `;
+        document.head.appendChild(style);
+
+        button.addEventListener('click',async()=>{
+            const next=!isEnabled();
+            localStorage.setItem(STORAGE_KEY,next?'on':'off');
+            await applyState();
+        });
+
+        updateButton();
+        if(isEnabled()) applyState();
+    }
+
+    function resumeOnVisibility(){
+        if(document.visibilityState==='visible' && isEnabled() && !wakeLock) applyState();
+    }
+
+    document.addEventListener('visibilitychange',resumeOnVisibility);
+    window.addEventListener('pageshow',resumeOnVisibility);
+
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',createControl);
+    else createControl();
+})();
+
+// =====================================================
 // Shared: Japanese pronunciation
 // =====================================================
 
@@ -131,8 +227,9 @@ function createSpeakerButton(text){
         if(!toggle || !nav) return;
 
         const direction=document.getElementById('direction');
+        const wakeField=document.getElementById('screenWakeField');
         let bottom=document.querySelector('.mobile-bottom-controls');
-        let directionMark=null,shuffleMark=null,romajiMark=null,moved=false;
+        let directionMark=null,shuffleMark=null,romajiMark=null,wakeMark=null,moved=false;
 
         if(!bottom){
             bottom=document.createElement('div');
@@ -164,6 +261,13 @@ function createSpeakerButton(text){
                 bottom.appendChild(direction);
             }
 
+            const wake=document.getElementById('screenWakeField');
+            if(wake && wake.parentNode!==bottom){
+                wakeMark=document.createComment('desktop-screen-wake-position');
+                wake.before(wakeMark);
+                bottom.appendChild(wake);
+            }
+
             if(bottom.parentNode!==document.body) document.body.appendChild(bottom);
             applySharedMobileIcons();
             moved=true;
@@ -186,6 +290,10 @@ function createSpeakerButton(text){
                 directionMark.after(direction);
             }
             if(directionMark){ directionMark.remove(); directionMark=null; }
+
+            const wake=document.getElementById('screenWakeField');
+            if(wake && wakeMark && wakeMark.parentNode){ wake.remove(); wakeMark.after(wake); }
+            if(wakeMark){ wakeMark.remove(); wakeMark=null; }
 
             restoreSharedMobileIcons();
             moved=false;
