@@ -317,3 +317,7 @@ button {
     .mobile-bottom-controls { display: none !important; }
     #theme { position: fixed; bottom: 10px; right: 10px; }
 }
+
+.logic h1{
+    text-align:center;
+}
