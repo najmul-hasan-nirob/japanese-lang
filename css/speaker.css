@@ -2,7 +2,8 @@
 .card .speaker-btn{
     position:absolute;
     right:5px;
-    bottom:5px;
+    top:5px;
+    bottom:auto;
     z-index:20;
     width:28px;
     height:28px;
@@ -23,5 +24,5 @@
 .card .speaker-btn:hover{border-color:var(--vermilion);color:var(--vermilion)}
 .card .speaker-btn:focus-visible{outline:2px solid var(--vermilion);outline-offset:1px}
 @media(max-width:520px){
-    .card .speaker-btn{width:24px;height:24px;right:4px;bottom:4px;font-size:12px}
+    .card .speaker-btn{width:24px;height:24px;right:4px;top:4px;bottom:auto;font-size:12px}
 }
