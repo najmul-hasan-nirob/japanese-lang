@@ -1,18 +1,18 @@
-/* Shared footer + lessons toolbar UI refinements */
+/* Shared footer + toolbar UI */
 .site-footer{max-width:var(--layout-width);margin:40px auto 0;padding:24px 0 70px;border-top:1px solid var(--paper-line);color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:11px}
 .site-footer-inner{display:flex;justify-content:space-between;gap:12px}
 .toolbar-toggle{width:38px;height:30px;margin:0 auto 7px;padding:5px;border:1px solid var(--paper-line);border-radius:6px;background:var(--paper-cell);color:var(--ink-soft);box-shadow:var(--shadow)}
 .toolbar-toggle:hover{color:var(--vermilion);border-color:var(--vermilion)}
 .toolbar-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease}
 .toolbar-toggle.expanded svg{transform:rotate(180deg)}
-.toolbar.toolbar-collapsed{display:none !important}
-.toolbar .filter-field > label{display:none}
-.toolbar .filter-field .multiselect-btn,.toolbar .filter-field select{min-height:38px}
-.toolbar .shuffle-field > label,.toolbar .romaji-field > label,.toolbar .direction-field > label,.toolbar .screen-wake-field > label{display:none}
-#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.toolbar.toolbar-collapsed{display:none!important}
+.toolbar .field>label{display:none!important}
+.toolbar .field .multiselect-btn,.toolbar .field select{min-height:38px}
 .lesson-control-text{display:inline-flex;align-items:center;line-height:1}
 .lesson-control-svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
-#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{color:var(--vermilion) !important}
+#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{color:var(--vermilion)!important}
+.direction-filter-field .abacus{min-height:38px}
 .site-footer .mobile-bottom-controls{display:none}
-@media (max-width:520px){.site-footer{margin-top:30px;padding:20px 0 90px}.site-footer-inner{display:none}.toolbar-toggle{margin-bottom:7px}.site-footer .mobile-bottom-controls{display:flex}.mobile-bottom-controls .lesson-control-text{display:none}}
-@media (min-width:521px){.site-footer .mobile-bottom-controls{display:none !important}}
+@media(max-width:520px){.site-footer{margin-top:30px;padding:20px 0 90px}.site-footer-inner{display:none}.toolbar-toggle{margin-bottom:7px}.site-footer .mobile-bottom-controls{display:flex}.mobile-bottom-controls .lesson-control-text{display:none}}
+@media(min-width:521px){.site-footer .mobile-bottom-controls{display:none!important}}
