@@ -39,7 +39,12 @@ js:
 
     <div class="field direction-field">
         <label>Front / Back</label>
-        <button id="direction" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back"></button>
+        <button id="direction" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back">
+            <span class="direction-compat left active" aria-hidden="true">Kana</span>
+            <span class="direction-compat right" aria-hidden="true">Romaji</span>
+            <span class="lesson-control-text">Front / Back</span>
+            <svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"></path></svg>
+        </button>
     </div>
 
     <div class="field shuffle-field">
