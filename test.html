@@ -8,7 +8,7 @@ css: /css/style.css
     <h1>TTS Diagnostic</h1>
     <textarea id="text" style="width:100%;min-height:120px;padding:12px;font-size:18px;box-sizing:border-box;">আমি বাংলায় কথা বলছি। তুমি কেমন আছো?</textarea>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin:15px 0;">
-        <button id="bangla" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Bangla</button>
+        <button id="bangla" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Bangla (Same Method)</button>
         <button id="japanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Japanese</button>
         <button id="lessonJapanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Lesson Japanese</button>
         <button id="status" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Check Bengali Support</button>
@@ -58,7 +58,8 @@ css: /css/style.css
         }
     }
 
-    function speakNative(text, language) {
+    // Legacy language-specific test. Kept separately so we can compare it with AndroidTTS.speak().
+    function speakNativeLanguage(text, language) {
         if (!hasNativeTTS()) {
             writeLog('❌ AndroidTTS bridge unavailable');
             return false;
@@ -73,22 +74,24 @@ css: /css/style.css
         }
     }
 
-    // EXACT same native method used by the lesson-card speakJapanese() function in main.js.
-    function speakLessonJapanese(text) {
-        const japaneseText = String(text || '').trim();
-        if (!japaneseText) {
-            writeLog('❌ Lesson Japanese: empty text');
+    // This is the EXACT method used by speakJapanese() in main.js.
+    function speakSameMethod(text, label) {
+        const cleanText = String(text || '').trim();
+        if (!cleanText) {
+            writeLog('❌ Empty text');
             return false;
         }
 
-        writeLog('=== LESSON JAPANESE SPEECH ===');
-        writeLog('Text: ' + japaneseText);
+        writeLog('');
+        writeLog('=== ' + label + ' ===');
+        writeLog('Text: ' + cleanText);
         writeLog('AndroidTTS available: ' + hasNativeTTS());
+        writeLog('AndroidTTS.speak type: ' + typeof (window.AndroidTTS && window.AndroidTTS.speak));
 
         if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
             try {
-                writeLog('Calling AndroidTTS.speak(text) — same method as lesson cards');
-                window.AndroidTTS.speak(japaneseText);
+                writeLog('Calling AndroidTTS.speak(text)');
+                window.AndroidTTS.speak(cleanText);
                 writeLog('✅ AndroidTTS.speak() called successfully');
                 return true;
             } catch (error) {
@@ -98,7 +101,6 @@ css: /css/style.css
         }
 
         writeLog('❌ AndroidTTS.speak() is NOT available');
-        writeLog('Lesson-card fallback would use Web Speech API, but this test is showing the native lesson method only.');
         return false;
     }
 
@@ -121,36 +123,25 @@ css: /css/style.css
         writeLog('Web speechSynthesis.speak() called: ' + language);
     }
 
+    // IMPORTANT: Bengali now uses the SAME AndroidTTS.speak(text) method as Japanese.
     banglaButton.addEventListener('click', function () {
         const text = textInput.value.trim() || 'আমি বাংলায় কথা বলছি। তুমি কেমন আছো?';
-        writeLog('');
-        writeLog('=== BENGALI TEST ===');
-        if (hasNativeTTS()) {
-            testNativeStatus();
-            speakNative(text, 'bn-BD');
-        } else {
-            writeLog('Native bridge unavailable; trying Web Speech API.');
-            speakWeb(text, 'bn-BD');
-        }
+        speakSameMethod(text, 'BENGALI — SAME METHOD AS JAPANESE');
     });
 
     japaneseButton.addEventListener('click', function () {
         const text = 'こんにちは。日本語を話しています。';
-        writeLog('');
-        writeLog('=== JAPANESE TEST ===');
-        if (hasNativeTTS()) speakNative(text, 'ja-JP');
-        else speakWeb(text, 'ja-JP');
+        speakSameMethod(text, 'JAPANESE — SAME METHOD');
     });
 
     lessonJapaneseButton.addEventListener('click', function () {
         const text = 'こんにちは。日本語を話しています。';
-        writeLog('');
-        speakLessonJapanese(text);
+        speakSameMethod(text, 'LESSON JAPANESE — EXACT LESSON METHOD');
     });
 
     statusButton.addEventListener('click', function () {
         writeLog('');
-        writeLog('=== BENGALI SUPPORT TEST ===');
+        writeLog('=== BENGALI SUPPORT TEST (LEGACY METHOD) ===');
         testNativeStatus();
     });
 
