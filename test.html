@@ -10,6 +10,7 @@ css: /css/style.css
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin:15px 0;">
         <button id="bangla" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Bangla</button>
         <button id="japanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Japanese</button>
+        <button id="lessonJapanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Lesson Japanese</button>
         <button id="status" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Check Bengali Support</button>
         <button id="stop" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Stop</button>
     </div>
@@ -23,6 +24,7 @@ css: /css/style.css
     const textInput = document.getElementById('text');
     const banglaButton = document.getElementById('bangla');
     const japaneseButton = document.getElementById('japanese');
+    const lessonJapaneseButton = document.getElementById('lessonJapanese');
     const statusButton = document.getElementById('status');
     const stopButton = document.getElementById('stop');
     const clearButton = document.getElementById('clear');
@@ -71,6 +73,35 @@ css: /css/style.css
         }
     }
 
+    // EXACT same native method used by the lesson-card speakJapanese() function in main.js.
+    function speakLessonJapanese(text) {
+        const japaneseText = String(text || '').trim();
+        if (!japaneseText) {
+            writeLog('❌ Lesson Japanese: empty text');
+            return false;
+        }
+
+        writeLog('=== LESSON JAPANESE SPEECH ===');
+        writeLog('Text: ' + japaneseText);
+        writeLog('AndroidTTS available: ' + hasNativeTTS());
+
+        if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
+            try {
+                writeLog('Calling AndroidTTS.speak(text) — same method as lesson cards');
+                window.AndroidTTS.speak(japaneseText);
+                writeLog('✅ AndroidTTS.speak() called successfully');
+                return true;
+            } catch (error) {
+                writeLog('❌ AndroidTTS.speak() exception: ' + error.message);
+                return false;
+            }
+        }
+
+        writeLog('❌ AndroidTTS.speak() is NOT available');
+        writeLog('Lesson-card fallback would use Web Speech API, but this test is showing the native lesson method only.');
+        return false;
+    }
+
     function speakWeb(text, language) {
         if (!synth || !window.SpeechSynthesisUtterance) {
             writeLog('❌ Web Speech API unavailable');
@@ -109,6 +140,12 @@ css: /css/style.css
         writeLog('=== JAPANESE TEST ===');
         if (hasNativeTTS()) speakNative(text, 'ja-JP');
         else speakWeb(text, 'ja-JP');
+    });
+
+    lessonJapaneseButton.addEventListener('click', function () {
+        const text = 'こんにちは。日本語を話しています。';
+        writeLog('');
+        speakLessonJapanese(text);
     });
 
     statusButton.addEventListener('click', function () {
