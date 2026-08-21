@@ -84,7 +84,7 @@ if(themeBtn){
         const field=document.createElement('div');
         field.className='field screen-wake-field';
         field.id='screenWakeField';
-        field.innerHTML='<label>Screen</label><button id="screenWakeToggle" class="screen-wake-toggle" type="button" aria-pressed="false" aria-label="Normal screen timeout"></button>';
+        field.innerHTML='<button id="screenWakeToggle" class="screen-wake-toggle" type="button" aria-pressed="false" aria-label="Normal screen timeout">Screen</button>';
         toolbar.appendChild(field);
         button=field.querySelector('#screenWakeToggle');
 
