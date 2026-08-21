@@ -21,10 +21,7 @@
     };
 
     function getCards() { return Array.from(document.querySelectorAll("#grid .card")); }
-
-    function labelledIcon(label, icon) {
-        return '<span class="lesson-control-text">' + label + '</span>' + icon;
-    }
+    function labelledIcon(label, icon) { return '<span class="lesson-control-text">' + label + '</span>' + icon; }
 
     function updateScreenUI() {
         const button = document.getElementById("screenWakeToggle");
@@ -55,11 +52,7 @@
     }
 
     function applyRomajiVisibility() {
-        getCards().forEach(card => {
-            card.querySelectorAll(".romaji").forEach(romaji => {
-                romaji.style.display = showBackRomaji ? "" : "none";
-            });
-        });
+        getCards().forEach(card => card.querySelectorAll(".romaji").forEach(romaji => { romaji.style.display = showBackRomaji ? "" : "none"; }));
     }
 
     function applyCardState() {
@@ -67,17 +60,8 @@
         applyRomajiVisibility();
     }
 
-    function toggleAllCards() {
-        showBack = !showBack;
-        updateSwitchUI();
-        applyCardState();
-    }
-
-    function toggleBackRomaji() {
-        showBackRomaji = !showBackRomaji;
-        updateRomajiUI();
-        applyRomajiVisibility();
-    }
+    function toggleAllCards() { showBack = !showBack; updateSwitchUI(); applyCardState(); }
+    function toggleBackRomaji() { showBackRomaji = !showBackRomaji; updateRomajiUI(); applyRomajiVisibility(); }
 
     function resetLessons() {
         showBack = false;
@@ -94,10 +78,8 @@
         resetButton.className = "lesson-reset-btn";
         resetButton.setAttribute("aria-label", "Reset lesson cards and return to top");
         resetButton.setAttribute("title", "Reset cards and return to top");
-        resetButton.innerHTML = ICONS.reset;
-        resetButton.addEventListener("click", function (event) {
-            event.preventDefault(); event.stopPropagation(); resetLessons();
-        });
+        resetButton.innerHTML = labelledIcon("Reset", ICONS.reset);
+        resetButton.addEventListener("click", function (event) { event.preventDefault(); event.stopPropagation(); resetLessons(); });
         return resetButton;
     }
 
@@ -134,8 +116,7 @@
             resetField = document.createElement("div");
             resetField.id = "lessonResetField";
             resetField.className = "field lesson-reset-field";
-            const label = document.createElement("label"); label.innerHTML = "&nbsp;";
-            resetField.appendChild(label); resetField.appendChild(reset);
+            resetField.appendChild(reset);
         }
         if (screenField) toolbar.appendChild(screenField);
         toolbar.appendChild(romajiField);
@@ -185,15 +166,10 @@
         direction.onclick = function (event) { event.preventDefault(); event.stopPropagation(); toggleAllCards(); };
         if (romajiButton) romajiButton.onclick = function (event) { event.preventDefault(); event.stopPropagation(); toggleBackRomaji(); };
         mobileQuery = window.matchMedia("(max-width:520px)");
-        if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", syncResponsiveControls);
-        else if (mobileQuery.addListener) mobileQuery.addListener(syncResponsiveControls);
+        if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", syncResponsiveControls); else if (mobileQuery.addListener) mobileQuery.addListener(syncResponsiveControls);
         updateSwitchUI(); updateRomajiUI(); applyCardState(); ensureScreenField(); syncResponsiveControls();
         if (observer) observer.disconnect();
-        observer = new MutationObserver(() => {
-            if (showBack || !showBackRomaji) applyCardState();
-            // Do not reorder controls in response to every card mutation.
-            // Shuffle rebuilds the grid; toolbar order must remain stable.
-        });
+        observer = new MutationObserver(() => { if (showBack || !showBackRomaji) applyCardState(); });
         observer.observe(grid, { childList: true });
     }
 
