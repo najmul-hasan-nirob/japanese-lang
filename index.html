@@ -11,7 +11,7 @@ js:
 
     <div class="field">
         <label id="scriptLabel">Script</label>
-        <button type="button" class="multiselect-btn" id="scriptBtn" aria-haspopup="true" aria-expanded="false">Hiragana + Katakana</button>
+        <button type="button" class="multiselect-btn" id="scriptBtn" aria-haspopup="true" aria-expanded="false">Script</button>
         <div class="multiselect-panel" id="scriptPanel">
             <label><input type="checkbox" value="hiragana" checked> あ Hiragana</label>
             <label><input type="checkbox" value="katakana" checked> ア Katakana</label>
@@ -21,14 +21,14 @@ js:
     <div class="field">
         <label for="mode">Order</label>
         <select id="mode">
-            <option value="normal">Normal</option>
+            <option value="normal">Order</option>
             <option value="shuffle">Shuffle</option>
         </select>
     </div>
 
     <div class="field">
         <label id="typeLabel">Type</label>
-        <button type="button" class="multiselect-btn" id="typeBtn" aria-haspopup="true" aria-expanded="false">All types</button>
+        <button type="button" class="multiselect-btn" id="typeBtn" aria-haspopup="true" aria-expanded="false">Type</button>
         <div class="multiselect-panel" id="typePanel">
             <label><input type="checkbox" value="basic" checked> Basic</label>
             <label><input type="checkbox" value="dakuten" checked> Dakuten (Porobortito)</label>
@@ -48,7 +48,7 @@ js:
 
     <div class="field shuffle-field">
         <label>Shuffle</label>
-        <button id="shuffleBtn" class="shuffle-btn" type="button">🔀 Shuffle</button>
+        <button id="shuffleBtn" class="shuffle-btn" type="button">Shuffle</button>
     </div>
 
 </div>
@@ -56,8 +56,7 @@ js:
     <div class="logic">
         <h2>সুত্রঃ আকা ছাতায় নাহা মাইয়ারা ওয়ান</h2>
     </div>
-    <div class="count-display" id="countDisplay" aria-live="polite">
-    </div>
+    <div class="count-display" id="countDisplay" aria-live="polite"></div>
 </div>
 <div class="grid" id="grid"></div>
 
@@ -65,12 +64,10 @@ js:
 (function(){
     const grid=document.getElementById('grid');
     const count=document.getElementById('countDisplay');
-
     function updateCount(){
         const total=grid.querySelectorAll(':scope > .card').length;
         count.textContent=`Showing ${total} ${total===1 ? 'kana' : 'kana'}`;
     }
-
     updateCount();
     new MutationObserver(updateCount).observe(grid,{childList:true});
 })();
