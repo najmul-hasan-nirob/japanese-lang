@@ -6,27 +6,24 @@ css: /css/style.css
 
 <div style="max-width:700px;margin:30px auto;padding:20px;text-align:center;font-family:Arial,sans-serif;">
     <h1>TTS Diagnostic</h1>
-
     <textarea id="text" style="width:100%;min-height:120px;padding:12px;font-size:18px;box-sizing:border-box;">আমি বাংলায় কথা বলছি। তুমি কেমন আছো?</textarea>
-
-    <div style="display:flex;gap:10px;margin:15px 0;">
-        <button id="bangla" style="flex:1;padding:12px;font-size:16px;">Test Bangla</button>
-        <button id="japanese" style="flex:1;padding:12px;font-size:16px;">Test Japanese</button>
-        <button id="stop" style="flex:1;padding:12px;font-size:16px;">Stop</button>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin:15px 0;">
+        <button id="bangla" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Bangla</button>
+        <button id="japanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Japanese</button>
+        <button id="status" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Check Bengali Support</button>
+        <button id="stop" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Stop</button>
     </div>
-
     <button id="clear" style="width:100%;padding:10px;">Clear Log</button>
-
     <h3 style="text-align:left;margin-bottom:5px;">Diagnostics</h3>
-    <pre id="ttsLog" style="background:#111;color:#0f0;padding:15px;text-align:left;white-space:pre-wrap;word-break:break-word;min-height:220px;border-radius:6px;"></pre>
+    <pre id="ttsLog" style="background:#111;color:#0f0;padding:15px;text-align:left;white-space:pre-wrap;word-break:break-word;min-height:260px;border-radius:6px;"></pre>
 </div>
-
 <script>
 (function () {
     const synth = window.speechSynthesis;
     const textInput = document.getElementById('text');
     const banglaButton = document.getElementById('bangla');
     const japaneseButton = document.getElementById('japanese');
+    const statusButton = document.getElementById('status');
     const stopButton = document.getElementById('stop');
     const clearButton = document.getElementById('clear');
     const log = document.getElementById('ttsLog');
@@ -37,107 +34,119 @@ css: /css/style.css
         log.scrollTop = log.scrollHeight;
     }
 
-    function inspectVoices() {
-        if (!synth) {
-            writeLog('❌ speechSynthesis is NOT available');
-            return;
-        }
-
-        const voices = synth.getVoices();
-        writeLog('Voices available: ' + voices.length);
-
-        if (!voices.length) {
-            writeLog('⚠️ No voices exposed by this browser/WebView.');
-            return;
-        }
-
-        voices.forEach((voice, index) => {
-            writeLog(
-                index + ': ' +
-                voice.name +
-                ' | lang=' + voice.lang +
-                ' | default=' + voice.default
-            );
-        });
-
-        const bangla = voices.filter(v =>
-            String(v.lang || '').toLowerCase().startsWith('bn')
-        );
-
-        writeLog('Bengali voices: ' + bangla.length);
+    function hasNativeTTS() {
+        return typeof window.AndroidTTS !== 'undefined';
     }
 
-    function speak(text, lang) {
-        if (!synth) {
-            writeLog('❌ speechSynthesis unavailable');
+    function inspectWebSpeech() {
+        writeLog('speechSynthesis: ' + (!!synth));
+        writeLog('SpeechSynthesisUtterance: ' + (!!window.SpeechSynthesisUtterance));
+        writeLog('Initial web voice count: ' + (synth ? synth.getVoices().length : 0));
+    }
+
+    function testNativeStatus() {
+        if (!hasNativeTTS()) {
+            writeLog('❌ AndroidTTS bridge is NOT available');
             return;
         }
+        try {
+            writeLog('Native Bengali status: ' + AndroidTTS.getLanguageStatus('bn-BD'));
+        } catch (error) {
+            writeLog('❌ Native status exception: ' + error.message);
+        }
+    }
 
+    function speakNative(text, language) {
+        if (!hasNativeTTS()) {
+            writeLog('❌ AndroidTTS bridge unavailable');
+            return false;
+        }
+        try {
+            AndroidTTS.speakLanguage(text, language);
+            writeLog('✅ Native TTS requested: ' + language);
+            return true;
+        } catch (error) {
+            writeLog('❌ Native TTS exception: ' + error.message);
+            return false;
+        }
+    }
+
+    function speakWeb(text, language) {
+        if (!synth || !window.SpeechSynthesisUtterance) {
+            writeLog('❌ Web Speech API unavailable');
+            return;
+        }
         synth.cancel();
         synth.resume();
-
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang;
+        utterance.lang = language;
         utterance.rate = 0.95;
         utterance.pitch = 1;
         utterance.volume = 1;
-
-        writeLog('');
-        writeLog('Trying: ' + lang);
-        writeLog('Text: ' + text);
-
-        utterance.onstart = function () {
-            writeLog('✅ TTS STARTED');
-        };
-
-        utterance.onend = function () {
-            writeLog('✅ TTS FINISHED');
-        };
-
-        utterance.onerror = function (event) {
-            writeLog('❌ TTS ERROR: ' + (event.error || 'unknown'));
-        };
-
-        try {
-            synth.speak(utterance);
-            writeLog('speechSynthesis.speak() called');
-        } catch (error) {
-            writeLog('❌ speak() exception: ' + error.message);
-        }
+        utterance.onstart = function () { writeLog('✅ Web TTS STARTED: ' + language); };
+        utterance.onend = function () { writeLog('✅ Web TTS FINISHED: ' + language); };
+        utterance.onerror = function (event) { writeLog('❌ Web TTS ERROR: ' + (event.error || 'unknown')); };
+        synth.speak(utterance);
+        writeLog('Web speechSynthesis.speak() called: ' + language);
     }
 
     banglaButton.addEventListener('click', function () {
-        inspectVoices();
-        speak(textInput.value.trim() || 'আমি বাংলায় কথা বলছি। তুমি কেমন আছো?', 'bn-BD');
+        const text = textInput.value.trim() || 'আমি বাংলায় কথা বলছি। তুমি কেমন আছো?';
+        writeLog('');
+        writeLog('=== BENGALI TEST ===');
+        if (hasNativeTTS()) {
+            testNativeStatus();
+            speakNative(text, 'bn-BD');
+        } else {
+            writeLog('Native bridge unavailable; trying Web Speech API.');
+            speakWeb(text, 'bn-BD');
+        }
     });
 
     japaneseButton.addEventListener('click', function () {
-        inspectVoices();
-        speak('こんにちは。日本語を話しています。', 'ja-JP');
+        const text = 'こんにちは。日本語を話しています。';
+        writeLog('');
+        writeLog('=== JAPANESE TEST ===');
+        if (hasNativeTTS()) speakNative(text, 'ja-JP');
+        else speakWeb(text, 'ja-JP');
+    });
+
+    statusButton.addEventListener('click', function () {
+        writeLog('');
+        writeLog('=== BENGALI SUPPORT TEST ===');
+        testNativeStatus();
     });
 
     stopButton.addEventListener('click', function () {
-        synth.cancel();
-        writeLog('⏹ TTS STOPPED');
+        if (hasNativeTTS()) {
+            try {
+                AndroidTTS.stop();
+                writeLog('⏹ Native TTS STOPPED');
+            } catch (error) {
+                writeLog('❌ Native stop exception: ' + error.message);
+            }
+        }
+        if (synth) {
+            synth.cancel();
+            writeLog('⏹ Web TTS STOPPED');
+        }
     });
 
-    clearButton.addEventListener('click', function () {
-        log.textContent = '';
-    });
+    clearButton.addEventListener('click', function () { log.textContent = ''; });
 
     writeLog('User agent: ' + navigator.userAgent);
-    writeLog('speechSynthesis: ' + (!!synth));
-    writeLog('SpeechSynthesisUtterance: ' + (!!window.SpeechSynthesisUtterance));
-    writeLog('Initial voice count: ' + (synth ? synth.getVoices().length : 0));
+    writeLog('AndroidTTS bridge: ' + hasNativeTTS());
+    inspectWebSpeech();
 
     if (synth && 'onvoiceschanged' in synth) {
         synth.addEventListener('voiceschanged', function () {
-            writeLog('🔄 voiceschanged event fired');
-            inspectVoices();
+            writeLog('🔄 Web voiceschanged event fired');
+            writeLog('Web voice count: ' + synth.getVoices().length);
         });
     }
 
-    setTimeout(inspectVoices, 500);
-    setTimeout(inspectVoices, 1500);
+    setTimeout(function () {
+        writeLog('Delayed web voice count: ' + (synth ? synth.getVoices().length : 0));
+    }, 1000);
 })();
 </script>
