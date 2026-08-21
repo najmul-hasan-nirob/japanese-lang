@@ -42,6 +42,7 @@ js:
 - /js/hard-vocabulary.js
 - /js/lesson-card-number.js
 - /js/lesson-card-topbar.js
+- /js/lesson-teacher-mode.js
 ---
 
 <div class="toolbar">
@@ -98,6 +99,10 @@ js:
     .lesson-card-topbar .speaker-btn, .lesson-card-topbar .speak-btn, .lesson-card-topbar .pronunciation-btn { grid-column: 3; display: flex !important; visibility: visible !important; opacity: 1 !important; }
     .card .front, .card .back { text-align: center; }
     .card .front> :not(.lesson-card-topbar), .card .back> :not(.lesson-card-topbar) { margin-left: auto; margin-right: auto; }
+    .card.teacher-active { outline: 2px solid var(--vermilion); outline-offset: 2px; }
+    .teacher-mode-field { display: flex; gap: 6px; }
+    .teacher-mode-field > button { flex: 1 1 0; min-width: 0; }
+    .teacher-stop-btn:disabled { opacity: .45; cursor: default; }
     @media (max-width:520px) {
         .grid { grid-template-columns: repeat(2, 1fr); }
         .lesson-illustration { margin: 4px auto 6px; }
