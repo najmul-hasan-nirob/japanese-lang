@@ -279,6 +279,13 @@ button {
 
 /* Mobile CSS - max 520px */
 @media (max-width: 520px) {
+    .field
+{
+    display: none !important;
+}
+.filter-field{
+    display: block !important;
+}
     .logic h2{
     font-size: 15px;
 }
@@ -343,10 +350,3 @@ main{
 
 }
 
-.field
-{
-    display: none;
-}
-.filter-field{
-    display: block !important;
-}
