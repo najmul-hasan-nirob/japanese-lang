@@ -1,59 +1,55 @@
 // =====================================================
 // Shared Front / Back switch for Kana, Numbers & Lessons
 // =====================================================
-// The switch always controls the actual card face state.
-// Front = all cards show their front.
-// Back  = all cards show their back.
+// Uses the same labelled SVG button presentation as Lessons.
 // =====================================================
 
 (function () {
-    function moveToDesktopToolbar() {
-        if (window.innerWidth <= 520) return;
+    const FLIP_ICON = '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"></path></svg>';
 
-        const direction = document.getElementById("direction");
-        const toolbar = document.querySelector(".toolbar");
+    function labelledIcon(label) {
+        return '<span class="lesson-control-text">' + label + '</span>' + FLIP_ICON;
+    }
+
+    function moveToDesktopToolbar(direction) {
+        if (window.innerWidth <= 520) return;
+        const toolbar = document.querySelector('.toolbar');
         if (!direction || !toolbar) return;
 
-        // Lessons already has the direction field. Reuse it instead of
-        // creating a second field. This prevents the duplicate Cards field.
-        let field = document.getElementById("directionFilterField");
-        if (!field) field = toolbar.querySelector(".direction-field");
-
+        let field = direction.closest('.field');
         if (!field) {
-            field = document.createElement("div");
-            field.id = "directionFilterField";
-            field.className = "field direction-filter-field";
+            field = document.createElement('div');
+            field.id = 'directionFilterField';
+            field.className = 'field direction-field';
             toolbar.appendChild(field);
-        } else {
-            field.id = field.id || "directionFilterField";
-            field.classList.add("direction-filter-field");
+            field.appendChild(direction);
         }
 
-        // Never show the old Cards label. The control itself carries
-        // the visible Front / Back label and icon.
-        const label = field.querySelector("label");
+        const label = field.querySelector(':scope > label');
         if (label) label.remove();
-
-        field.appendChild(direction);
     }
 
     function initDirectionSwitch() {
-        const direction = document.getElementById("direction");
-        const grid = document.getElementById("grid");
+        const direction = document.getElementById('direction');
+        const grid = document.getElementById('grid');
         if (!direction || !grid) return;
 
         let showBack = false;
 
         function updateUI() {
-            direction.classList.toggle("right", showBack);
-            direction.setAttribute("aria-pressed", String(showBack));
-            direction.setAttribute("aria-label", showBack ? "Show all cards Front" : "Show all cards Back");
-            direction.setAttribute("title", showBack ? "Show Front" : "Show Back");
+            direction.classList.toggle('right', showBack);
+            direction.setAttribute('aria-pressed', String(showBack));
+            direction.setAttribute('aria-label', showBack ? 'Show all cards Front' : 'Show all cards Back');
+            direction.setAttribute('title', showBack ? 'Show Front' : 'Show Back');
+            // Lessons uses the exact same visual control.
+            if (!direction.closest('.mobile-bottom-controls')) {
+                direction.innerHTML = labelledIcon('Front / Back');
+            }
         }
 
         function applyState() {
-            grid.querySelectorAll(":scope > .card:not(.blank)").forEach(card => {
-                card.classList.toggle("flipped", showBack);
+            grid.querySelectorAll(':scope > .card:not(.blank)').forEach(card => {
+                card.classList.toggle('flipped', showBack);
             });
         }
 
@@ -63,14 +59,14 @@
             applyState();
         }
 
-        direction.addEventListener("click", function (event) {
+        direction.addEventListener('click', function (event) {
             event.preventDefault();
             event.stopImmediatePropagation();
             toggle();
         }, true);
 
-        direction.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
+        direction.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 toggle();
@@ -79,7 +75,7 @@
 
         updateUI();
         applyState();
-        moveToDesktopToolbar();
+        moveToDesktopToolbar(direction);
 
         const observer = new MutationObserver(() => {
             if (showBack) applyState();
@@ -87,8 +83,8 @@
         observer.observe(grid, { childList: true });
     }
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initDirectionSwitch);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDirectionSwitch);
     } else {
         initDirectionSwitch();
     }
