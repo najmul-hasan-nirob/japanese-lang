@@ -1,4 +1,4 @@
-/* Shared pronunciation button */
+/* Shared pronunciation button — invisible but still clickable */
 .card .speaker-btn{
     position:absolute;
     right:5px;
@@ -9,20 +9,28 @@
     height:28px;
     margin:0;
     padding:0;
-    border:1px solid var(--paper-line);
+    border:1px solid transparent;
     border-radius:50%;
-    background:var(--paper-cell);
-    color:var(--vermilion);
-    box-shadow:var(--shadow);
+    background:transparent;
+    color:transparent;
+    box-shadow:none;
     display:flex;
     align-items:center;
     justify-content:center;
     font-family:sans-serif;
     font-size:14px;
     line-height:1;
+    opacity:0;
+    cursor:pointer;
 }
-.card .speaker-btn:hover{border-color:var(--vermilion);color:var(--vermilion)}
-.card .speaker-btn:focus-visible{outline:2px solid var(--vermilion);outline-offset:1px}
+.card .speaker-btn:hover,
+.card .speaker-btn:focus-visible{
+    border-color:transparent;
+    background:transparent;
+    color:transparent;
+    box-shadow:none;
+    outline:none;
+}
 @media(max-width:520px){
     .card .speaker-btn{width:24px;height:24px;right:4px;top:4px;bottom:auto;font-size:12px}
 }
