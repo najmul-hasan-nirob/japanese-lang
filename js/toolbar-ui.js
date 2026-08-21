@@ -1,19 +1,42 @@
 (function(){
   function init(){
     const toolbar = document.querySelector('.toolbar');
-    if(!toolbar || !document.getElementById('lessonBtn')) return;
+    if(!toolbar) return;
 
-    // Filter names are represented by the controls themselves.
-    toolbar.querySelectorAll('.filter-field > label').forEach(label => label.setAttribute('aria-hidden','true'));
+    // Field names are represented by the controls themselves.
+    toolbar.querySelectorAll('.field > label').forEach(label => label.setAttribute('aria-hidden','true'));
 
     const lessonBtn = document.getElementById('lessonBtn');
     const typeBtn = document.getElementById('typeBtn');
-    const mode = document.getElementById('mode');
-    if(lessonBtn){ lessonBtn.dataset.placeholder = 'Lesson'; lessonBtn.setAttribute('aria-label','Lesson'); }
-    if(typeBtn){ typeBtn.dataset.placeholder = 'Type'; typeBtn.setAttribute('aria-label','Type'); }
-    if(mode) mode.setAttribute('aria-label','Order');
+    const scriptBtn = document.getElementById('scriptBtn');
+    if(lessonBtn) lessonBtn.setAttribute('aria-label','Lesson');
+    if(typeBtn) typeBtn.setAttribute('aria-label','Type');
+    if(scriptBtn) scriptBtn.setAttribute('aria-label','Script');
 
-    // The toolbar starts collapsed on every page load.
+    const mode = document.getElementById('mode');
+    if(mode){
+      const first = mode.querySelector('option[value="normal"]');
+      if(first) first.textContent = 'Order';
+      mode.setAttribute('aria-label','Order');
+    }
+
+    const range = document.getElementById('range');
+    if(range) range.setAttribute('aria-label','Range');
+
+    // Non-Lessons pages own their Shuffle button here. Lessons keeps its
+    // dedicated lesson-controls.js implementation so Shuffle never gets
+    // rewritten when the card grid changes.
+    if(!lessonBtn){
+      const shuffle = document.getElementById('shuffleBtn');
+      if(shuffle){
+        const icon = '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3c4 0 6 10 10 10h3M17 14l3 3-3 3M4 17h3c1.5 0 2.5-1.5 3.5-3M14 10c1-1.5 2-3 3-3h3M17 4l3 3-3 3"></path></svg>';
+        shuffle.innerHTML = '<span class="lesson-control-text">Shuffle</span>' + icon;
+        shuffle.setAttribute('aria-label','Shuffle');
+        shuffle.removeAttribute('title');
+      }
+    }
+
+    // One shared expand/collapse toggle for every page toolbar.
     if(!document.getElementById('toolbarToggle')){
       const toggle = document.createElement('button');
       toggle.type='button';
@@ -40,10 +63,6 @@
       if(host && bar && bar !== host && bar.parentNode !== host) host.appendChild(bar);
     }
     moveSticky();
-
-    // Do not observe attributes or rewrite control HTML here.
-    // lesson-controls.js owns the action icons and their order. Rewriting
-    // them from a second observer caused the icons to change after Shuffle.
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
