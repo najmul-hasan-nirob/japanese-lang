@@ -6,7 +6,7 @@
 // =====================================================
 (function () {
     const WAIT_MS = 4000;
-    const AFTER_BANGLA_MS = 1000;
+    const AFTER_BANGLA_MS = 500;
     const RETRY_MS = 700;
     let state='stopped', cards=[], index=0, pausedPhase=null;
     let waitTimer=null, waitStartedAt=0, waitRemaining=WAIT_MS, pausedSpeech=false, runId=0;
