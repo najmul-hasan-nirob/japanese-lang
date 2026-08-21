@@ -1,23 +1,24 @@
 /* Shared footer + toolbar UI */
 .site-footer{max-width:var(--layout-width);margin:40px auto 0;padding:24px 0 70px;border-top:1px solid var(--paper-line);color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:11px}
 .site-footer-inner{display:flex;justify-content:space-between;gap:12px}
-.toolbar-toggle {
-    width: 100%;
-    height: 20px;
-    margin: 0 auto 15px;
-    padding: 10px;
-    border: 1px solid var(--paper-line);
-    border-radius: 6px;
-    background: var(--paper-cell);
-    color: var(--ink-soft);
-    box-shadow: var(--shadow);
-}
+.toolbar-toggle{width:100%;height:20px;margin:0 auto 15px;padding:10px;border:1px solid var(--paper-line);border-radius:6px;background:var(--paper-cell);color:var(--ink-soft);box-shadow:var(--shadow)}
 .toolbar-toggle:hover{color:var(--vermilion);border-color:var(--vermilion)}
 .toolbar-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease}
 .toolbar-toggle.expanded svg{transform:rotate(180deg)}
 .toolbar.toolbar-collapsed{display:none!important}
 .toolbar .field>label{display:none!important}
 .toolbar .field .multiselect-btn,.toolbar .field select{min-height:38px}
+
+/* Desktop toolbar: one row, intrinsic field widths, with extra space distributed so the row fills the toolbar. */
+.toolbar:not(.toolbar-collapsed){display:flex!important;flex-wrap:nowrap;align-items:stretch;gap:10px;width:100%}
+.toolbar:not(.toolbar-collapsed)>.field{flex:1 1 max-content;min-width:0;width:auto}
+.toolbar:not(.toolbar-collapsed)>.field>button,
+.toolbar:not(.toolbar-collapsed)>.field>select,
+.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,
+.toolbar:not(.toolbar-collapsed)>.field>.direction-toggle{width:100%;box-sizing:border-box}
+.toolbar:not(.toolbar-collapsed)>.field.direction-field{flex:1.15 1 max-content}
+.toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 max-content}
+
 .lesson-control-text{display:inline-flex;align-items:center;line-height:1}
 .lesson-control-svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
 #backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
@@ -35,25 +36,11 @@
   .site-footer .mobile-bottom-controls>.abacus,
   .site-footer .mobile-bottom-controls>.screen-control,
   .site-footer .mobile-bottom-controls>#screenWakeToggle{
-    flex:1 1 0;
-    width:auto;
-    min-width:0;
-    min-height:44px;
-    margin:0;
-    padding:6px;
-    border:1px solid var(--paper-line)!important;
-    border-radius:6px;
-    background:var(--paper-cell)!important;
-    box-shadow:var(--shadow);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--vermilion)!important;
+    flex:1 1 0;width:auto;min-width:0;min-height:44px;margin:0;padding:6px;
+    border:1px solid var(--paper-line)!important;border-radius:6px;background:var(--paper-cell)!important;
+    box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:var(--vermilion)!important;
   }
-  .site-footer .mobile-bottom-controls>#screenWakeToggle{
-    border:1px solid var(--paper-line)!important;
-    background:var(--paper-cell)!important;
-  }
+  .site-footer .mobile-bottom-controls>#screenWakeToggle{border:1px solid var(--paper-line)!important;background:var(--paper-cell)!important}
   .site-footer .mobile-bottom-controls .mobile-control-icon,
   .site-footer .mobile-bottom-controls .lesson-control-svg{width:18px;height:18px}
   .mobile-bottom-controls .lesson-control-text{display:none}
