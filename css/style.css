@@ -350,3 +350,6 @@ main{
 
 }
 
+.lesson-control-text, .lesson-control-text span {
+    font-size: 14px !important;
+}
