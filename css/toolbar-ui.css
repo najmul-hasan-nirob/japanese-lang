@@ -1,7 +1,17 @@
 /* Shared footer + toolbar UI */
 .site-footer{max-width:var(--layout-width);margin:40px auto 0;padding:24px 0 70px;border-top:1px solid var(--paper-line);color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:11px}
 .site-footer-inner{display:flex;justify-content:space-between;gap:12px}
-.toolbar-toggle{width:38px;height:30px;margin:0 auto 7px;padding:5px;border:1px solid var(--paper-line);border-radius:6px;background:var(--paper-cell);color:var(--ink-soft);box-shadow:var(--shadow)}
+.toolbar-toggle {
+    width: 100%;
+    height: 20px;
+    margin: 0 auto 15px;
+    padding: 10px;
+    border: 1px solid var(--paper-line);
+    border-radius: 6px;
+    background: var(--paper-cell);
+    color: var(--ink-soft);
+    box-shadow: var(--shadow);
+}
 .toolbar-toggle:hover{color:var(--vermilion);border-color:var(--vermilion)}
 .toolbar-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease}
 .toolbar-toggle.expanded svg{transform:rotate(180deg)}
