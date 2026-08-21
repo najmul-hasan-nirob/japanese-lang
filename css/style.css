@@ -323,7 +323,7 @@ button {
 
 .under-toolbar {
     max-width: var(--layout-width);
-    margin: 0 auto 20px;
+    margin: 0 auto 25px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -331,4 +331,9 @@ button {
 }
 .logic h2{
     font-size: 18px;
+}
+
+main{
+    max-width: var(--layout-width);
+    margin: 0 auto;
 }

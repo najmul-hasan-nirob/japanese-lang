@@ -164,7 +164,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     border-radius:6px;
     background:var(--paper-cell);
     color:var(--ink);
-    font-size:21px;
     line-height:1;
     cursor:pointer;
     transition:transform .2s ease, border-color .25s ease, background-color .25s ease;
@@ -293,4 +292,10 @@ body{
     display: flex;
     flex-direction: column;
     padding-top: 10px
+}
+
+.count-display{
+    max-width: var(--layout-width);
+    margin: 0 auto 25px;
+    text-align: center !important;
 }
