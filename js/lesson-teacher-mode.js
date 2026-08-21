@@ -1,9 +1,8 @@
 // =====================================================
 // Lessons — Teacher Mode
-// Japanese → 4 seconds → Bangla → 1 second → next card.
+// Japanese → 4 seconds → Bangla finishes → 1 second → next card.
 // Japanese speech is intentionally untouched.
-// Bangla uses the same working method as test.html:
-// AndroidTTS.speak() first, then Web Speech API fallback.
+// Bangla uses the same working method as test.html.
 // =====================================================
 (function () {
     const WAIT_MS = 4000;
@@ -24,27 +23,35 @@
     function browserSpeak(text,lang){return new Promise(resolve=>{const s=synth();if(!s||!text||typeof SpeechSynthesisUtterance==='undefined'){resolve(false);return;}let finished=false,started=false;const finish=ok=>{if(finished)return;finished=true;resolve(ok);};const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=lang.startsWith('ja')?.9:.95;const voice=findVoice(lang.split('-')[0]);if(voice)u.voice=voice;u.onstart=()=>{started=true;};u.onend=()=>finish(started);u.onerror=()=>finish(false);try{s.cancel();s.resume();s.speak(u);}catch(e){finish(false);}setTimeout(()=>{if(!started)try{s.cancel();}catch(e){};finish(false);},7000);});}
     async function speakJapanese(text){if(!text)return false;if(window.AndroidTTS&&typeof window.AndroidTTS.speak==='function'){try{window.AndroidTTS.speak(text);return true;}catch(e){}}return browserSpeak(text,'ja-JP');}
 
-    // Same Bengali implementation as test.html.
-    // Native AndroidTTS is the primary path, which is the working method
-    // in the Android WebView. Browser speechSynthesis remains only as fallback.
+    // AndroidTTS.speak() is fire-and-forget, so the native path does not
+    // provide an onend callback to the webpage. Estimate the speech duration
+    // from the Bengali text, then add the required 1-second pause.
+    function getBanglaWaitMs(text){
+        const words=String(text||'').trim().split(/\s+/).filter(Boolean).length;
+        const chars=String(text||'').replace(/\s/g,'').length;
+        // ~0.42s/word plus a small character-based component, with safe bounds.
+        return Math.max(1400,Math.min(9000,Math.round(words*420+chars*35+500)));
+    }
+
     function speakBangla(text,id){
         return new Promise(resolve=>{
             if(!text||id!==runId||state==='stopped'||state==='paused'){resolve(false);return;}
             const bengaliText=String(text).trim();
             if(!bengaliText){resolve(false);return;}
 
-            // PRIMARY: exact working native method from test.html.
             if(window.AndroidTTS&&typeof window.AndroidTTS.speak==='function'){
                 try{
                     window.AndroidTTS.speak(bengaliText);
-                    resolve(true);
+                    // Keep the promise open for approximately the full native
+                    // speech duration. The 1-second card transition is added later.
+                    const speechWait=getBanglaWaitMs(bengaliText);
+                    setTimeout(()=>resolve(true),speechWait);
                     return;
                 }catch(e){
                     console.warn('Teacher Mode: AndroidTTS failed, falling back to Web Speech API.',e);
                 }
             }
 
-            // FALLBACK: same Web Speech implementation used by test.html.
             const s=synth();
             if(!s||typeof SpeechSynthesisUtterance==='undefined'){resolve(false);return;}
             const generation=++banglaGeneration;
@@ -60,22 +67,15 @@
                 const voices=s.getVoices();
                 const voice=voices.find(v=>v.lang&&/^bn(?:-|$)/i.test(v.lang));
                 if(voice)u.voice=voice;
-                try{
-                    s.cancel();
-                    s.resume();
-                    s.speak(u);
-                }catch(e){finish(false);}
+                try{s.cancel();s.resume();s.speak(u);}catch(e){finish(false);}
             };
             u.onstart=()=>{started=true;};
             u.onend=()=>finish(started);
             u.onerror=()=>finish(false);
-
             if(s.getVoices().length===0){
                 s.addEventListener('voiceschanged',speakNow,{once:true});
                 setTimeout(()=>{if(!finished&&s.getVoices().length>0)speakNow();},300);
-            }else{
-                speakNow();
-            }
+            }else speakNow();
             setTimeout(()=>{if(!started&&generation===banglaGeneration)finish(false);},7000);
         });
     }
