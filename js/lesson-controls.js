@@ -106,6 +106,7 @@
             resetField = document.createElement("div");
             resetField.id = "lessonResetField";
             resetField.className = "field lesson-reset-field";
+            const label = document.createElement("label"); label.innerHTML = "&nbsp;";
             resetField.appendChild(label); resetField.appendChild(reset);
         }
         toolbar.appendChild(romajiField);
