@@ -8,11 +8,9 @@ css: /css/style.css
     <h1>TTS Diagnostic</h1>
     <textarea id="text" style="width:100%;min-height:120px;padding:12px;font-size:18px;box-sizing:border-box;">আমি বাংলায় কথা বলছি। তুমি কেমন আছো?</textarea>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin:15px 0;">
-        <button id="bangla" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Bangla (Same Method)</button>
-        <button id="japanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Japanese</button>
-        <button id="lessonJapanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Test Lesson Japanese</button>
-        <button id="status" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Check Bengali Support</button>
-        <button id="stop" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Stop</button>
+        <button id="bangla" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Bangla</button>
+        <button id="androidJapanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Android Japanese</button>
+        <button id="lessonJapanese" style="flex:1;min-width:140px;padding:12px;font-size:16px;">Lesson Japanese</button>
     </div>
     <button id="clear" style="width:100%;padding:10px;">Clear Log</button>
     <h3 style="text-align:left;margin-bottom:5px;">Diagnostics</h3>
@@ -20,13 +18,10 @@ css: /css/style.css
 </div>
 <script>
 (function () {
-    const synth = window.speechSynthesis;
     const textInput = document.getElementById('text');
     const banglaButton = document.getElementById('bangla');
-    const japaneseButton = document.getElementById('japanese');
+    const androidJapaneseButton = document.getElementById('androidJapanese');
     const lessonJapaneseButton = document.getElementById('lessonJapanese');
-    const statusButton = document.getElementById('status');
-    const stopButton = document.getElementById('stop');
     const clearButton = document.getElementById('clear');
     const log = document.getElementById('ttsLog');
 
@@ -40,141 +35,74 @@ css: /css/style.css
         return typeof window.AndroidTTS !== 'undefined';
     }
 
-    function inspectWebSpeech() {
-        writeLog('speechSynthesis: ' + (!!synth));
-        writeLog('SpeechSynthesisUtterance: ' + (!!window.SpeechSynthesisUtterance));
-        writeLog('Initial web voice count: ' + (synth ? synth.getVoices().length : 0));
-    }
-
-    function testNativeStatus() {
-        if (!hasNativeTTS()) {
-            writeLog('❌ AndroidTTS bridge is NOT available');
-            return;
-        }
-        try {
-            writeLog('Native Bengali status: ' + AndroidTTS.getLanguageStatus('bn-BD'));
-        } catch (error) {
-            writeLog('❌ Native status exception: ' + error.message);
-        }
-    }
-
-    // Legacy language-specific test. Kept separately so we can compare it with AndroidTTS.speak().
-    function speakNativeLanguage(text, language) {
-        if (!hasNativeTTS()) {
-            writeLog('❌ AndroidTTS bridge unavailable');
-            return false;
-        }
-        try {
-            AndroidTTS.speakLanguage(text, language);
-            writeLog('✅ Native TTS requested: ' + language);
-            return true;
-        } catch (error) {
-            writeLog('❌ Native TTS exception: ' + error.message);
-            return false;
-        }
-    }
-
-    // This is the EXACT method used by speakJapanese() in main.js.
-    function speakSameMethod(text, label) {
+    function speakAndroid(text, label) {
         const cleanText = String(text || '').trim();
-        if (!cleanText) {
-            writeLog('❌ Empty text');
-            return false;
-        }
-
         writeLog('');
         writeLog('=== ' + label + ' ===');
         writeLog('Text: ' + cleanText);
         writeLog('AndroidTTS available: ' + hasNativeTTS());
         writeLog('AndroidTTS.speak type: ' + typeof (window.AndroidTTS && window.AndroidTTS.speak));
 
-        if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
+        if (!window.AndroidTTS || typeof window.AndroidTTS.speak !== 'function') {
+            writeLog('❌ AndroidTTS.speak() is NOT available');
+            return;
+        }
+
+        try {
+            writeLog('Calling AndroidTTS.speak(text)');
+            window.AndroidTTS.speak(cleanText);
+            writeLog('✅ AndroidTTS.speak() called successfully');
+        } catch (error) {
+            writeLog('❌ AndroidTTS.speak() exception: ' + error.message);
+        }
+    }
+
+    // This mirrors the actual speakJapanese() function used by the lesson cards.
+    function speakLessonJapanese(text) {
+        if (!text) return;
+        const japaneseText = String(text).trim();
+        if (!japaneseText) return;
+
+        writeLog('');
+        writeLog('=== LESSON JAPANESE — ACTUAL LESSON METHOD ===');
+        writeLog('Text: ' + japaneseText);
+        writeLog('AndroidTTS available: ' + hasNativeTTS());
+
+        if (window.AndroidTTS && typeof window.AndroidTTS.speak === "function") {
             try {
-                writeLog('Calling AndroidTTS.speak(text)');
-                window.AndroidTTS.speak(cleanText);
+                writeLog('Calling AndroidTTS.speak(text) — actual lesson method');
+                window.AndroidTTS.speak(japaneseText);
                 writeLog('✅ AndroidTTS.speak() called successfully');
-                return true;
-            } catch (error) {
-                writeLog('❌ AndroidTTS.speak() exception: ' + error.message);
-                return false;
+                return;
+            } catch (e) {
+                writeLog('❌ AndroidTTS.speak() exception: ' + e.message);
             }
         }
 
-        writeLog('❌ AndroidTTS.speak() is NOT available');
-        return false;
+        writeLog('❌ AndroidTTS unavailable — lesson fallback would normally use Web Speech');
     }
 
-    function speakWeb(text, language) {
-        if (!synth || !window.SpeechSynthesisUtterance) {
-            writeLog('❌ Web Speech API unavailable');
-            return;
-        }
-        synth.cancel();
-        synth.resume();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = language;
-        utterance.rate = 0.95;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-        utterance.onstart = function () { writeLog('✅ Web TTS STARTED: ' + language); };
-        utterance.onend = function () { writeLog('✅ Web TTS FINISHED: ' + language); };
-        utterance.onerror = function (event) { writeLog('❌ Web TTS ERROR: ' + (event.error || 'unknown')); };
-        synth.speak(utterance);
-        writeLog('Web speechSynthesis.speak() called: ' + language);
-    }
-
-    // IMPORTANT: Bengali now uses the SAME AndroidTTS.speak(text) method as Japanese.
     banglaButton.addEventListener('click', function () {
         const text = textInput.value.trim() || 'আমি বাংলায় কথা বলছি। তুমি কেমন আছো?';
-        speakSameMethod(text, 'BENGALI — SAME METHOD AS JAPANESE');
+        speakAndroid(text, 'BANGLA — DIRECT ANDROID TTS');
     });
 
-    japaneseButton.addEventListener('click', function () {
-        const text = 'こんにちは。日本語を話しています。';
-        speakSameMethod(text, 'JAPANESE — SAME METHOD');
+    androidJapaneseButton.addEventListener('click', function () {
+        speakAndroid('こんにちは。日本語を話しています。', 'ANDROID JAPANESE — DIRECT ANDROID TTS');
     });
 
     lessonJapaneseButton.addEventListener('click', function () {
-        const text = 'こんにちは。日本語を話しています。';
-        speakSameMethod(text, 'LESSON JAPANESE — EXACT LESSON METHOD');
+        speakLessonJapanese('こんにちは。日本語を話しています。');
     });
 
-    statusButton.addEventListener('click', function () {
-        writeLog('');
-        writeLog('=== BENGALI SUPPORT TEST (LEGACY METHOD) ===');
-        testNativeStatus();
+    clearButton.addEventListener('click', function () {
+        log.textContent = '';
     });
-
-    stopButton.addEventListener('click', function () {
-        if (hasNativeTTS()) {
-            try {
-                AndroidTTS.stop();
-                writeLog('⏹ Native TTS STOPPED');
-            } catch (error) {
-                writeLog('❌ Native stop exception: ' + error.message);
-            }
-        }
-        if (synth) {
-            synth.cancel();
-            writeLog('⏹ Web TTS STOPPED');
-        }
-    });
-
-    clearButton.addEventListener('click', function () { log.textContent = ''; });
 
     writeLog('User agent: ' + navigator.userAgent);
     writeLog('AndroidTTS bridge: ' + hasNativeTTS());
-    inspectWebSpeech();
-
-    if (synth && 'onvoiceschanged' in synth) {
-        synth.addEventListener('voiceschanged', function () {
-            writeLog('🔄 Web voiceschanged event fired');
-            writeLog('Web voice count: ' + synth.getVoices().length);
-        });
-    }
-
-    setTimeout(function () {
-        writeLog('Delayed web voice count: ' + (synth ? synth.getVoices().length : 0));
-    }, 1000);
+    writeLog('AndroidTTS.speak type: ' + typeof (window.AndroidTTS && window.AndroidTTS.speak));
+    writeLog('Web speechSynthesis: ' + (typeof window.speechSynthesis !== 'undefined'));
+    writeLog('SpeechSynthesisUtterance: ' + (typeof window.SpeechSynthesisUtterance !== 'undefined'));
 })();
 </script>
