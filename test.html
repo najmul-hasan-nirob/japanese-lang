@@ -1,0 +1,289 @@
+<h1 class="display-4 fw-semibold mb-3">Text to Speech</h1>
+
+<form>
+  <div class="row gx-2 gy-3">
+    <div class="input-group mx-auto">
+      <textarea type="text" id="text" class="form-control form-control-lg shadow-sm" placeholder="Your text" rows="1"></textarea>
+      <button class="btn btn-lg btn-dark shadow" type="submit" id="speak">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+          <path fill="currentColor" d="M533.6 32.5C598.5 85.3 640 165.8 640 256s-41.5 170.8-106.4 223.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C557.5 398.2 592 331.2 592 256s-34.5-142.2-88.7-186.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zM473.1 107c43.2 35.2 70.9 88.9 70.9 149s-27.7 113.8-70.9 149c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C475.3 341.3 496 301.1 496 256s-20.7-85.3-53.2-111.8c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zm-60.5 74.5C434.1 199.1 448 225.9 448 256s-13.9 56.9-35.4 74.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C393.1 284.4 400 271 400 256s-6.9-28.4-17.7-37.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zM301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3z" />
+        </svg>
+        <span class="d-none d-sm-inline">Talk</span>
+      </button>
+    </div>
+    <div class="input-group mx-auto">
+      <span class="input-group-text">Voice</span>
+      <select id="tts" class="form-select">
+        <option selected>Select TTS</option>
+      </select>
+    </div>
+  </div>
+</form>
+
+<style>
+  @import url('https://fonts.googleapis.com/css?family=PT+Sans:400,700|Sigmar+One');
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  
+}
+
+body{
+  color:#F3EED9;
+  background-color:#39181a;
+  font-family: 'PT Sans', sans-serif;
+  
+}
+.container{
+ position:absolute;
+ left:50%;
+ transform:translateX(-50%);
+ text-align:center;
+ margin-top:3em;
+}
+
+h1{
+  font-family: 'Sigmar One', cursive;
+}
+textarea{
+  margin:2em;
+}
+.range-container{
+  margin:2em 0;
+}
+.range-value{
+  display:flex;
+  width:100%;
+  justify-content:space-between;
+}
+
+
+.button{
+  font-size:1.1rem;
+  padding:0.6em 3em;
+  margin:2em 0;
+  border-radius:.2em;
+  font-weight:400;
+  color:#F3EED9;
+  background-color:transparent;
+  border: 2px solid #F3EED9;
+  text-transform: uppercase;
+  outline:none;
+  cursor: pointer;
+}
+
+.button:hover{
+ 
+  color:#F3EED9;
+  background-color:#6BB092;
+  border:2px solid #6BB092;
+  transition: all 0.4s ease 0s;
+}
+
+
+
+
+
+/*Bars */
+.bars{
+  position:relative;
+  height:40px;
+  width:70px;
+  margin:0 auto;
+}
+span{
+  display:block;
+  width:5px;
+  height:5px;
+  bottom:0px;
+  background:#F3EED9;
+  position:absolute;
+  animation:audio-bars 500ms linear infinite alternate;
+}
+span:nth-child(2){
+  left:7px;
+  animation-duration: 0.55s;
+}
+span:nth-child(3){
+  left:14px;
+  animation-duration:0.40px;
+}
+span:nth-child(4){
+  left:21px;
+  animation-duration:0.52s;
+}
+span:nth-child(5){
+  left:28px;
+  animation-duration:0.45s;
+}
+span:nth-child(6){
+  left:35px;
+  animation-duration:0.53s;
+}
+span:nth-child(7){
+  left:42px;
+  animation-duration:0.56s;
+}
+span:nth-child(8){
+  left:49px;
+  animation-duration:0.44s;
+}
+span:nth-child(9){
+  left:56px;
+  animation-duration:0.48s;
+}
+span:nth-child(10){
+  left:63px;
+  animation-duration:0.52s;
+}
+
+@keyframes audio-bars{
+  0%{
+    height:5px;
+    opacity:0.1;
+    
+  }
+  100%{
+    height:40px;
+    opacity:1;
+    
+  }
+}
+/*End Bars*/
+</style>
+<script>
+  
+//Initialize speech synthesis
+const synth = window.speechSynthesis;
+
+//select the HTML elements
+const button = document.querySelector('.button');
+const textInput = document.getElementById('textarea-input');
+const voiceSelect = document.getElementById('voice-select');
+
+const rate = document.getElementById('rate-range');
+const rateValue = document.getElementById("rate-value");
+
+const pitch = document.getElementById("pitch-range");
+const pitchValue = document.getElementById("pitch-value");
+
+const volume = document.getElementById("volume-range");
+const volumeValue =  document.getElementById("volume-value");
+
+
+//get the list of voices
+let voices = [];
+
+function addVoices(){
+  voices = synth.getVoices();
+  
+
+  //Loop through voices and create an option for each one
+  for (i = 0; i < voices.length; i++) {
+    const voice = voices[i];
+
+    //create an option element
+    const option = document.createElement('option');
+
+    //add voice and language
+    option.textContent = voice.name + ' ( ' + voice.lang + ' ) ';
+
+    //Set option attributes
+    option.setAttribute('data-lang',voice.lang);
+    option.setAttribute('data-name',voice.name);
+
+    //add option created to select element
+    voiceSelect.appendChild(option);
+  }
+}
+
+
+ addVoices();
+
+if(synth.onvoiceschanged !== undefined){
+  synth.onvoiceschanged = addVoices;
+}
+
+
+//playText - this function will be called when we press the button
+
+function playText(){
+
+  //check if speaking (if it's actually in the process of speaking and we click the button)
+  if(synth.speaking){
+    console.error('already speaking....');
+    return;
+  }
+
+  if(textInput.value !== ''){
+
+    //Initialize a new SpeechSynthesisUtterance object  and set the text from textarea 
+    const speakText = new SpeechSynthesisUtterance(textInput.value);
+   
+
+    //speak end
+    speakText.onend = function(){
+      console.log('Done speaking....');
+    }
+
+    //speak error
+    speakText.onerror = function(){
+      console.error('something went wrong');
+    }
+
+    //get the selected option
+    const selectedVoice = voiceSelect.selectedOptions[0].getAttribute('data-name');
+
+
+    //loop through voices and set the voice
+    for (i = 0; i < voices.length; i++) {
+      const voice = voices[i];
+      if(voice.name === selectedVoice){
+        speakText.voice = voice;
+      }
+    
+    }
+    
+
+    //set pitch,rate and volume from the value on range
+    speakText.rate = rate.value;
+    speakText.pitch = pitch.value;
+    speakText.volume = volume.value;
+
+  
+    //Speak
+    synth.speak(speakText);
+  
+  }
+}
+
+//Event Listener
+
+//text form submit
+button.addEventListener('click',function(e){
+  
+  playText();
+  
+});
+
+//rate value change
+rate.addEventListener('change',function(e){
+  rateValue.textContent = rate.value;
+})
+
+//pitch value change
+pitch.addEventListener('change',function(e){
+  pitchValue.textContent = pitch.value;
+})
+
+//volume value change
+volume.addEventListener('change',function(e){
+  volumeValue.textContent = volume.value;
+})
+
+//voice select change(as soon as i select the voice i want it to play)
+voiceSelect.addEventListener('change',function(e){
+  playText();
+})
+</script>
