@@ -12,7 +12,10 @@
         const grid = document.getElementById('grid');
         if (!direction || !grid) return;
 
-        let showBack = false;
+        // Use the button's actual visual state as the source of truth. This
+        // keeps the reverse Teacher Mode trigger synchronized even if another
+        // script changes the direction state before this handler runs.
+        let showBack = direction.classList.contains('right') || direction.getAttribute('aria-pressed') === 'true';
 
         function updateUI() {
             direction.classList.toggle('right', showBack);
@@ -28,16 +31,23 @@
             });
         }
 
+        function runReverseTeacherMode() {
+            if (typeof window.TeacherMode?.reverseCurrent === 'function') {
+                window.TeacherMode.reverseCurrent();
+            }
+        }
+
         function toggle() {
+            // Capture the state BEFORE changing it. If we were on Back and
+            // are now returning to Front, Teacher Mode must run:
+            // Bangla -> 4 seconds -> Japanese -> 1 second -> next card.
             const wasBack = showBack;
             showBack = !showBack;
             updateUI();
             applyState();
 
-            // When Teacher Mode is running and the cards are changed from
-            // Back -> Front, let Teacher Mode handle the reverse sequence.
-            if (wasBack && !showBack && typeof window.TeacherMode?.reverseCurrent === 'function') {
-                window.TeacherMode.reverseCurrent();
+            if (wasBack && !showBack) {
+                runReverseTeacherMode();
             }
         }
 
