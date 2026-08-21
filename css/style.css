@@ -342,3 +342,11 @@ main{
     display: none;
 
 }
+
+.field
+{
+    display: none;
+}
+.filter-field{
+    display: block !important;
+}
