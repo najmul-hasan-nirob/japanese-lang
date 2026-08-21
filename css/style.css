@@ -337,3 +337,8 @@ main{
     max-width: var(--layout-width);
     margin: 0 auto;
 }
+
+.mobile-bottom-controls .lesson-control-text{
+    display: none;
+
+}
