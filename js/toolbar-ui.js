@@ -8,13 +8,17 @@
     const lessonBtn = document.getElementById('lessonBtn');
     const typeBtn = document.getElementById('typeBtn');
     const mode = document.getElementById('mode');
-    if(lessonBtn){ lessonBtn.dataset.placeholder = 'Lesson'; lessonBtn.setAttribute('aria-label','Lesson'); }
-    if(typeBtn){ typeBtn.dataset.placeholder = 'Type'; typeBtn.setAttribute('aria-label','Type'); }
-    if(mode) mode.setAttribute('aria-label','Order');
+    if(lessonBtn){ lessonBtn.dataset.placeholder = 'Lesson'; lessonBtn.textContent = 'Lesson'; lessonBtn.setAttribute('aria-label','Lesson'); }
+    if(typeBtn){ typeBtn.dataset.placeholder = 'Type'; typeBtn.textContent = 'Type'; typeBtn.setAttribute('aria-label','Type'); }
+    if(mode){
+      const first = mode.querySelector('option[value="normal"]');
+      if(first) first.textContent = 'Order';
+      mode.setAttribute('aria-label','Order');
+    }
 
     const icons = {
       screenOn:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>',
-      screenOff:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A8 8 0 0 1 8.5 4 8 8 0 1 0 20 15.5Z"></path></svg>',
+      screenOff:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A8 8 0 1 1 8.5 4 8 8 0 0 0 20 15.5Z"></path></svg>',
       romaji:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7M7.5 5v14M4 19h7M14 5l6 14M20 5l-6 14"></path></svg>',
       flip:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"></path></svg>',
       shuffle:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3c4 0 6 10 10 10h3M17 14l3 3-3 3M4 17h3c1.5 0 2.5-1.5 3.5-3M14 10c1-1.5 2-3 3-3h3M17 4l3 3-3 3"></path></svg>'
