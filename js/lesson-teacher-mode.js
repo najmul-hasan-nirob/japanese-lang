@@ -2,17 +2,19 @@
 // Lessons — Teacher Mode
 // Japanese → 5 seconds → Bangla → next card immediately.
 // Japanese speech is intentionally untouched.
-// Bangla uses local Piper neural TTS in the browser/WebView,
-// so it does not depend on an installed Bengali browser voice.
+// Bangla uses Google's translate_tts endpoint played through
+// a plain <audio> element — no npm import, no WASM model
+// download, no pre-generated mp3 files. Falls back to the
+// browser's own Bengali voice only if that request fails.
 // =====================================================
 (function () {
     const WAIT_MS = 5000;
     const RETRY_MS = 700;
-    const PIPER_VOICE = 'bn_BD-google-medium';
-    const PIPER_IMPORT = 'https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm';
+    const GOOGLE_TTS_ENDPOINT = 'https://translate.google.com/translate_tts';
+    const GOOGLE_TTS_MAX_CHARS = 190; // Google's unofficial endpoint caps out around ~200 chars per request
     let state='stopped', cards=[], index=0, pausedPhase=null;
     let waitTimer=null, waitStartedAt=0, waitRemaining=WAIT_MS, pausedSpeech=false, runId=0;
-    let piperPromise=null, banglaAudio=null, banglaObjectUrl=null, banglaGeneration=0;
+    let banglaAudio=null, banglaGeneration=0;
     const ICONS={play:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"></path></svg>',pause:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14M17 5v14"></path></svg>',stop:'<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>'};
     const labelIcon=(label,icon)=>'<span class="lesson-control-text">'+label+'</span>'+icon;
     const synth=()=>window.speechSynthesis||null;
@@ -27,11 +29,46 @@
     async function speakJapanese(text){if(!text)return false;if(window.AndroidTTS&&typeof window.AndroidTTS.speak==='function'){try{window.AndroidTTS.speak(text);return true;}catch(e){}}return browserSpeak(text,'ja-JP');}
 
     // =====================================================
-    // Bangla Piper TTS — independent of browser/OS Bengali voices
+    // Bangla TTS — Google's translate_tts endpoint
+    // (no CDN library, no model download, no stored mp3 files)
     // =====================================================
-    async function getPiper(){if(!piperPromise){piperPromise=import(PIPER_IMPORT).then(async tts=>{if(tts.download)await tts.download(PIPER_VOICE);return tts;}).catch(err=>{piperPromise=null;console.error('Teacher Mode Piper Bengali TTS failed to load:',err);throw err;});}return piperPromise;}
-    function stopBanglaAudio(){banglaGeneration++;if(banglaAudio){try{banglaAudio.pause();banglaAudio.currentTime=0;}catch(e){}banglaAudio=null;}if(banglaObjectUrl){URL.revokeObjectURL(banglaObjectUrl);banglaObjectUrl=null;}}
-    async function speakBangla(text,id){if(!text||id!==runId)return false;const generation=++banglaGeneration;stopBanglaAudio();const tts=await getPiper();if(id!==runId||state==='stopped'||state==='paused'||generation!==banglaGeneration)return false;const wav=await tts.predict({text,voiceId:PIPER_VOICE});if(id!==runId||state==='stopped'||generation!==banglaGeneration)return false;banglaObjectUrl=URL.createObjectURL(wav);const audio=new Audio(banglaObjectUrl);banglaAudio=audio;audio.preload='auto';return await new Promise(resolve=>{let settled=false;const finish=ok=>{if(settled)return;settled=true;banglaAudio=null;if(banglaObjectUrl){URL.revokeObjectURL(banglaObjectUrl);banglaObjectUrl=null;}resolve(ok);};audio.onended=()=>finish(true);audio.onerror=()=>finish(false);audio.onpause=()=>{if(state==='stopped')finish(false);};if(id!==runId||state==='stopped'||generation!==banglaGeneration){finish(false);return;}audio.play().catch(()=>finish(false));});}
+    function splitForGoogleTTS(text){
+        const parts=[];
+        let remaining=text.trim();
+        while(remaining.length>GOOGLE_TTS_MAX_CHARS){
+            let cut=remaining.lastIndexOf(' ',GOOGLE_TTS_MAX_CHARS);
+            if(cut<=0)cut=GOOGLE_TTS_MAX_CHARS;
+            parts.push(remaining.slice(0,cut).trim());
+            remaining=remaining.slice(cut).trim();
+        }
+        if(remaining)parts.push(remaining);
+        return parts;
+    }
+    function googleTTSUrl(text){return GOOGLE_TTS_ENDPOINT+'?ie=UTF-8&q='+encodeURIComponent(text)+'&tl=bn&client=tw-ob';}
+    function stopBanglaAudio(){banglaGeneration++;if(banglaAudio){try{banglaAudio.pause();banglaAudio.currentTime=0;}catch(e){}banglaAudio=null;}}
+    function playAudioUrl(url,id,generation){return new Promise(resolve=>{const audio=new Audio();banglaAudio=audio;audio.preload='auto';let settled=false;const finish=ok=>{if(settled)return;settled=true;if(banglaAudio===audio)banglaAudio=null;resolve(ok);};audio.onended=()=>finish(true);audio.onerror=()=>finish(false);audio.onpause=()=>{if(state==='stopped')finish(false);};if(id!==runId||state==='stopped'||generation!==banglaGeneration){finish(false);return;}audio.src=url;audio.play().catch(()=>finish(false));});}
+    async function speakBanglaGoogle(text,id){
+        const generation=banglaGeneration;
+        const chunks=splitForGoogleTTS(text);
+        if(!chunks.length)return false;
+        for(const chunk of chunks){
+            if(id!==runId||state==='stopped'||state==='paused'||generation!==banglaGeneration)return false;
+            const ok=await playAudioUrl(googleTTSUrl(chunk),id,generation);
+            if(!ok)return false;
+        }
+        return true;
+    }
+    async function speakBangla(text,id){
+        if(!text||id!==runId)return false;
+        const generation=++banglaGeneration;
+        stopBanglaAudio();
+        if(id!==runId||state==='stopped'||state==='paused')return false;
+        const ok=await speakBanglaGoogle(text,id);
+        if(ok)return true;
+        // Fallback only if Google's endpoint is unreachable (e.g. fully offline)
+        if(id!==runId||state==='stopped'||state==='paused'||generation!==banglaGeneration)return false;
+        return browserSpeak(text,'bn-BD');
+    }
     function scheduleBangla(delay,id){clearTimeout(waitTimer);state='waiting';waitRemaining=delay;waitStartedAt=Date.now();updateUI();waitTimer=setTimeout(()=>{if(id!==runId||state==='stopped'||state==='paused')return;waitTimer=null;waitRemaining=0;speakBanglaForCard(id);},delay);}
     async function speakJapaneseForCard(){if(state==='stopped')return;const id=runId,card=cards[index];if(!card)return finish();setActiveCard(card);state='japanese';updateUI();await speakJapanese(japaneseText(card));if(id!==runId||state==='stopped'||state==='paused')return;scheduleBangla(WAIT_MS,id);}
     async function speakBanglaForCard(id){if(id!==runId||state==='stopped'||state==='paused')return;const card=cards[index];if(!card)return finish();const text=banglaText(card);if(!text){console.warn('Teacher Mode: no Bangla text found on current card.');retryBangla(id);return;}state='bangla';updateUI();try{const ok=await speakBangla(text,id);if(id!==runId||state==='stopped'||state==='paused')return;if(!ok){retryBangla(id);return;}index++;if(index>=cards.length)finish();else speakJapaneseForCard();}catch(e){console.error('Teacher Mode Bengali TTS error:',e);retryBangla(id);}}
