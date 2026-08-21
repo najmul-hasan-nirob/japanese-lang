@@ -8,41 +8,23 @@
 .toolbar.toolbar-collapsed{display:none!important}
 .toolbar .field>label{display:none!important}
 .toolbar .field .multiselect-btn,.toolbar .field select{min-height:38px}
-
-/* Desktop toolbar: one row, intrinsic field widths, with extra space distributed so the row fills the toolbar. */
 .toolbar:not(.toolbar-collapsed){display:flex!important;flex-wrap:nowrap;align-items:stretch;gap:10px;width:100%}
 .toolbar:not(.toolbar-collapsed)>.field{flex:1 1 max-content;min-width:0;width:auto}
-.toolbar:not(.toolbar-collapsed)>.field>button,
-.toolbar:not(.toolbar-collapsed)>.field>select,
-.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,
-.toolbar:not(.toolbar-collapsed)>.field>.direction-toggle{width:100%;box-sizing:border-box}
+.toolbar:not(.toolbar-collapsed)>.field>button,.toolbar:not(.toolbar-collapsed)>.field>select,.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,.toolbar:not(.toolbar-collapsed)>.field>.direction-toggle{width:100%;box-sizing:border-box}
 .toolbar:not(.toolbar-collapsed)>.field.direction-field{flex:1.15 1 max-content}
 .toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 max-content}
-
 .lesson-control-text{display:inline-flex;align-items:center;line-height:1}
 .lesson-control-svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
-#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
-#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{color:var(--vermilion)!important}
+#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle,#lessonResetBtn{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+#backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle,#lessonResetBtn{color:var(--vermilion)!important}
 .direction-filter-field .abacus{min-height:38px}
+.direction-compat{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .site-footer .mobile-bottom-controls{display:none}
-
-/* Mobile sticky controls: every control uses the same bordered card design. */
 @media(max-width:520px){
-  .site-footer{margin-top:30px;padding:20px 0 90px}
-  .site-footer-inner{display:none}
-  .toolbar-toggle{margin-bottom:7px}
-  .site-footer .mobile-bottom-controls{display:flex}
-  .site-footer .mobile-bottom-controls>button,
-  .site-footer .mobile-bottom-controls>.abacus,
-  .site-footer .mobile-bottom-controls>.screen-control,
-  .site-footer .mobile-bottom-controls>#screenWakeToggle{
-    flex:1 1 0;width:auto;min-width:0;min-height:44px;margin:0;padding:6px;
-    border:1px solid var(--paper-line)!important;border-radius:6px;background:var(--paper-cell)!important;
-    box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:var(--vermilion)!important;
-  }
+  .site-footer{margin-top:30px;padding:20px 0 90px}.site-footer-inner{display:none}.toolbar-toggle{margin-bottom:7px}.site-footer .mobile-bottom-controls{display:flex}
+  .site-footer .mobile-bottom-controls>button,.site-footer .mobile-bottom-controls>.abacus,.site-footer .mobile-bottom-controls>.screen-control,.site-footer .mobile-bottom-controls>#screenWakeToggle,.site-footer .mobile-bottom-controls>#lessonResetBtn{flex:1 1 0;width:auto;min-width:0;min-height:44px;margin:0;padding:6px;border:1px solid var(--paper-line)!important;border-radius:6px;background:var(--paper-cell)!important;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:var(--vermilion)!important}
   .site-footer .mobile-bottom-controls>#screenWakeToggle{border:1px solid var(--paper-line)!important;background:var(--paper-cell)!important}
-  .site-footer .mobile-bottom-controls .mobile-control-icon,
-  .site-footer .mobile-bottom-controls .lesson-control-svg{width:18px;height:18px}
-  .mobile-bottom-controls .lesson-control-text{display:none}
+  .site-footer .mobile-bottom-controls .mobile-control-icon,.site-footer .mobile-bottom-controls .lesson-control-svg{width:18px;height:18px}
+  .site-footer .mobile-bottom-controls #screenWakeToggle .lesson-control-text,.site-footer .mobile-bottom-controls #lessonResetBtn .lesson-control-text{display:inline-flex}
 }
 @media(min-width:521px){.site-footer .mobile-bottom-controls{display:none!important}}
