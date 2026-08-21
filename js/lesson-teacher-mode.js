@@ -92,8 +92,25 @@
     function updateButton(b){if(state==='stopped'){b.innerHTML=labelIcon('',ICONS.play);b.setAttribute('aria-label','Start Teacher Mode from first card');b.title='Start Teacher Mode';}else if(state==='paused'){b.innerHTML=labelIcon('',ICONS.play);b.setAttribute('aria-label','Resume Teacher Mode');b.title='Resume Teacher Mode';}else{b.innerHTML=labelIcon('',ICONS.pause);b.setAttribute('aria-label','Pause Teacher Mode');b.title='Pause Teacher Mode';}}
     function updateUI(){document.querySelectorAll('.teacher-mode-btn').forEach(updateButton);document.querySelectorAll('.teacher-stop-btn').forEach(b=>{b.innerHTML=labelIcon('',ICONS.stop);b.setAttribute('aria-label','Stop Teacher Mode');b.title='Stop Teacher Mode';b.disabled=state==='stopped';});}
     function createButton(cls){const b=document.createElement('button');b.type='button';b.className=cls;return b;}
-    function addToolbarControls(){const toolbar=document.querySelector('.toolbar');if(!toolbar||document.querySelector('.teacher-mode-field'))return;const field=document.createElement('div');const startBtn=createButton('teacher-mode-btn'),stopBtn=createButton('teacher-stop-btn');field.append(startBtn,stopBtn);toolbar.appendChild(field);startBtn.addEventListener('click',()=>state==='stopped'?start():state==='paused'?resume():pause());stopBtn.addEventListener('click',stop);}
-    function addMobileControls(){const bar=document.querySelector('.mobile-bottom-controls');if(!bar||bar.querySelector('.teacher-mode-btn'))return;const startBtn=createButton('teacher-mode-btn'),stopBtn=createButton('teacher-stop-btn');bar.append(startBtn,stopBtn);startBtn.addEventListener('click',()=>state==='stopped'?start():state==='paused'?resume():pause());stopBtn.addEventListener('click',stop);}
+    function addToolbarControls(){const toolbar=document.querySelector('.toolbar');if(!toolbar||document.querySelector('.teacher-mode-field'))return;const field=document.createElement('div');field.className='field teacher-mode-field';const startBtn=createButton('teacher-mode-btn'),stopBtn=createButton('teacher-stop-btn');field.append(startBtn,stopBtn);toolbar.appendChild(field);startBtn.addEventListener('click',()=>state==='stopped'?start():state==='paused'?resume():pause());stopBtn.addEventListener('click',stop);}
+    function addMobileControls(){
+        const bar=document.querySelector('.mobile-bottom-controls');
+        if(!bar)return;
+
+        // Keep the Screen Always On control in the mobile sticky bar.
+        // main.js creates this field in the toolbar first, so move it here
+        // after the shared mobile-controls container has been created.
+        const screenWake=document.getElementById('screenWakeField');
+        if(screenWake&&screenWake.parentNode!==bar){
+            bar.appendChild(screenWake);
+        }
+
+        if(bar.querySelector('.teacher-mode-btn'))return;
+        const startBtn=createButton('teacher-mode-btn'),stopBtn=createButton('teacher-stop-btn');
+        bar.append(startBtn,stopBtn);
+        startBtn.addEventListener('click',()=>state==='stopped'?start():state==='paused'?resume():pause());
+        stopBtn.addEventListener('click',stop);
+    }
     function init(){if(!document.getElementById('grid'))return;addToolbarControls();addMobileControls();updateUI();}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
