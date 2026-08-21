@@ -6,19 +6,23 @@
 .toolbar-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease}
 .toolbar-toggle.expanded svg{transform:rotate(180deg)}
 .toolbar.toolbar-collapsed{display:none!important}
+.toolbar .field{position:relative;z-index:1}
+.toolbar .field:has(.multiselect-panel.open){z-index:100}
 .toolbar .field>label{display:none!important}
 .toolbar .field .multiselect-btn,.toolbar .field select{min-height:38px}
-.toolbar:not(.toolbar-collapsed){display:flex!important;flex-wrap:nowrap;align-items:stretch;gap:10px;width:100%;box-sizing:border-box}
+.toolbar:not(.toolbar-collapsed){display:flex!important;flex-wrap:nowrap;align-items:stretch;gap:10px;width:100%;box-sizing:border-box;position:relative;z-index:10}
 .toolbar:not(.toolbar-collapsed)>.field{flex:1 1 0;min-width:0;width:0;max-width:none}
 .toolbar:not(.toolbar-collapsed)>.field>button,.toolbar:not(.toolbar-collapsed)>.field>select,.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,.toolbar:not(.toolbar-collapsed)>.field>.direction-toggle{width:100%;box-sizing:border-box}
 .toolbar:not(.toolbar-collapsed)>.field.direction-field,.toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 0}
 
 @media(max-width:520px){
-  .toolbar:not(.toolbar-collapsed){display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:6px;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}
+  .toolbar:not(.toolbar-collapsed){display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:6px;width:100%;max-width:100%;box-sizing:border-box;overflow:visible!important;position:relative;z-index:50}
   .toolbar:not(.toolbar-collapsed)>.field{flex:1 1 0!important;min-width:0!important;width:0!important;max-width:none!important;margin:0!important}
   .toolbar:not(.toolbar-collapsed)>.field.direction-field,.toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 0!important}
   .toolbar:not(.toolbar-collapsed)>.field>button,.toolbar:not(.toolbar-collapsed)>.field>select,.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,.toolbar:not(.toolbar-collapsed)>.field>.direction-toggle,.toolbar:not(.toolbar-collapsed)>.field>.abacus{display:flex;width:100%!important;min-width:0!important;max-width:none!important;box-sizing:border-box}
   .toolbar:not(.toolbar-collapsed)>.field>select,.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .toolbar .multiselect-panel{z-index:1000!important;position:absolute!important;top:calc(100% + 6px)!important;left:0!important;right:auto!important;max-width:min(260px,90vw);min-width:180px;width:max-content!important}
+  .toolbar .multiselect-panel.open{display:flex!important}
 }
 
 .lesson-control-text{display:inline-flex;align-items:center;line-height:1}
