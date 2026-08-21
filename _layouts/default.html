@@ -3,58 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{{ page.title }}</title>
     <link rel="icon" type="image/svg+xml" href="{{ '/favicon.svg' | relative_url }}">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="{{ '/css/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
     <link rel="stylesheet" href="{{ '/css/shuffle-transition.css' | relative_url }}?v={{ site.time | date: '%s' }}">
     <link rel="stylesheet" href="{{ '/css/toolbar-ui.css' | relative_url }}?v={{ site.time | date: '%s' }}">
-    {% if page.css %}
-<link rel="stylesheet" href="{{ page.css | relative_url }}?v={{ site.time | date: '%s' }}">
-{% endif %}
-    
+    <link rel="stylesheet" href="{{ '/css/speaker.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+    {% if page.css %}<link rel="stylesheet" href="{{ page.css | relative_url }}?v={{ site.time | date: '%s' }}">{% endif %}
 </head>
-
 <body>
-
     {% include header.html %}
-
-    <main>
-        {{ content }}
-    </main>
-
+    <main>{{ content }}</main>
     {% include footer.html %}
-
     {% if page.js %}
-    {% for script in page.js %}
-        <script src="{{ script | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-    {% endfor %}
+    {% for script in page.js %}<script src="{{ script | relative_url }}?v={{ site.time | date: '%s' }}"></script>{% endfor %}
     {% endif %}
-
-    <!-- Shared Front / Back switch for Kana, Numbers and Lessons -->
     <script src="{{ '/js/direction.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-
-    <!-- Shared Shuffle button for Numbers and Lessons -->
     <script src="{{ '/js/shuffle-control.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-
-    <!-- Shared smooth shuffle transition -->
     <script src="{{ '/js/shuffle-transition.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-
-    <!-- Mobile Lesson filter pull-to-refresh guard -->
     <script src="{{ '/js/lesson-filter-touch.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-
-    <!-- Lessons toolbar and footer sticky controls -->
     <script src="{{ '/js/toolbar-ui.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-
-    <!-- Supabase browser client + cross-device sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="{{ '/js/supabase-sync.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
-
 </body>
 </html>
