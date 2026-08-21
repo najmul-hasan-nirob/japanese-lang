@@ -8,11 +8,54 @@
 .toolbar.toolbar-collapsed{display:none!important}
 .toolbar .field>label{display:none!important}
 .toolbar .field .multiselect-btn,.toolbar .field select{min-height:38px}
+
+/* Desktop: fields use their natural width first, then share all remaining space. */
 .toolbar:not(.toolbar-collapsed){display:flex!important;flex-wrap:nowrap;align-items:stretch;gap:10px;width:100%}
-.toolbar:not(.toolbar-collapsed)>.field{flex:1 1 max-content;min-width:0;width:auto}
+.toolbar:not(.toolbar-collapsed)>.field{flex:1 1 auto;min-width:0;width:auto}
 .toolbar:not(.toolbar-collapsed)>.field>button,.toolbar:not(.toolbar-collapsed)>.field>select,.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,.toolbar:not(.toolbar-collapsed)>.field>.direction-toggle{width:100%;box-sizing:border-box}
-.toolbar:not(.toolbar-collapsed)>.field.direction-field{flex:1.15 1 max-content}
-.toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 max-content}
+.toolbar:not(.toolbar-collapsed)>.field.direction-field{flex:1.15 1 auto}
+.toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 auto}
+
+/* Mobile: keep every toolbar field on one row. Each field gets its intrinsic
+   minimum space and then grows/shrinks proportionally to consume 100%. */
+@media(max-width:520px){
+  .toolbar:not(.toolbar-collapsed){
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:stretch;
+    gap:6px;
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+    overflow:visible;
+  }
+  .toolbar:not(.toolbar-collapsed)>.field{
+    flex:1 1 auto!important;
+    min-width:0!important;
+    width:auto!important;
+    max-width:none!important;
+  }
+  .toolbar:not(.toolbar-collapsed)>.field.direction-field{flex:1.15 1 auto!important}
+  .toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 auto!important}
+  .toolbar:not(.toolbar-collapsed)>.field>button,
+  .toolbar:not(.toolbar-collapsed)>.field>select,
+  .toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,
+  .toolbar:not(.toolbar-collapsed)>.field>.direction-toggle,
+  .toolbar:not(.toolbar-collapsed)>.field>.abacus{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box;
+  }
+  .toolbar:not(.toolbar-collapsed)>.field>select,
+  .toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
 .lesson-control-text{display:inline-flex;align-items:center;line-height:1}
 .lesson-control-svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
 #backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle,#lessonResetBtn{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
