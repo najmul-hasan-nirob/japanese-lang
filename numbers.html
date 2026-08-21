@@ -13,7 +13,7 @@ js:
         <label for="range">Range</label>
         <select id="range">
             <option value="all">All</option>
-            <option value="1-100" selected>1 – 100</option>
+            <option value="1-100" selected>Range</option>
             <option value="101-1000">101 – 1,000</option>
             <option value="thousands">Thousands</option>
         </select>
@@ -22,7 +22,7 @@ js:
     <div class="field">
         <label for="mode">Order</label>
         <select id="mode">
-            <option value="normal">Normal</option>
+            <option value="normal">Order</option>
             <option value="shuffle">Shuffle</option>
         </select>
     </div>
@@ -38,7 +38,7 @@ js:
 
     <div class="field shuffle-field">
         <label>Shuffle</label>
-        <button id="shuffleBtn" class="shuffle-btn" type="button">🔀 Shuffle</button>
+        <button id="shuffleBtn" class="shuffle-btn" type="button">Shuffle</button>
     </div>
 </div>
 
@@ -46,29 +46,24 @@ js:
     <div class="logic">
         <h2>সুত্রঃ</h2>
     </div>
-    <div class="count-display" id="countDisplay" aria-live="polite">
-    </div>
+    <div class="count-display" id="countDisplay" aria-live="polite"></div>
 </div>
 <div class="grid" id="grid"></div>
 
 <div class="footnote"><span class="dot"></span>marked cards are round-number milestones (hundreds &amp; thousands)</div>
 
 <style>
-@media (max-width:520px){
-    .grid{grid-template-columns:repeat(3,1fr);}
-}
+@media (max-width:520px){.grid{grid-template-columns:repeat(3,1fr);}}
 </style>
 
 <script>
 (function(){
     const grid=document.getElementById('grid');
     const count=document.getElementById('countDisplay');
-
     function updateCount(){
         const total=grid.querySelectorAll(':scope > .card').length;
         count.textContent=`Showing ${total} ${total===1 ? 'number' : 'numbers'}`;
     }
-
     updateCount();
     new MutationObserver(updateCount).observe(grid,{childList:true});
 })();
