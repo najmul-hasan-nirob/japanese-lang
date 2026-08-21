@@ -197,3 +197,9 @@
 .direction-filter-field .abacus{ min-width:154px; justify-content:center; }
 
 @media (prefers-reduced-motion:reduce){ .bead{ transition:none; } }
+
+.count-display {
+    max-width: var(--layout-width);
+    margin: 0 auto 20px;
+    text-align: center !important;
+}
