@@ -14,5 +14,38 @@
 #backRomajiToggle,#direction,#shuffleBtn,#screenWakeToggle{color:var(--vermilion)!important}
 .direction-filter-field .abacus{min-height:38px}
 .site-footer .mobile-bottom-controls{display:none}
-@media(max-width:520px){.site-footer{margin-top:30px;padding:20px 0 90px}.site-footer-inner{display:none}.toolbar-toggle{margin-bottom:7px}.site-footer .mobile-bottom-controls{display:flex}.mobile-bottom-controls .lesson-control-text{display:none}}
+
+/* Mobile sticky controls: every control uses the same bordered card design. */
+@media(max-width:520px){
+  .site-footer{margin-top:30px;padding:20px 0 90px}
+  .site-footer-inner{display:none}
+  .toolbar-toggle{margin-bottom:7px}
+  .site-footer .mobile-bottom-controls{display:flex}
+  .site-footer .mobile-bottom-controls>button,
+  .site-footer .mobile-bottom-controls>.abacus,
+  .site-footer .mobile-bottom-controls>.screen-control,
+  .site-footer .mobile-bottom-controls>#screenWakeToggle{
+    flex:1 1 0;
+    width:auto;
+    min-width:0;
+    min-height:44px;
+    margin:0;
+    padding:6px;
+    border:1px solid var(--paper-line)!important;
+    border-radius:6px;
+    background:var(--paper-cell)!important;
+    box-shadow:var(--shadow);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--vermilion)!important;
+  }
+  .site-footer .mobile-bottom-controls>#screenWakeToggle{
+    border:1px solid var(--paper-line)!important;
+    background:var(--paper-cell)!important;
+  }
+  .site-footer .mobile-bottom-controls .mobile-control-icon,
+  .site-footer .mobile-bottom-controls .lesson-control-svg{width:18px;height:18px}
+  .mobile-bottom-controls .lesson-control-text{display:none}
+}
 @media(min-width:521px){.site-footer .mobile-bottom-controls{display:none!important}}
