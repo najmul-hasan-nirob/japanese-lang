@@ -1,271 +1,32 @@
-<div class="iphone-mockup">
-  <div class="screen">
-    <div class="container">
-      <h1>Text-to-Speech Reader</h1>
-      <h2>Google Chrome Edition</h2>
-      <div id="textInput" contenteditable="true"></div><br>
-      <label for="voiceSelect">Choose a voice:</label>
-      <select id="voiceSelect"></select><br>
-      <div class="action-buttons">
-        <button id="speakButton">Speak</button>
-        <button id="stopButton">Stop</button>
-      </div>
-      <button id="clearButton">Clear Text</button>
-    </div>
-    Version 1.0
-  </div>
-</div>
+<textarea id="text">আমি বাংলায় কথা বলছি। তুমি কেমন আছো?</textarea>
 
-<style>
-  @import url("https://fonts.googleapis.com/css2?family=Roboto&family=Segoe+UI& family=Oxygen&family=Ubuntu&family=Cantarell&family=Fira+Sans&family=Droid+Sans&family=Helvetica Neue&display=swap");
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  background-color: #f0f0f5;
-  display: flex;
-  justify-content: center;
-  //align-items: center;
-  height: 120vh;
-  padding: 20px;
-}
-
-/* iPhone mockup container */
-.iphone-mockup {
-  position: relative;
-  width: 375px;  /* iPhone width */
-  height: 667px; /* iPhone height */
-  background: #fff;
-  border-radius: 50px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  border: 8px solid #333; /* simulate the iPhone bezel */
-}
-
-.iphone-mockup::before {
-  content: '';
-  position: absolute;
-  top: 15px;
-  left: 50%;
-  width: 60px;
-  height: 5px;
-  background-color: #ccc;
-  border-radius: 10px;
-  transform: translateX(-50%);
-}
-
-.screen {
-  padding: 20px;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  background-color: #ffffff;
-  border-radius: 30px;
-}
-
-.container {
-  max-width: 100%;
-  text-align: center;
-}
-
-h1 {
-  margin-top: 5px;
-  font-size: 1.5em;
-  color: #333;
-}
-
-h2 {
-  font-size: 0.8em;
-  color: #33F;
-  margin-bottom: 15px;
-}
-
-
-#textInput {
-  width: 100%;
-  min-height: 160px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  font-size: 1em;
-  resize: none;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 15px;
-  color: #333;
-  white-space: pre-wrap; /* Preserve whitespace formatting */
-  word-wrap: break-word;
-  outline: none;
-}
-
-select, button {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 1em;
-  cursor: pointer;
-}
-
-select {
-  background-color: #fafafa;
-}
-
-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-button:active {
-  background-color: #388e3c;
-}
-
-button#clearButton {
-  background-color: #f44336;
-}
-
-button#clearButton:hover {
-  background-color: #e53935;
-}
-
-button#clearButton:active {
-  background-color: #d32f2f;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-label {
-  font-size: 1.1em;
-  color: #555;
-  margin-bottom: 5px;
-  display: block;
-}
-</style>
+<button id="speak">Speak Bangla</button>
 
 <script>
-  const textInput = document.getElementById('textInput');
-const speakButton = document.getElementById('speakButton');
-const stopButton = document.getElementById('stopButton');
-const clearButton = document.getElementById('clearButton');
-const voiceSelect = document.getElementById('voiceSelect');
+document.getElementById('speak').onclick = function () {
 
-let voices = [];
-let defaultVoice = 'Google US English';
-let currentUtterance = null;  // To hold the current speech utterance
+    const text = document.getElementById('text').value;
 
-// Default instruction text
-const defaultText = `こんにちは. 안녕하세요. 你好嗎? This is a text-to-speech demo. Enter text here and select a language and voice from the dropdown. Press the Speak button to hear the text spoken aloud. You can also clear the text using the Clear Text button.`;
+    speechSynthesis.cancel();
+    speechSynthesis.resume();
 
-// Function to populate the voice dropdown
-function populateVoiceList() {
-  voices = speechSynthesis.getVoices();  // Get the available voices
-  voiceSelect.innerHTML = '';  // Clear the existing options
+    const utterance =
+        new SpeechSynthesisUtterance(text);
 
-  voices.forEach(voice => {
-    const option = document.createElement('option');
-    option.textContent = voice.name + ' (' + voice.lang + ')';
-    option.setAttribute('data-lang', voice.lang);
-    option.setAttribute('data-name', voice.name);
-    voiceSelect.appendChild(option);
+    utterance.lang = 'bn-BD';
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.volume = 1;
 
-    // Set Google US English as default
-    if (voice.name === defaultVoice) {
-      option.selected = true;
-    }
-  });
-}
+    utterance.onstart = () =>
+        console.log('Bangla started');
 
-// Function to speak the text
-function speakText() {
-  const text = textInput.textContent;
-  const selectedVoice = voiceSelect.selectedOptions[0].getAttribute('data-name');
+    utterance.onend = () =>
+        console.log('Bangla finished');
 
-  if (text !== '') {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voice = voices.find(v => v.name === selectedVoice);
-    utterance.voice = voice;
+    utterance.onerror = e =>
+        console.error('Bangla error:', e.error);
 
-    utterance.rate = 1;  // Speed of speech
-    utterance.pitch = 1; // Pitch of speech
-    utterance.volume = 1; // Volume of speech
-
-    // Split the text into words for highlighting
-    const words = text.split(' ');
-    let currentWordIndex = 0;
-
-    utterance.onboundary = (event) => {
-      if (event.name === 'word') {
-        // Highlight the current word
-        highlightWord(currentWordIndex, words);
-        currentWordIndex++;
-      }
-    };
-
-    // Store the current utterance
-    currentUtterance = utterance;
-
-    window.speechSynthesis.speak(utterance);
-  } else {
-    alert("Please enter text to speak!");
-  }
-}
-
-// Function to highlight words
-function highlightWord(index, words) {
-  // Reset the previous highlight
-  textInput.innerHTML = words.map((word, i) => {
-    if (i === index) {
-      return `<span style="background-color: yellow;">${word}</span>`;
-    }
-    return word;
-  }).join(' ');  // Join the words back into a string
-}
-
-// Function to stop the speech
-function stopSpeech() {
-  if (currentUtterance) {
-    window.speechSynthesis.cancel();  // Stop the current speech
-  }
-}
-
-// Function to clear the instruction text
-function clearText() {
-  textInput.textContent = '';  // Clear the text in the editable div
-}
-
-// Set the default instruction text when the page loads
-textInput.textContent = defaultText;
-
-// Add event listener to the "Speak" button
-speakButton.addEventListener('click', speakText);
-
-// Add event listener to the "Stop" button
-stopButton.addEventListener('click', stopSpeech);
-
-// Add event listener to the "Clear" button
-clearButton.addEventListener('click', clearText);
-
-// Populate the voice list when voices are loaded
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = populateVoiceList;
-} else {
-  populateVoiceList();  // For older browsers
-}
-
+    speechSynthesis.speak(utterance);
+};
 </script>
