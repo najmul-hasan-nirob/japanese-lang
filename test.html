@@ -57,8 +57,72 @@ css: /css/style.css
         }
     }
 
-    // Exact fallback behavior from the shared lesson speech system:
-    // AndroidTTS first, then browser Web Speech with ja-JP voice selection.
+    // Same architecture as the working lesson speech system, adapted for Bengali.
+    function speakBengali(text) {
+        if (!text) return;
+        const bengaliText = String(text).trim();
+        if (!bengaliText) return;
+
+        writeLog('');
+        writeLog('=== BANGLA — LESSON-STYLE METHOD ===');
+        writeLog('Text: ' + bengaliText);
+        writeLog('AndroidTTS available: ' + hasNativeTTS());
+
+        if (window.AndroidTTS && typeof window.AndroidTTS.speak === "function") {
+            try {
+                writeLog('Calling AndroidTTS.speak(text) — same native path as lesson');
+                window.AndroidTTS.speak(bengaliText);
+                writeLog('✅ AndroidTTS.speak() called successfully');
+                return;
+            } catch (e) {
+                writeLog('⚠️ AndroidTTS failed: ' + e.message);
+                writeLog('Falling back to Web Speech API...');
+            }
+        }
+
+        const synth = window.speechSynthesis;
+        if (!synth || typeof SpeechSynthesisUtterance === 'undefined') {
+            writeLog('❌ Web Speech API unavailable — no Bengali fallback possible');
+            return;
+        }
+
+        const utter = new SpeechSynthesisUtterance(bengaliText);
+        utter.lang = 'bn-BD';
+        utter.rate = 0.9;
+        utter.volume = 1;
+        utter.pitch = 1;
+
+        const speakNow = () => {
+            const voices = synth.getVoices();
+            writeLog('Web voice count: ' + voices.length);
+            const bnVoice = voices.find(v => v.lang && /^bn(?:-|$)/i.test(v.lang));
+            if (bnVoice) {
+                utter.voice = bnVoice;
+                writeLog('Bengali voice selected: ' + bnVoice.name + ' (' + bnVoice.lang + ')');
+            } else {
+                writeLog('⚠️ No Bengali voice found; using bn-BD language setting');
+            }
+            synth.cancel();
+            synth.speak(utter);
+            writeLog('✅ Web speechSynthesis.speak() called');
+        };
+
+        utter.onstart = () => writeLog('🔊 Web Bengali TTS STARTED');
+        utter.onend = () => writeLog('✅ Web Bengali TTS FINISHED');
+        utter.onerror = e => writeLog('❌ Web Bengali TTS ERROR: ' + (e.error || 'unknown'));
+
+        if (synth.getVoices().length === 0) {
+            writeLog('No voices initially; waiting for voiceschanged...');
+            synth.addEventListener('voiceschanged', speakNow, { once: true });
+            setTimeout(() => {
+                if (synth.getVoices().length > 0) speakNow();
+            }, 300);
+        } else {
+            speakNow();
+        }
+    }
+
+    // Exact lesson-style Japanese implementation for comparison.
     function speakLessonJapanese(text) {
         if (!text) return;
         const japaneseText = String(text).trim();
@@ -125,7 +189,7 @@ css: /css/style.css
 
     banglaButton.addEventListener('click', function () {
         const text = textInput.value.trim() || 'আমি বাংলায় কথা বলছি। তুমি কেমন আছো?';
-        speakAndroid(text, 'BANGLA — DIRECT ANDROID TTS');
+        speakBengali(text);
     });
 
     androidJapaneseButton.addEventListener('click', function () {
