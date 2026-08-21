@@ -1,32 +1,143 @@
-<textarea id="text">আমি বাংলায় কথা বলছি। তুমি কেমন আছো?</textarea>
+---
+layout: default
+title: TTS Test
+css: /css/style.css
+---
 
-<button id="speak">Speak Bangla</button>
+<div style="max-width:700px;margin:30px auto;padding:20px;text-align:center;font-family:Arial,sans-serif;">
+    <h1>TTS Diagnostic</h1>
+
+    <textarea id="text" style="width:100%;min-height:120px;padding:12px;font-size:18px;box-sizing:border-box;">আমি বাংলায় কথা বলছি। তুমি কেমন আছো?</textarea>
+
+    <div style="display:flex;gap:10px;margin:15px 0;">
+        <button id="bangla" style="flex:1;padding:12px;font-size:16px;">Test Bangla</button>
+        <button id="japanese" style="flex:1;padding:12px;font-size:16px;">Test Japanese</button>
+        <button id="stop" style="flex:1;padding:12px;font-size:16px;">Stop</button>
+    </div>
+
+    <button id="clear" style="width:100%;padding:10px;">Clear Log</button>
+
+    <h3 style="text-align:left;margin-bottom:5px;">Diagnostics</h3>
+    <pre id="ttsLog" style="background:#111;color:#0f0;padding:15px;text-align:left;white-space:pre-wrap;word-break:break-word;min-height:220px;border-radius:6px;"></pre>
+</div>
 
 <script>
-document.getElementById('speak').onclick = function () {
+(function () {
+    const synth = window.speechSynthesis;
+    const textInput = document.getElementById('text');
+    const banglaButton = document.getElementById('bangla');
+    const japaneseButton = document.getElementById('japanese');
+    const stopButton = document.getElementById('stop');
+    const clearButton = document.getElementById('clear');
+    const log = document.getElementById('ttsLog');
 
-    const text = document.getElementById('text').value;
+    function writeLog(message) {
+        console.log(message);
+        log.textContent += message + '\n';
+        log.scrollTop = log.scrollHeight;
+    }
 
-    speechSynthesis.cancel();
-    speechSynthesis.resume();
+    function inspectVoices() {
+        if (!synth) {
+            writeLog('❌ speechSynthesis is NOT available');
+            return;
+        }
 
-    const utterance =
-        new SpeechSynthesisUtterance(text);
+        const voices = synth.getVoices();
+        writeLog('Voices available: ' + voices.length);
 
-    utterance.lang = 'bn-BD';
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+        if (!voices.length) {
+            writeLog('⚠️ No voices exposed by this browser/WebView.');
+            return;
+        }
 
-    utterance.onstart = () =>
-        console.log('Bangla started');
+        voices.forEach((voice, index) => {
+            writeLog(
+                index + ': ' +
+                voice.name +
+                ' | lang=' + voice.lang +
+                ' | default=' + voice.default
+            );
+        });
 
-    utterance.onend = () =>
-        console.log('Bangla finished');
+        const bangla = voices.filter(v =>
+            String(v.lang || '').toLowerCase().startsWith('bn')
+        );
 
-    utterance.onerror = e =>
-        console.error('Bangla error:', e.error);
+        writeLog('Bengali voices: ' + bangla.length);
+    }
 
-    speechSynthesis.speak(utterance);
-};
+    function speak(text, lang) {
+        if (!synth) {
+            writeLog('❌ speechSynthesis unavailable');
+            return;
+        }
+
+        synth.cancel();
+        synth.resume();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = 0.95;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        writeLog('');
+        writeLog('Trying: ' + lang);
+        writeLog('Text: ' + text);
+
+        utterance.onstart = function () {
+            writeLog('✅ TTS STARTED');
+        };
+
+        utterance.onend = function () {
+            writeLog('✅ TTS FINISHED');
+        };
+
+        utterance.onerror = function (event) {
+            writeLog('❌ TTS ERROR: ' + (event.error || 'unknown'));
+        };
+
+        try {
+            synth.speak(utterance);
+            writeLog('speechSynthesis.speak() called');
+        } catch (error) {
+            writeLog('❌ speak() exception: ' + error.message);
+        }
+    }
+
+    banglaButton.addEventListener('click', function () {
+        inspectVoices();
+        speak(textInput.value.trim() || 'আমি বাংলায় কথা বলছি। তুমি কেমন আছো?', 'bn-BD');
+    });
+
+    japaneseButton.addEventListener('click', function () {
+        inspectVoices();
+        speak('こんにちは。日本語を話しています。', 'ja-JP');
+    });
+
+    stopButton.addEventListener('click', function () {
+        synth.cancel();
+        writeLog('⏹ TTS STOPPED');
+    });
+
+    clearButton.addEventListener('click', function () {
+        log.textContent = '';
+    });
+
+    writeLog('User agent: ' + navigator.userAgent);
+    writeLog('speechSynthesis: ' + (!!synth));
+    writeLog('SpeechSynthesisUtterance: ' + (!!window.SpeechSynthesisUtterance));
+    writeLog('Initial voice count: ' + (synth ? synth.getVoices().length : 0));
+
+    if (synth && 'onvoiceschanged' in synth) {
+        synth.addEventListener('voiceschanged', function () {
+            writeLog('🔄 voiceschanged event fired');
+            inspectVoices();
+        });
+    }
+
+    setTimeout(inspectVoices, 500);
+    setTimeout(inspectVoices, 1500);
+})();
 </script>
