@@ -159,137 +159,88 @@ span:nth-child(10){
 /*End Bars*/
 </style>
 <script>
-  
-//Initialize speech synthesis
 const synth = window.speechSynthesis;
 
-//select the HTML elements
-const button = document.querySelector('.button');
-const textInput = document.getElementById('textarea-input');
-const voiceSelect = document.getElementById('voice-select');
+const button = document.getElementById('speak');
+const textInput = document.getElementById('text');
+const voiceSelect = document.getElementById('tts');
 
-const rate = document.getElementById('rate-range');
-const rateValue = document.getElementById("rate-value");
-
-const pitch = document.getElementById("pitch-range");
-const pitchValue = document.getElementById("pitch-value");
-
-const volume = document.getElementById("volume-range");
-const volumeValue =  document.getElementById("volume-value");
-
-
-//get the list of voices
 let voices = [];
 
-function addVoices(){
-  voices = synth.getVoices();
-  
+function addVoices() {
+    voices = synth.getVoices();
 
-  //Loop through voices and create an option for each one
-  for (i = 0; i < voices.length; i++) {
-    const voice = voices[i];
+    voiceSelect.innerHTML = '<option value="">Select TTS</option>';
 
-    //create an option element
-    const option = document.createElement('option');
+    voices.forEach((voice, index) => {
+        const option = document.createElement('option');
 
-    //add voice and language
-    option.textContent = voice.name + ' ( ' + voice.lang + ' ) ';
+        option.value = index;
+        option.textContent = `${voice.name} (${voice.lang})`;
 
-    //Set option attributes
-    option.setAttribute('data-lang',voice.lang);
-    option.setAttribute('data-name',voice.name);
+        voiceSelect.appendChild(option);
+    });
 
-    //add option created to select element
-    voiceSelect.appendChild(option);
-  }
+    console.log('Available voices:', voices);
 }
 
+addVoices();
 
- addVoices();
-
-if(synth.onvoiceschanged !== undefined){
-  synth.onvoiceschanged = addVoices;
+if (typeof synth.onvoiceschanged !== 'undefined') {
+    synth.onvoiceschanged = addVoices;
 }
 
+function playText() {
+    const text = textInput.value.trim();
 
-//playText - this function will be called when we press the button
-
-function playText(){
-
-  //check if speaking (if it's actually in the process of speaking and we click the button)
-  if(synth.speaking){
-    console.error('already speaking....');
-    return;
-  }
-
-  if(textInput.value !== ''){
-
-    //Initialize a new SpeechSynthesisUtterance object  and set the text from textarea 
-    const speakText = new SpeechSynthesisUtterance(textInput.value);
-   
-
-    //speak end
-    speakText.onend = function(){
-      console.log('Done speaking....');
+    if (!text) {
+        return;
     }
 
-    //speak error
-    speakText.onerror = function(){
-      console.error('something went wrong');
+    synth.cancel();
+
+    const speakText = new SpeechSynthesisUtterance(text);
+
+    const selectedIndex = voiceSelect.value;
+
+    if (selectedIndex !== '') {
+        const selectedVoice = voices[Number(selectedIndex)];
+
+        if (selectedVoice) {
+            speakText.voice = selectedVoice;
+            speakText.lang = selectedVoice.lang;
+        }
     }
 
-    //get the selected option
-    const selectedVoice = voiceSelect.selectedOptions[0].getAttribute('data-name');
+    speakText.rate = 0.95;
+    speakText.pitch = 1;
+    speakText.volume = 1;
 
+    speakText.onstart = function () {
+        console.log('Started:', speakText.text);
+        console.log('Voice:', speakText.voice?.name);
+        console.log('Language:', speakText.lang);
+    };
 
-    //loop through voices and set the voice
-    for (i = 0; i < voices.length; i++) {
-      const voice = voices[i];
-      if(voice.name === selectedVoice){
-        speakText.voice = voice;
-      }
-    
-    }
-    
+    speakText.onend = function () {
+        console.log('Finished speaking');
+    };
 
-    //set pitch,rate and volume from the value on range
-    speakText.rate = rate.value;
-    speakText.pitch = pitch.value;
-    speakText.volume = volume.value;
+    speakText.onerror = function (event) {
+        console.error('TTS error:', event.error);
+    };
 
-  
-    //Speak
     synth.speak(speakText);
-  
-  }
 }
 
-//Event Listener
-
-//text form submit
-button.addEventListener('click',function(e){
-  
-  playText();
-  
+button.addEventListener('click', function (e) {
+    e.preventDefault();
+    playText();
 });
 
-//rate value change
-rate.addEventListener('change',function(e){
-  rateValue.textContent = rate.value;
-})
-
-//pitch value change
-pitch.addEventListener('change',function(e){
-  pitchValue.textContent = pitch.value;
-})
-
-//volume value change
-volume.addEventListener('change',function(e){
-  volumeValue.textContent = volume.value;
-})
-
-//voice select change(as soon as i select the voice i want it to play)
-voiceSelect.addEventListener('change',function(e){
-  playText();
-})
+voiceSelect.addEventListener('change', function () {
+    if (textInput.value.trim()) {
+        playText();
+    }
+});
 </script>
