@@ -29,7 +29,6 @@
             field.className = "field direction-filter-field";
 
             const label = document.createElement("label");
-            label.textContent = "Cards";
             field.appendChild(label);
         }
 
