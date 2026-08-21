@@ -57,7 +57,8 @@ css: /css/style.css
         }
     }
 
-    // This mirrors the actual speakJapanese() function used by the lesson cards.
+    // Exact fallback behavior from the shared lesson speech system:
+    // AndroidTTS first, then browser Web Speech with ja-JP voice selection.
     function speakLessonJapanese(text) {
         if (!text) return;
         const japaneseText = String(text).trim();
@@ -75,11 +76,51 @@ css: /css/style.css
                 writeLog('✅ AndroidTTS.speak() called successfully');
                 return;
             } catch (e) {
-                writeLog('❌ AndroidTTS.speak() exception: ' + e.message);
+                writeLog('⚠️ AndroidTTS failed: ' + e.message);
+                writeLog('Falling back to Web Speech API...');
             }
         }
 
-        writeLog('❌ AndroidTTS unavailable — lesson fallback would normally use Web Speech');
+        const synth = window.speechSynthesis;
+        if (!synth || typeof SpeechSynthesisUtterance === 'undefined') {
+            writeLog('❌ Web Speech API unavailable — no lesson fallback possible');
+            return;
+        }
+
+        const utter = new SpeechSynthesisUtterance(japaneseText);
+        utter.lang = 'ja-JP';
+        utter.rate = 0.9;
+        utter.volume = 1;
+        utter.pitch = 1;
+
+        const speakNow = () => {
+            const voices = synth.getVoices();
+            writeLog('Web voice count: ' + voices.length);
+            const jaVoice = voices.find(v => v.lang && /^ja(?:-|$)/i.test(v.lang));
+            if (jaVoice) {
+                utter.voice = jaVoice;
+                writeLog('Japanese voice selected: ' + jaVoice.name + ' (' + jaVoice.lang + ')');
+            } else {
+                writeLog('⚠️ No Japanese voice found; using ja-JP language setting');
+            }
+            synth.cancel();
+            synth.speak(utter);
+            writeLog('✅ Web speechSynthesis.speak() called');
+        };
+
+        utter.onstart = () => writeLog('🔊 Web TTS STARTED');
+        utter.onend = () => writeLog('✅ Web TTS FINISHED');
+        utter.onerror = e => writeLog('❌ Web TTS ERROR: ' + (e.error || 'unknown'));
+
+        if (synth.getVoices().length === 0) {
+            writeLog('No voices initially; waiting for voiceschanged...');
+            synth.addEventListener('voiceschanged', speakNow, { once: true });
+            setTimeout(() => {
+                if (!utter.voice && synth.getVoices().length > 0) speakNow();
+            }, 300);
+        } else {
+            speakNow();
+        }
     }
 
     banglaButton.addEventListener('click', function () {
