@@ -11,38 +11,102 @@
     const HARD_KEY = "japanese-lang-hard-vocabulary";
     const SR_KEY = "japanese-lang-spaced-repetition-v1";
     const PRACTICE_KEY = "japanese-lang-practice-lessons-v1";
+    const LESSON_FILTER_KEY = "japanese-lang-lesson-filter-v1";
+    const DEFAULT_LESSON_FILTER = { selectedLessons: ["lesson1"] };
     let client = null, syncTimer = null, lastSnapshot = "";
-    function get(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (_) { return fallback; } }
-    function set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
-    function snapshot() { return JSON.stringify({ hard: get(HARD_KEY, []), sr: get(SR_KEY, {}), lessons: get(PRACTICE_KEY, []) }); }
+
+    function get(key, fallback) {
+        try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+        catch (_) { return fallback; }
+    }
+
+    function set(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); }
+        catch (_) {}
+    }
+
+    function normalizeLessonFilter(value) {
+        if (!value || typeof value !== "object" || !Array.isArray(value.selectedLessons)) {
+            return DEFAULT_LESSON_FILTER;
+        }
+        const selectedLessons = value.selectedLessons
+            .filter(item => typeof item === "string" && /^lesson\d+$/.test(item));
+        return { selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"] };
+    }
+
+    function snapshot() {
+        return JSON.stringify({
+            hard: get(HARD_KEY, []),
+            sr: get(SR_KEY, {}),
+            lessons: get(PRACTICE_KEY, []),
+            lessonFilter: normalizeLessonFilter(get(LESSON_FILTER_KEY, DEFAULT_LESSON_FILTER))
+        });
+    }
+
     async function pullCloud(userId) {
         if (!client || !userId) return;
-        const { data, error } = await client.from(TABLE).select("hard_vocabulary,spaced_repetition,practice_lessons,updated_at").eq("user_id", userId).maybeSingle();
-        if (error) { console.warn("Japanese Lang cloud sync:", error.message); return; }
+        const { data, error } = await client.from(TABLE)
+            .select("hard_vocabulary,spaced_repetition,practice_lessons,lesson_filter,updated_at")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+        if (error) {
+            console.warn("Japanese Lang cloud sync:", error.message);
+            return;
+        }
         if (!data) return;
+
         if (Array.isArray(data.hard_vocabulary)) set(HARD_KEY, data.hard_vocabulary);
         if (data.spaced_repetition && typeof data.spaced_repetition === "object") set(SR_KEY, data.spaced_repetition);
         if (Array.isArray(data.practice_lessons)) set(PRACTICE_KEY, data.practice_lessons);
+        if (data.lesson_filter && typeof data.lesson_filter === "object") {
+            set(LESSON_FILTER_KEY, normalizeLessonFilter(data.lesson_filter));
+        }
+
         lastSnapshot = snapshot();
         window.dispatchEvent(new CustomEvent("japaneseLangCloudLoaded"));
     }
+
     async function pushCloud(userId, force = false) {
         if (!client || !userId) return;
         const snap = snapshot();
         if (!force && snap === lastSnapshot) return;
+
         const payload = JSON.parse(snap);
-        const { error } = await client.from(TABLE).upsert({ user_id: userId, hard_vocabulary: payload.hard, spaced_repetition: payload.sr, practice_lessons: payload.lessons, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-        if (error) { console.warn("Japanese Lang cloud sync:", error.message); return; }
+        const { error } = await client.from(TABLE).upsert({
+            user_id: userId,
+            hard_vocabulary: payload.hard,
+            spaced_repetition: payload.sr,
+            practice_lessons: payload.lessons,
+            lesson_filter: payload.lessonFilter,
+            updated_at: new Date().toISOString()
+        }, { onConflict: "user_id" });
+
+        if (error) {
+            console.warn("Japanese Lang cloud sync:", error.message);
+            return;
+        }
+
         lastSnapshot = snap;
         window.dispatchEvent(new CustomEvent("japaneseLangCloudSaved"));
     }
+
     async function syncUser(userId) {
         if (!client || !userId) return;
         if (snapshot() !== lastSnapshot) await pushCloud(userId);
         else await pullCloud(userId);
     }
-    function startPolling(userId) { clearInterval(syncTimer); syncTimer = setInterval(() => syncUser(userId), 1500); }
-    function stopPolling() { clearInterval(syncTimer); syncTimer = null; }
+
+    function startPolling(userId) {
+        clearInterval(syncTimer);
+        syncTimer = setInterval(() => syncUser(userId), 1500);
+    }
+
+    function stopPolling() {
+        clearInterval(syncTimer);
+        syncTimer = null;
+    }
+
     function createAuthUI() {
         if (document.getElementById("jlCloudAuth")) return;
         const wrap = document.createElement("div"); wrap.id = "jlCloudAuth";
@@ -83,17 +147,20 @@
         placeAuth(); window.addEventListener("resize", placeAuth);
         document.addEventListener("click", (e) => { if (window.innerWidth <= 520 && !wrap.contains(e.target)) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; } });
     }
+
     async function auth(signUp) {
         const email = document.getElementById("jlEmail").value.trim(), password = document.getElementById("jlPassword").value, msg = document.getElementById("jlCloudMessage");
         if (!email || !password) { msg.textContent = "Enter email and password."; return; }
         const result = signUp ? await client.auth.signUp({ email, password }) : await client.auth.signInWithPassword({ email, password });
         msg.textContent = result.error ? result.error.message : (signUp ? "Account created. Check your email if confirmation is enabled." : "Signed in.");
     }
+
     function updateUI(session) {
         const status = document.getElementById("jlCloudStatus"); if (!status) return;
         const signed = !!session?.user; status.textContent = signed ? `Synced: ${session.user.email}` : "Not signed in";
         document.getElementById("jlSignIn").hidden = signed; document.getElementById("jlSignUp").hidden = signed; document.getElementById("jlSignOut").hidden = !signed;
     }
+
     async function init() {
         if (!window.supabase) return;
         client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); createAuthUI();
@@ -101,5 +168,6 @@
         if (data.session?.user) { await pullCloud(data.session.user.id); startPolling(data.session.user.id); }
         client.auth.onAuthStateChange(async (_event, session) => { updateUI(session); if (session?.user) { await pullCloud(session.user.id); startPolling(session.user.id); } else stopPolling(); });
     }
+
     document.addEventListener("DOMContentLoaded", init);
 })();
