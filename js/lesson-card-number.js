@@ -34,14 +34,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function scheduleUpdate() {
+    function scheduleUpdate(delay = 0) {
         clearTimeout(timer);
-        timer = setTimeout(updateNumbers, 0);
+        timer = setTimeout(updateNumbers, delay);
     }
 
-    mode.addEventListener("change", scheduleUpdate);
+    // Re-run immediately after the Lesson renderer has replaced the cards.
+    // This is more reliable than relying only on MutationObserver because
+    // the card-layout/topbar scripts also restructure newly-rendered cards.
+    document.addEventListener("lessonCardsRendered", () => {
+        scheduleUpdate(0);
+        // Run once more after the topbar/layout observers have moved controls.
+        scheduleUpdate(50);
+    });
 
-    const observer = new MutationObserver(scheduleUpdate);
+    mode.addEventListener("change", () => {
+        scheduleUpdate(0);
+        scheduleUpdate(50);
+    });
+
+    const observer = new MutationObserver(() => scheduleUpdate(0));
     observer.observe(grid, {
         childList: true,
         attributes: true,
