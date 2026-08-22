@@ -1,6 +1,11 @@
 // Lesson card sequence numbers — Lessons page only
 // Shows 1, 2, 3... at the top-center of cards while Order = Normal.
-// Numbers follow the currently visible card order after all filters.
+// Shuffle never shows serial numbers.
+//
+// This controller intentionally does not depend on a single render event.
+// The Lesson renderer, card layout observer, and other card scripts can all
+// run asynchronously when switching Shuffle <-> Normal, so we retry after
+// the DOM has settled.
 
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("grid");
@@ -8,17 +13,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!grid || !mode) return;
 
     const NUMBER_CLASS = "lesson-card-number";
-    let timer = null;
+    let updateTimer = null;
+
+    function isNormalOrder() {
+        return String(mode.value || "").trim().toLowerCase() === "normal";
+    }
 
     function updateNumbers() {
         const cards = Array.from(grid.querySelectorAll(":scope > .card"));
-        const normal = mode.value === "normal";
+        const normal = isNormalOrder();
         let number = 1;
 
         cards.forEach(card => {
             let badge = card.querySelector(`.${NUMBER_CLASS}`);
 
-            if (!normal || card.style.display === "none") {
+            // Shuffle: remove every existing number.
+            if (!normal) {
+                if (badge) badge.remove();
+                return;
+            }
+
+            // Normal: add the number if the freshly-rendered card does not
+            // have one yet. Number only cards that are currently visible.
+            const hidden = card.style.display === "none" ||
+                           getComputedStyle(card).display === "none";
+
+            if (hidden) {
                 if (badge) badge.remove();
                 return;
             }
@@ -30,39 +50,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 card.appendChild(badge);
             }
 
-            badge.textContent = number++;
+            badge.textContent = String(number++);
         });
     }
 
-    function scheduleUpdate(delay = 0) {
-        clearTimeout(timer);
-        timer = setTimeout(updateNumbers, delay);
+    function settleUpdate() {
+        updateNumbers();
+
+        // The card renderer and card-layout script use MutationObservers.
+        // Run again after each stage so Shuffle -> Normal cannot leave the
+        // newly-created cards without their serial numbers.
+        [30, 100, 250, 500].forEach(delay => {
+            setTimeout(updateNumbers, delay);
+        });
     }
 
-    // Re-run immediately after the Lesson renderer has replaced the cards.
-    // This is more reliable than relying only on MutationObserver because
-    // the card-layout/topbar scripts also restructure newly-rendered cards.
-    document.addEventListener("lessonCardsRendered", () => {
-        scheduleUpdate(0);
-        // Run once more after the topbar/layout observers have moved controls.
-        scheduleUpdate(50);
-    });
+    function queueUpdate() {
+        clearTimeout(updateTimer);
+        updateTimer = setTimeout(settleUpdate, 0);
+    }
 
-    mode.addEventListener("change", () => {
-        scheduleUpdate(0);
-        scheduleUpdate(50);
-    });
+    // Order selector: this is the important Shuffle -> Normal transition.
+    mode.addEventListener("change", queueUpdate);
 
-    const observer = new MutationObserver(() => scheduleUpdate(0));
+    // The renderer replaces the entire grid when Order/filters change.
+    const observer = new MutationObserver(queueUpdate);
     observer.observe(grid, {
         childList: true,
+        subtree: true,
         attributes: true,
-        attributeFilter: ["style"]
+        attributeFilter: ["style", "class"]
     });
 
-    // Other Lesson controls may change the visible cards without changing
-    // the Order select, so keep the numbering synchronized with the grid.
-    document.addEventListener("hardVocabularyUpdated", scheduleUpdate);
+    document.addEventListener("lessonCardsRendered", queueUpdate);
+    document.addEventListener("hardVocabularyUpdated", queueUpdate);
 
-    updateNumbers();
+    // Initial state.
+    settleUpdate();
 });
