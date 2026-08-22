@@ -55,7 +55,6 @@
         if (number && number.parentElement !== bar) bar.appendChild(number);
         if (speaker && speaker.parentElement !== bar) bar.appendChild(speaker);
 
-        // Move only the actual flip faces into the content wrapper.
         Array.from(inner.children).forEach(child => {
             if (child !== bar && child !== content &&
                 (child.classList.contains('front') || child.classList.contains('back'))) {
@@ -73,7 +72,6 @@
         const style = document.createElement('style');
         style.id = 'lesson-card-structure-styles';
         style.textContent = `
-/* Keep the complete structure inside the exact card box. */
 .card.lesson-card-structured {
     position:relative;
     overflow:hidden;
@@ -90,7 +88,6 @@
     box-sizing:border-box;
 }
 
-/* The topbar is physically inside the card, never outside its edges. */
 .lesson-card-topbar {
     position:absolute;
     top:0;
@@ -117,8 +114,6 @@
     pointer-events:none;
 }
 
-/* Keep the existing card faces and their border/radius. Extra top padding
-   gives the content breathing room below the control bar. */
 .lesson-card-content > .front,
 .lesson-card-content > .back {
     position:absolute;
@@ -192,6 +187,13 @@
 
     function setupAll(grid) {
         grid.querySelectorAll(':scope > .card').forEach(setupCard);
+
+        // The number controller inserts the serial directly into the finished
+        // topbar. Calling it here removes the Shuffle -> Normal race between
+        // the two MutationObservers.
+        if (typeof window.updateLessonCardNumbers === 'function') {
+            window.updateLessonCardNumbers();
+        }
     }
 
     function init() {
