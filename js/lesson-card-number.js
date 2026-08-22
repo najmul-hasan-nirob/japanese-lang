@@ -1,11 +1,11 @@
 // Lesson card sequence numbers — Lessons page only
-// Shows 1, 2, 3... at the top-center of cards while Order = Normal.
-// Shuffle never shows serial numbers.
+// Normal order: show 1, 2, 3... in the card's topbar.
+// Shuffle order: remove the serial numbers.
 //
-// This controller intentionally does not depend on a single render event.
-// The Lesson renderer, card layout observer, and other card scripts can all
-// run asynchronously when switching Shuffle <-> Normal, so we retry after
-// the DOM has settled.
+// Important: the Lesson card topbar script restructures every freshly-rendered
+// card. Therefore numbers are inserted directly into .lesson-card-topbar
+// instead of first being appended to .card and waiting for another script to
+// move them. This makes Shuffle -> Normal deterministic.
 
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("grid");
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!grid || !mode) return;
 
     const NUMBER_CLASS = "lesson-card-number";
-    let updateTimer = null;
+    let timer = null;
 
     function isNormalOrder() {
         return String(mode.value || "").trim().toLowerCase() === "normal";
@@ -25,66 +25,60 @@ document.addEventListener("DOMContentLoaded", () => {
         let number = 1;
 
         cards.forEach(card => {
-            let badge = card.querySelector(`.${NUMBER_CLASS}`);
+            // The topbar is created by lesson-card-topbar.js. If it has not
+            // been created yet, leave this card alone and the observer/retry
+            // will run again after the structure is ready.
+            const topbar = card.querySelector(":scope > .lesson-card-inner > .lesson-card-topbar");
+            if (!topbar) return;
 
-            // Shuffle: remove every existing number.
+            const badges = Array.from(topbar.querySelectorAll(`.${NUMBER_CLASS}`));
+
             if (!normal) {
-                if (badge) badge.remove();
+                badges.forEach(badge => badge.remove());
                 return;
             }
 
-            // Normal: add the number if the freshly-rendered card does not
-            // have one yet. Number only cards that are currently visible.
-            const hidden = card.style.display === "none" ||
-                           getComputedStyle(card).display === "none";
+            // Only one number is allowed per card.
+            const badge = badges[0] || document.createElement("span");
+            badges.slice(1).forEach(item => item.remove());
 
-            if (hidden) {
-                if (badge) badge.remove();
-                return;
-            }
-
-            if (!badge) {
-                badge = document.createElement("span");
-                badge.className = NUMBER_CLASS;
-                badge.setAttribute("aria-hidden", "true");
-                card.appendChild(badge);
-            }
-
+            badge.className = NUMBER_CLASS;
+            badge.setAttribute("aria-hidden", "true");
             badge.textContent = String(number++);
-        });
-    }
 
-    function settleUpdate() {
-        updateNumbers();
-
-        // The card renderer and card-layout script use MutationObservers.
-        // Run again after each stage so Shuffle -> Normal cannot leave the
-        // newly-created cards without their serial numbers.
-        [30, 100, 250, 500].forEach(delay => {
-            setTimeout(updateNumbers, delay);
+            if (badge.parentElement !== topbar) {
+                // Put it directly in the center slot of the topbar.
+                topbar.appendChild(badge);
+            }
         });
     }
 
     function queueUpdate() {
-        clearTimeout(updateTimer);
-        updateTimer = setTimeout(settleUpdate, 0);
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            updateNumbers();
+            // Topbar restructuring itself runs through a MutationObserver, so
+            // make sure we also run after that observer has completed.
+            setTimeout(updateNumbers, 20);
+            setTimeout(updateNumbers, 100);
+            setTimeout(updateNumbers, 300);
+        }, 0);
     }
 
-    // Order selector: this is the important Shuffle -> Normal transition.
     mode.addEventListener("change", queueUpdate);
 
-    // The renderer replaces the entire grid when Order/filters change.
     const observer = new MutationObserver(queueUpdate);
     observer.observe(grid, {
         childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["style", "class"]
+        subtree: true
     });
 
     document.addEventListener("lessonCardsRendered", queueUpdate);
     document.addEventListener("hardVocabularyUpdated", queueUpdate);
 
-    // Initial state.
-    settleUpdate();
+    // Expose a small hook for the card-topbar script so it can request a
+    // numbering pass after it finishes restructuring newly-rendered cards.
+    window.updateLessonCardNumbers = updateNumbers;
+
+    queueUpdate();
 });
