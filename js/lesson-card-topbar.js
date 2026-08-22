@@ -96,7 +96,7 @@
     width:100%;
     height:42px;
     display:grid;
-    grid-template-columns:1fr auto 1fr;
+    grid-template-columns:1fr 1fr 1fr;
     align-items:center;
     justify-items:center;
     box-sizing:border-box;
@@ -136,29 +136,51 @@
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
-    position:relative !important;
-    inset:auto !important;
-    transform:none !important;
     margin:0 !important;
     pointer-events:auto;
 }
 
 .lesson-card-topbar .hard-star {
     grid-column:1;
+    grid-row:1;
     justify-self:start;
+    align-self:center;
+    position:relative !important;
+    inset:auto !important;
+    transform:none !important;
     margin-left:8px !important;
 }
 
+/* Serial number: fixed at the top-center of the card, between the star and speaker. */
 .lesson-card-topbar .lesson-card-number {
-    grid-column:2;
-    justify-self:center;
+    position:absolute !important;
+    top:50% !important;
+    left:50% !important;
+    right:auto !important;
+    bottom:auto !important;
+    transform:translate(-50%, -50%) !important;
+    grid-column:auto !important;
+    grid-row:auto !important;
+    justify-self:auto !important;
+    align-self:auto !important;
+    margin:0 !important;
+    z-index:60;
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none !important;
 }
 
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
     grid-column:3;
+    grid-row:1;
     justify-self:end;
+    align-self:center;
+    position:relative !important;
+    inset:auto !important;
+    transform:none !important;
     margin-right:8px !important;
     display:flex !important;
     visibility:visible !important;
@@ -176,7 +198,6 @@
     }
 
     .lesson-card-topbar .hard-star { margin-left:5px !important; }
-
     .lesson-card-topbar .speaker-btn,
     .lesson-card-topbar .speak-btn,
     .lesson-card-topbar .pronunciation-btn { margin-right:5px !important; }
@@ -187,10 +208,6 @@
 
     function setupAll(grid) {
         grid.querySelectorAll(':scope > .card').forEach(setupCard);
-
-        // The number controller inserts the serial directly into the finished
-        // topbar. Calling it here removes the Shuffle -> Normal race between
-        // the two MutationObservers.
         if (typeof window.updateLessonCardNumbers === 'function') {
             window.updateLessonCardNumbers();
         }
