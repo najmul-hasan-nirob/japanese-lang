@@ -353,3 +353,8 @@ main{
 .lesson-control-text, .lesson-control-text span {
     font-size: 14px !important;
 }
+
+.mobile-bottom-controls .screen-wake-field
+ {
+        display: block !important;
+    }
