@@ -6,8 +6,13 @@ create table if not exists public.user_settings (
   hard_vocabulary jsonb not null default '[]'::jsonb,
   spaced_repetition jsonb not null default '{}'::jsonb,
   practice_lessons jsonb not null default '[]'::jsonb,
+  lesson_filter jsonb not null default '{"selectedLessons":["lesson1"]}'::jsonb,
   updated_at timestamptz not null default now()
 );
+
+-- Add the column for existing installations without changing existing data.
+alter table public.user_settings
+  add column if not exists lesson_filter jsonb not null default '{"selectedLessons":["lesson1"]}'::jsonb;
 
 alter table public.user_settings enable row level security;
 
