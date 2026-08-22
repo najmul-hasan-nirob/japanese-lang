@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back vocabulary-back"><span class="romaji" style="display:${hideRomaji?'none':''}">${toRomaji(item.jp)}</span><span class="english">${item.en}</span><span class="bangla">${banglaMeaning(item)}</span></div></div>`;
             }else{
                 const backText=showJapaneseFirst?item.en:item.jp;
-                card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div></div></div>`;
+                card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${backText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div></div>`;
             }
             card.addEventListener("click",()=>card.classList.toggle("flipped"));
             const speakText=isVocab?item.jp:cleanForSpeech(item.jp);
@@ -100,6 +100,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         grid.appendChild(frag);
         const counter=document.getElementById("cardCount");if(counter)counter.textContent=`Showing ${cards.length} cards`;
+
+        // Tell the card-number controller that a fresh card set is ready.
+        // This fixes the transition Shuffle -> Normal where the old number
+        // elements were removed together with the shuffled cards.
+        document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
     }
 
     lessonBtn.addEventListener("click",e=>{e.stopPropagation();const open=lessonPanel.classList.contains("open");document.querySelectorAll(".multiselect-panel.open").forEach(p=>p.classList.remove("open"));lessonPanel.classList.toggle("open",!open);lessonBtn.setAttribute("aria-expanded",String(!open));});
