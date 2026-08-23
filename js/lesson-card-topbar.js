@@ -20,6 +20,28 @@
         speaker.style.setProperty('pointer-events', 'auto', 'important');
     }
 
+    // Some lesson datasets/cards were not receiving the pronunciation control
+    // during the initial renderer pass. Build it here from the card's original
+    // lesson item as a final, centralized guarantee. This applies uniformly to
+    // Lessons 1-25 and to every card type (vocabulary, C part, country, grammar).
+    function ensureSpeaker(card) {
+        let speaker = findSpeaker(card);
+        if (speaker) {
+            makeVisibleSpeaker(speaker);
+            return speaker;
+        }
+
+        const item = card.__lessonItem;
+        const text = item?.jp ? String(item.jp).trim() : '';
+        if (!text || typeof window.createSpeakerButton !== 'function') return null;
+
+        speaker = window.createSpeakerButton(text);
+        if (!speaker) return null;
+        card.querySelector(':scope > .lesson-card-inner')?.appendChild(speaker);
+        makeVisibleSpeaker(speaker);
+        return speaker;
+    }
+
     function setupCard(card) {
         if (!card) return;
 
@@ -47,9 +69,11 @@
             inner.appendChild(content);
         }
 
+        // Ensure the pronunciation control exists BEFORE moving controls into
+        // the topbar. This makes the topbar identical on every card.
+        const speaker = ensureSpeaker(card);
         const star = inner.querySelector(':scope > .hard-star');
         const number = inner.querySelector(':scope > .lesson-card-number');
-        const speaker = findSpeaker(inner);
 
         if (star && star.parentElement !== bar) bar.appendChild(star);
         if (number && number.parentElement !== bar) bar.appendChild(number);
@@ -151,7 +175,6 @@
     margin-left:8px !important;
 }
 
-/* Serial number: fixed at the top-center of the card, between the star and speaker. */
 .lesson-card-topbar .lesson-card-number {
     position:absolute !important;
     top:50% !important;
