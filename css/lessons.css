@@ -213,6 +213,10 @@ body{
 }
 
 @media only screen and (max-width:520px) {
+
+    .toolbar .teacher-mode-btn, .toolbar .teacher-stop-btn{
+    display: none;
+}
     html,
     body{
         overscroll-behavior-y: none;
