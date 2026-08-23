@@ -25,56 +25,36 @@ document.addEventListener("DOMContentLoaded", () => {
     function cardKey(card) {
         const item = card?.__lessonItem;
         if (!item) return "";
-        return JSON.stringify([
-            item.lesson || "",
-            item.type || "",
-            item.jp || "",
-            item.en || "",
-            item.bn || ""
-        ]);
+        return JSON.stringify([item.lesson || "", item.type || "", item.jp || "", item.en || "", item.bn || ""]);
     }
 
-    function currentCards() {
-        return Array.from(grid.querySelectorAll(":scope > .card"));
-    }
-
-    function orderSignature(cards) {
-        return cards.map(cardKey).filter(Boolean).sort().join("\u001f");
-    }
+    function currentCards() { return Array.from(grid.querySelectorAll(":scope > .card")); }
+    function orderSignature(cards) { return cards.map(cardKey).filter(Boolean).sort().join("\u001f"); }
 
     function saveShuffleOrder(cards) {
         const keys = cards.map(cardKey).filter(Boolean);
         if (!keys.length) return;
-        setLocal(SHUFFLE_KEY, {
-            signature: keys.slice().sort().join("\u001f"),
-            order: keys,
-            updatedAt: Date.now()
-        });
+        setLocal(SHUFFLE_KEY, { signature: keys.slice().sort().join("\u001f"), order: keys, updatedAt: Date.now() });
     }
 
     function restoreShuffleOrder(cards) {
         if (String(mode.value || "").trim().toLowerCase() !== "shuffle") return false;
-
         const saved = getLocal(SHUFFLE_KEY, null);
         const currentKeys = cards.map(cardKey).filter(Boolean);
         if (!saved || !Array.isArray(saved.order) || !currentKeys.length) return false;
+        if (saved.signature !== orderSignature(cards) || saved.order.length !== currentKeys.length) return false;
 
-        const signature = orderSignature(cards);
-        if (saved.signature !== signature || saved.order.length !== currentKeys.length) return false;
+        // Already in the saved order — do not touch the DOM or trigger our observer again.
+        if (saved.order.length === currentKeys.length && saved.order.every((key, i) => key === currentKeys[i])) return true;
 
         const byKey = new Map();
         cards.forEach(card => byKey.set(cardKey(card), card));
         const ordered = [];
         const used = new Set();
-
         saved.order.forEach(key => {
             const card = byKey.get(key);
-            if (card && !used.has(card)) {
-                ordered.push(card);
-                used.add(card);
-            }
+            if (card && !used.has(card)) { ordered.push(card); used.add(card); }
         });
-
         if (ordered.length !== cards.length) return false;
 
         const fragment = document.createDocumentFragment();
@@ -85,29 +65,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function persistOrRestoreShuffleOrder() {
         const cards = currentCards();
-        if (!cards.length) return;
-
-        if (String(mode.value || "").trim().toLowerCase() === "shuffle") {
-            if (!restoreShuffleOrder(cards)) saveShuffleOrder(cards);
-        }
+        if (!cards.length || String(mode.value || "").trim().toLowerCase() !== "shuffle") return;
+        if (!restoreShuffleOrder(cards)) saveShuffleOrder(cards);
     }
 
     function updateNumbers() {
         const cards = currentCards();
         let number = 1;
-
         cards.forEach(card => {
             const topbar = card.querySelector(":scope > .lesson-card-inner > .lesson-card-topbar");
             if (!topbar) return;
-
             const badges = Array.from(topbar.querySelectorAll(`.${NUMBER_CLASS}`));
             const badge = badges[0] || document.createElement("span");
             badges.slice(1).forEach(item => item.remove());
-
             badge.className = NUMBER_CLASS;
             badge.setAttribute("aria-hidden", "true");
             badge.textContent = String(number++);
-
             if (badge.parentElement !== topbar) topbar.appendChild(badge);
         });
     }
@@ -126,10 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     mode.addEventListener("change", queueUpdate);
-
     const observer = new MutationObserver(queueUpdate);
     observer.observe(grid, { childList: true, subtree: true });
-
     document.addEventListener("lessonCardsRendered", queueUpdate);
     document.addEventListener("hardVocabularyUpdated", queueUpdate);
     window.addEventListener("japaneseLangCloudLoaded", queueUpdate);
