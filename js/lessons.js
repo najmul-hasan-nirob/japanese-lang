@@ -55,18 +55,12 @@ function buildLessonCards(key) {
     return cards;
 }
 
-// Stable identity for a card. The shuffle state stores only these IDs,
-// never the complete card objects.
 function lessonShuffleId(card) {
     return [card.lesson || "", card.type || "", card.jp || "", card.en || ""].join("\u001f");
 }
 
 const LESSON_SHUFFLE_STORAGE = "japanese-lang-lesson-shuffle-v1";
 
-// IMPORTANT: shuffle state is stored PER CARD SET. Previously there was one
-// global order, so the first render during page/cloud initialization could
-// overwrite the saved order with a newly randomized set. A per-set map fixes
-// reloads and also lets different Lesson/type selections keep their own order.
 function lessonShuffleSetKey(array) {
     return array.map(lessonShuffleId).slice().sort().join("\u001e");
 }
@@ -74,19 +68,16 @@ function lessonShuffleSetKey(array) {
 function readLessonShuffleStore() {
     try {
         const value = JSON.parse(localStorage.getItem(LESSON_SHUFFLE_STORAGE) || "null");
-        if (!value || typeof value !== "object") return { version: 2, states: {} };
-
-        // Migrate the previous single-state format into the new structure.
+        if (!value || typeof value !== "object") return { version: 3, states: {} };
         if (Array.isArray(value.order) && Array.isArray(value.cards)) {
             const key = value.cards.slice().sort().join("\u001e");
-            return { version: 2, states: { [key]: { cards: value.cards, order: value.order } } };
+            return { version: 3, states: { [key]: { cards: value.cards, order: value.order, updatedAt: 0 } } };
         }
-
         return value.states && typeof value.states === "object"
-            ? { version: 2, states: value.states }
-            : { version: 2, states: {} };
+            ? { version: 3, states: value.states }
+            : { version: 3, states: {} };
     } catch (_) {
-        return { version: 2, states: {} };
+        return { version: 3, states: {} };
     }
 }
 
@@ -95,26 +86,32 @@ function writeLessonShuffleState(array) {
         const cards = array.map(lessonShuffleId);
         const key = cards.slice().sort().join("\u001e");
         const store = readLessonShuffleStore();
-        store.states[key] = { cards, order: cards };
+        store.states[key] = {
+            cards: cards.slice(),
+            order: cards.slice(),
+            updatedAt: Date.now()
+        };
         localStorage.setItem(LESSON_SHUFFLE_STORAGE, JSON.stringify(store));
+
+        // Tell Cloud Sync that an explicit new shuffle was created. The
+        // sync layer can then immediately save the newest timestamp/order.
+        window.dispatchEvent(new CustomEvent("lessonShuffleStateChanged"));
     } catch (_) {}
 }
 
 function readLessonShuffleState(array) {
     const store = readLessonShuffleStore();
-    return store.states[lessonShuffleSetKey(array)] || null;
+    const state = store.states[lessonShuffleSetKey(array)];
+    return state && Array.isArray(state.order) ? state : null;
 }
 
 function restoreLessonShuffle(array, state) {
     if (!state || !Array.isArray(state.order)) return false;
-
     const currentIds = array.map(lessonShuffleId);
     if (currentIds.length !== state.order.length) return false;
     if (new Set(currentIds).size !== currentIds.length) return false;
-
     const positions = new Map(array.map(card => [lessonShuffleId(card), card]));
     if (state.order.some(id => !positions.has(id))) return false;
-
     array.splice(0, array.length, ...state.order.map(id => positions.get(id)));
     return true;
 }
@@ -139,6 +136,4 @@ function shuffle(array) {
 }
 
 // Lessons always use Japanese as the card FRONT.
-// The Front / Back switch is handled by lesson-controls.js and flips
-// the cards physically; it must not change the card content to Romaji.
 let showJapaneseFirst = true;
