@@ -1,9 +1,6 @@
 // =====================================================
 // Japanese Lang — optional cloud sync
 // =====================================================
-// Uses Supabase Auth + one per-user settings row.
-// LocalStorage remains the fast/offline cache.
-// =====================================================
 (() => {
     const SUPABASE_URL = "https://levpdywhnikadumfocao.supabase.co";
     const SUPABASE_KEY = "sb_publishable_gRamSgjPAECxDmztLWLUfg_ZTrmYt4I";
@@ -34,6 +31,24 @@
             ...(typeof value.screenAwake === "boolean" ? { screenAwake: value.screenAwake } : {})
         };
     }
+
+    // Merge each card-set independently. The newest locally-created shuffle
+    // must never be replaced by an older cloud snapshot during page startup.
+    function mergeShuffleStores(localValue, cloudValue) {
+        const local = localValue && typeof localValue === "object" && localValue.states && typeof localValue.states === "object"
+            ? localValue : { version: 3, states: {} };
+        const cloud = cloudValue && typeof cloudValue === "object" && cloudValue.states && typeof cloudValue.states === "object"
+            ? cloudValue : { version: 3, states: {} };
+        const states = { ...cloud.states };
+        Object.entries(local.states).forEach(([key, localState]) => {
+            const cloudState = states[key];
+            const localTime = Number(localState?.updatedAt || 0);
+            const cloudTime = Number(cloudState?.updatedAt || 0);
+            if (!cloudState || localTime >= cloudTime) states[key] = localState;
+        });
+        return { version: 3, states };
+    }
+
     function buildLessonFilterSnapshot() {
         const saved = normalizeLessonFilter(get(LESSON_FILTER_KEY, DEFAULT_LESSON_FILTER));
         return {
@@ -71,15 +86,21 @@
         if (Array.isArray(data.practice_lessons)) set(PRACTICE_KEY, data.practice_lessons);
         if (data.lesson_filter && typeof data.lesson_filter === "object") {
             const cloudFilter = normalizeLessonFilter(data.lesson_filter);
-            // Preserve the full filter state locally. The previous code kept
-            // only selectedLessons, which caused Cloud Sync to lose Shuffle.
+            const localFilter = normalizeLessonFilter(get(LESSON_FILTER_KEY, DEFAULT_LESSON_FILTER));
+            const mergedShuffle = mergeShuffleStores(get(SHUFFLE_KEY, null), cloudFilter.shuffleState);
+
             set(LESSON_FILTER_KEY, {
                 selectedLessons: cloudFilter.selectedLessons,
                 orderMode: cloudFilter.orderMode,
-                ...(cloudFilter.shuffleState ? { shuffleState: cloudFilter.shuffleState } : {})
+                shuffleState: mergedShuffle
             });
-            if (cloudFilter.shuffleState && typeof cloudFilter.shuffleState === "object") set(SHUFFLE_KEY, cloudFilter.shuffleState);
+            set(SHUFFLE_KEY, mergedShuffle);
             if (typeof cloudFilter.screenAwake === "boolean") applyCloudScreenState(cloudFilter.screenAwake);
+
+            // If local state was newer than the cloud state, the merged local
+            // shuffle is intentionally retained. The next polling cycle will
+            // push it to Supabase instead of losing it on another reload.
+            void localFilter;
         }
         lastSnapshot = snapshot();
         window.dispatchEvent(new CustomEvent("japaneseLangCloudLoaded"));
@@ -122,13 +143,7 @@
           #jlCloudPanel input{font-size:16px}
           #jlCloudPanel input::placeholder{color:var(--ink-soft,#7a705e)}
           #jlCloudStatus,#jlCloudMessage{font-size:12px;color:var(--ink-soft,#7a705e)}
-          @media (max-width:520px){
-            #jlCloudAuth{position:static;left:auto;bottom:auto;width:auto;z-index:auto;grid-column:auto;margin:0}
-            #jlCloudButton{width:100%;height:42px;border-radius:6px;box-shadow:none;font-size:16px;min-width:0}
-            #jlCloudPanel{position:absolute;left:12px;right:12px;bottom:auto;top:calc(100% + 6px);width:auto;z-index:10001;max-height:calc(100dvh - 110px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(14px + env(safe-area-inset-bottom));scroll-padding-bottom:24px}
-            #jlCloudPanel input,#jlCloudPanel button:not(#jlCloudButton){min-height:42px}
-            #jlCloudAuth.jl-mobile-open #jlCloudPanel{display:flex}
-          }
+          @media (max-width:520px){#jlCloudAuth{position:static;left:auto;bottom:auto;width:auto;z-index:auto;grid-column:auto;margin:0}#jlCloudButton{width:100%;height:42px;border-radius:6px;box-shadow:none;font-size:16px;min-width:0}#jlCloudPanel{position:absolute;left:12px;right:12px;bottom:auto;top:calc(100% + 6px);width:auto;z-index:10001;max-height:calc(100dvh - 110px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(14px + env(safe-area-inset-bottom));scroll-padding-bottom:24px}#jlCloudPanel input,#jlCloudPanel button:not(#jlCloudButton){min-height:42px}#jlCloudAuth.jl-mobile-open #jlCloudPanel{display:flex}}
         `;
         document.head.appendChild(style);
         const button = document.getElementById("jlCloudButton"), panel = document.getElementById("jlCloudPanel");
@@ -136,28 +151,12 @@
         document.getElementById("jlSignIn").onclick = () => auth(false);
         document.getElementById("jlSignUp").onclick = () => auth(true);
         document.getElementById("jlSignOut").onclick = async () => { await client.auth.signOut(); };
-        function placeAuth() {
-            const mobile = window.innerWidth <= 520, nav = document.querySelector(".main-nav"), theme = document.getElementById("theme");
-            if (mobile && nav) {
-                if (theme && theme.parentNode === nav && wrap.previousElementSibling !== theme) theme.after(wrap);
-                else if (wrap.parentNode !== nav) nav.appendChild(wrap);
-            } else if (!mobile && wrap.parentNode !== document.body) document.body.appendChild(wrap);
-            if (!mobile) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; }
-        }
+        function placeAuth() { const mobile = window.innerWidth <= 520, nav = document.querySelector(".main-nav"), theme = document.getElementById("theme"); if (mobile && nav) { if (theme && theme.parentNode === nav && wrap.previousElementSibling !== theme) theme.after(wrap); else if (wrap.parentNode !== nav) nav.appendChild(wrap); } else if (!mobile && wrap.parentNode !== document.body) document.body.appendChild(wrap); if (!mobile) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; } }
         placeAuth(); window.addEventListener("resize", placeAuth);
         document.addEventListener("click", (e) => { if (window.innerWidth <= 520 && !wrap.contains(e.target)) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; } });
     }
-    async function auth(signUp) {
-        const email = document.getElementById("jlEmail").value.trim(), password = document.getElementById("jlPassword").value, msg = document.getElementById("jlCloudMessage");
-        if (!email || !password) { msg.textContent = "Enter email and password."; return; }
-        const result = signUp ? await client.auth.signUp({ email, password }) : await client.auth.signInWithPassword({ email, password });
-        msg.textContent = result.error ? result.error.message : (signUp ? "Account created. Check your email if confirmation is enabled." : "Signed in.");
-    }
-    function updateUI(session) {
-        const status = document.getElementById("jlCloudStatus"); if (!status) return;
-        const signed = !!session?.user; status.textContent = signed ? `Synced: ${session.user.email}` : "Not signed in";
-        document.getElementById("jlSignIn").hidden = signed; document.getElementById("jlSignUp").hidden = signed; document.getElementById("jlSignOut").hidden = !signed;
-    }
+    async function auth(signUp) { const email = document.getElementById("jlEmail").value.trim(), password = document.getElementById("jlPassword").value, msg = document.getElementById("jlCloudMessage"); if (!email || !password) { msg.textContent = "Enter email and password."; return; } const result = signUp ? await client.auth.signUp({ email, password }) : await client.auth.signInWithPassword({ email, password }); msg.textContent = result.error ? result.error.message : (signUp ? "Account created. Check your email if confirmation is enabled." : "Signed in."); }
+    function updateUI(session) { const status = document.getElementById("jlCloudStatus"); if (!status) return; const signed = !!session?.user; status.textContent = signed ? `Synced: ${session.user.email}` : "Not signed in"; document.getElementById("jlSignIn").hidden = signed; document.getElementById("jlSignUp").hidden = signed; document.getElementById("jlSignOut").hidden = !signed; }
     async function init() {
         if (!window.supabase) return;
         client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); createAuthUI();
