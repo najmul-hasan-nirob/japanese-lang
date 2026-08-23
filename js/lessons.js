@@ -86,12 +86,8 @@ function buildLessonCards(key) {
     if (Array.isArray(lesson.grammar)) {
         lesson.grammar.forEach(item => {
             if (!item) return;
-
-            // Grammar entries use pattern/note/examples in the lesson files.
-            // Convert each grammar point into a card while preserving its data.
             const pattern = item.pattern || item.jp || "";
             const note = item.note || item.en || "";
-
             cards.push({
                 jp: pattern,
                 en: note,
@@ -105,11 +101,60 @@ function buildLessonCards(key) {
     return cards;
 }
 
+// A stable identity for each Lesson card. It lets us restore the exact
+// shuffled order after a reload without storing the whole card objects.
+function lessonShuffleId(card) {
+    return [card.lesson || "", card.type || "", card.jp || "", card.en || ""].join("\u001f");
+}
+
+const LESSON_SHUFFLE_STORAGE = "japanese-lang-lesson-shuffle-v1";
+
+function readLessonShuffleState() {
+    try {
+        const value = JSON.parse(localStorage.getItem(LESSON_SHUFFLE_STORAGE) || "null");
+        return value && Array.isArray(value.order) && Array.isArray(value.cards) ? value : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function writeLessonShuffleState(array) {
+    try {
+        const cards = array.map(lessonShuffleId);
+        localStorage.setItem(LESSON_SHUFFLE_STORAGE, JSON.stringify({ cards, order: cards }));
+    } catch (_) {}
+}
+
+function restoreLessonShuffle(array, state) {
+    if (!state || !Array.isArray(state.order)) return false;
+
+    const currentIds = array.map(lessonShuffleId);
+    if (currentIds.length !== state.order.length) return false;
+    if (new Set(currentIds).size !== currentIds.length) return false;
+
+    const positions = new Map(array.map(card => [lessonShuffleId(card), card]));
+    if (state.order.some(id => !positions.has(id))) return false;
+
+    const restored = state.order.map(id => positions.get(id));
+    array.splice(0, array.length, ...restored);
+    return true;
+}
+
 function shuffle(array) {
+    // The Shuffle toolbar button explicitly requests a NEW shuffle.
+    const forceNew = window.lessonForceShuffle === true;
+    window.lessonForceShuffle = false;
+
+    if (!forceNew && restoreLessonShuffle(array, readLessonShuffleState())) {
+        return array;
+    }
+
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
+
+    writeLessonShuffleState(array);
     return array;
 }
 
