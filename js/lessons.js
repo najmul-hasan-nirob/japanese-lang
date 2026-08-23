@@ -55,9 +55,7 @@ function buildLessonCards(key) {
     return cards;
 }
 
-// Use only immutable card identity here. Do NOT include the English/Bangla
-// meaning because those fields can be changed by data/meaning fixes without
-// changing which cards are in the shuffle set.
+// Stable card identity. Meaning text is deliberately excluded.
 function lessonShuffleId(card) {
     return [card.lesson || "", card.type || "", card.jp || ""].join("\u001f");
 }
@@ -71,16 +69,16 @@ function lessonShuffleSetKey(array) {
 function readLessonShuffleStore() {
     try {
         const value = JSON.parse(localStorage.getItem(LESSON_SHUFFLE_STORAGE) || "null");
-        if (!value || typeof value !== "object") return { version: 4, states: {} };
+        if (!value || typeof value !== "object") return { version: 5, states: {} };
         if (Array.isArray(value.order) && Array.isArray(value.cards)) {
             const key = value.cards.slice().sort().join("\u001e");
-            return { version: 4, states: { [key]: { cards: value.cards, order: value.order, updatedAt: Number(value.updatedAt || 0) } } };
+            return { version: 5, states: { [key]: { cards: value.cards, order: value.order, updatedAt: Number(value.updatedAt || 0) } } };
         }
         return value.states && typeof value.states === "object"
-            ? { version: 4, states: value.states }
-            : { version: 4, states: {} };
+            ? { version: 5, states: value.states }
+            : { version: 5, states: {} };
     } catch (_) {
-        return { version: 4, states: {} };
+        return { version: 5, states: {} };
     }
 }
 
@@ -89,13 +87,12 @@ function writeLessonShuffleState(array) {
         const cards = array.map(lessonShuffleId);
         const key = lessonShuffleSetKey(array);
         const store = readLessonShuffleStore();
-        const state = {
+        store.states[key] = {
             cards: cards.slice(),
             order: cards.slice(),
             updatedAt: Date.now()
         };
-        store.states[key] = state;
-        store.version = 4;
+        store.version = 5;
         localStorage.setItem(LESSON_SHUFFLE_STORAGE, JSON.stringify(store));
         window.dispatchEvent(new CustomEvent("lessonShuffleStateChanged"));
     } catch (_) {}
@@ -120,16 +117,17 @@ function restoreLessonShuffle(array, state) {
 }
 
 function shuffle(array) {
-    // Only an explicit click on Shuffle is allowed to generate a new order.
-    // Every other call restores the saved order. This is deliberately strict:
-    // a reload must NEVER create another random order.
     const forceNew = window.lessonForceShuffle === true;
     window.lessonForceShuffle = false;
 
-    if (!forceNew) {
-        const saved = readLessonShuffleState(array);
-        if (saved && restoreLessonShuffle(array, saved)) return array;
-    }
+    // A saved order is authoritative. Reloads, cloud restoration, and
+    // ordinary re-renders must never replace it with a new random order.
+    const saved = readLessonShuffleState(array);
+    if (!forceNew && saved && restoreLessonShuffle(array, saved)) return array;
+
+    // No saved order + no explicit user request: keep deterministic source
+    // order. Randomization is ONLY allowed after a real user shuffle action.
+    if (!forceNew) return array;
 
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -140,5 +138,4 @@ function shuffle(array) {
     return array;
 }
 
-// Lessons always use Japanese as the card FRONT.
 let showJapaneseFirst = true;
