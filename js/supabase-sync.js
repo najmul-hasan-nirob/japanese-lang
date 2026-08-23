@@ -14,7 +14,7 @@
     const LESSON_FILTER_KEY = "japanese-lang-lesson-filter-v1";
     const SHUFFLE_KEY = "japanese-lang-lesson-shuffle-v1";
     const SCREEN_KEY = "japanese-lang-screen-awake";
-    const DEFAULT_LESSON_FILTER = { selectedLessons: ["lesson1"] };
+    const DEFAULT_LESSON_FILTER = { selectedLessons: ["lesson1"], orderMode: "normal" };
     let client = null, syncTimer = null, lastSnapshot = "";
 
     function get(key, fallback) {
@@ -29,6 +29,7 @@
         const selectedLessons = value.selectedLessons.filter(item => typeof item === "string" && /^lesson\d+$/.test(item));
         return {
             selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
+            orderMode: value.orderMode === "shuffle" ? "shuffle" : "normal",
             ...(value.shuffleState && typeof value.shuffleState === "object" ? { shuffleState: value.shuffleState } : {}),
             ...(typeof value.screenAwake === "boolean" ? { screenAwake: value.screenAwake } : {})
         };
@@ -37,6 +38,7 @@
         const saved = normalizeLessonFilter(get(LESSON_FILTER_KEY, DEFAULT_LESSON_FILTER));
         return {
             selectedLessons: saved.selectedLessons,
+            orderMode: saved.orderMode,
             shuffleState: get(SHUFFLE_KEY, null),
             screenAwake: get(SCREEN_KEY, false) === true
         };
@@ -55,8 +57,6 @@
             const current = toggle.getAttribute("aria-pressed") === "true";
             if (current !== enabled) toggle.click();
         }
-        // If the control was not created yet, or after its click handler runs,
-        // keep the desired cloud value as the local cache.
         set(SCREEN_KEY, enabled);
     }
     async function pullCloud(userId) {
@@ -71,7 +71,13 @@
         if (Array.isArray(data.practice_lessons)) set(PRACTICE_KEY, data.practice_lessons);
         if (data.lesson_filter && typeof data.lesson_filter === "object") {
             const cloudFilter = normalizeLessonFilter(data.lesson_filter);
-            set(LESSON_FILTER_KEY, { selectedLessons: cloudFilter.selectedLessons });
+            // Preserve the full filter state locally. The previous code kept
+            // only selectedLessons, which caused Cloud Sync to lose Shuffle.
+            set(LESSON_FILTER_KEY, {
+                selectedLessons: cloudFilter.selectedLessons,
+                orderMode: cloudFilter.orderMode,
+                ...(cloudFilter.shuffleState ? { shuffleState: cloudFilter.shuffleState } : {})
+            });
             if (cloudFilter.shuffleState && typeof cloudFilter.shuffleState === "object") set(SHUFFLE_KEY, cloudFilter.shuffleState);
             if (typeof cloudFilter.screenAwake === "boolean") applyCloudScreenState(cloudFilter.screenAwake);
         }
