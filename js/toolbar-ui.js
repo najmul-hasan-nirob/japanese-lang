@@ -72,8 +72,7 @@
       if(mobileBar && window.innerWidth<=520) mobileBar.appendChild(reset);
     }
 
-    // Put the shared toolbar into a fullscreen overlay. The toolbar itself is
-    // moved out of the page flow so it no longer sits underneath the header.
+    // Put the shared toolbar into the floating filter overlay.
     if(!document.getElementById('toolbarOverlay')){
       const overlay = document.createElement('div');
       overlay.id='toolbarOverlay';
@@ -88,7 +87,7 @@
 
       const header = document.createElement('div');
       header.className='toolbar-overlay-header';
-      header.innerHTML='<span>Filters &amp; Controls</span>';
+      header.innerHTML='<div class="toolbar-overlay-title"><span>Filters &amp; Controls</span><span class="toolbar-overlay-count" id="toolbarOverlayCount" aria-live="polite"></span></div>';
 
       const close = document.createElement('button');
       close.type='button';
@@ -104,6 +103,22 @@
       overlay.appendChild(panel);
       document.body.appendChild(overlay);
 
+      // Clone the live count shown under the toolbar. The original countDisplay
+      // remains in place, while this copy mirrors its text in the overlay.
+      const sourceCount = document.getElementById('countDisplay');
+      const overlayCount = document.getElementById('toolbarOverlayCount');
+      function syncOverlayCount(){
+        if(sourceCount && overlayCount) overlayCount.textContent = sourceCount.textContent || '';
+      }
+      syncOverlayCount();
+      if(sourceCount){
+        new MutationObserver(syncOverlayCount).observe(sourceCount,{childList:true,characterData:true,subtree:true});
+      }
+
+      document.addEventListener('hardVocabularyUpdated',syncOverlayCount);
+      document.addEventListener('lessonCardsRendered',syncOverlayCount);
+      toolbar.addEventListener('change',function(){setTimeout(syncOverlayCount,0);});
+
       const toggle = document.createElement('button');
       toggle.type='button';
       toggle.id='toolbarToggle';
@@ -115,7 +130,21 @@
       toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>';
       document.body.appendChild(toggle);
 
+      function positionOverlay(){
+        if(window.innerWidth>520) return;
+        const headerEl = document.querySelector('header');
+        const sticky = document.querySelector('.mobile-bottom-controls');
+        const top = headerEl ? Math.max(0,headerEl.getBoundingClientRect().bottom) : 0;
+        const bottom = sticky ? Math.max(0,window.innerHeight-sticky.getBoundingClientRect().top) : 0;
+        overlay.style.setProperty('--toolbar-overlay-top',top+'px');
+        overlay.style.setProperty('--toolbar-overlay-bottom',bottom+'px');
+      }
+      positionOverlay();
+      window.addEventListener('resize',positionOverlay,{passive:true});
+      window.addEventListener('orientationchange',positionOverlay,{passive:true});
+
       function setOpen(open){
+        positionOverlay();
         overlay.classList.toggle('open',open);
         toggle.classList.toggle('active',open);
         toggle.setAttribute('aria-expanded',String(open));
