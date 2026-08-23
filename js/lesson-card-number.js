@@ -1,11 +1,6 @@
-// Lesson card sequence numbers — Lessons page only
-// Normal order: show 1, 2, 3... in the card's topbar.
-// Shuffle order: remove the serial numbers.
-//
-// Important: the Lesson card topbar script restructures every freshly-rendered
-// card. Therefore numbers are inserted directly into .lesson-card-topbar
-// instead of first being appended to .card and waiting for another script to
-// move them. This makes Shuffle -> Normal deterministic.
+// Lesson card sequence numbers + persisted Shuffle order — Lessons page only.
+// Serial numbers are shown for BOTH Normal and Shuffle orders.
+// Shuffle order is cached locally and included in Cloud Sync by supabase-sync.js.
 
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("grid");
@@ -13,32 +8,99 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!grid || !mode) return;
 
     const NUMBER_CLASS = "lesson-card-number";
+    const SHUFFLE_KEY = "japanese-lang-lesson-shuffle-v1";
     let timer = null;
 
-    function isNormalOrder() {
-        return String(mode.value || "").trim().toLowerCase() === "normal";
+    function getLocal(key, fallback) {
+        try {
+            const value = JSON.parse(localStorage.getItem(key) || "null");
+            return value == null ? fallback : value;
+        } catch (_) { return fallback; }
+    }
+
+    function setLocal(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+    }
+
+    function cardKey(card) {
+        const item = card?.__lessonItem;
+        if (!item) return "";
+        return JSON.stringify([
+            item.lesson || "",
+            item.type || "",
+            item.jp || "",
+            item.en || "",
+            item.bn || ""
+        ]);
+    }
+
+    function currentCards() {
+        return Array.from(grid.querySelectorAll(":scope > .card"));
+    }
+
+    function orderSignature(cards) {
+        return cards.map(cardKey).filter(Boolean).sort().join("\u001f");
+    }
+
+    function saveShuffleOrder(cards) {
+        const keys = cards.map(cardKey).filter(Boolean);
+        if (!keys.length) return;
+        setLocal(SHUFFLE_KEY, {
+            signature: keys.slice().sort().join("\u001f"),
+            order: keys,
+            updatedAt: Date.now()
+        });
+    }
+
+    function restoreShuffleOrder(cards) {
+        if (String(mode.value || "").trim().toLowerCase() !== "shuffle") return false;
+
+        const saved = getLocal(SHUFFLE_KEY, null);
+        const currentKeys = cards.map(cardKey).filter(Boolean);
+        if (!saved || !Array.isArray(saved.order) || !currentKeys.length) return false;
+
+        const signature = orderSignature(cards);
+        if (saved.signature !== signature || saved.order.length !== currentKeys.length) return false;
+
+        const byKey = new Map();
+        cards.forEach(card => byKey.set(cardKey(card), card));
+        const ordered = [];
+        const used = new Set();
+
+        saved.order.forEach(key => {
+            const card = byKey.get(key);
+            if (card && !used.has(card)) {
+                ordered.push(card);
+                used.add(card);
+            }
+        });
+
+        if (ordered.length !== cards.length) return false;
+
+        const fragment = document.createDocumentFragment();
+        ordered.forEach(card => fragment.appendChild(card));
+        grid.appendChild(fragment);
+        return true;
+    }
+
+    function persistOrRestoreShuffleOrder() {
+        const cards = currentCards();
+        if (!cards.length) return;
+
+        if (String(mode.value || "").trim().toLowerCase() === "shuffle") {
+            if (!restoreShuffleOrder(cards)) saveShuffleOrder(cards);
+        }
     }
 
     function updateNumbers() {
-        const cards = Array.from(grid.querySelectorAll(":scope > .card"));
-        const normal = isNormalOrder();
+        const cards = currentCards();
         let number = 1;
 
         cards.forEach(card => {
-            // The topbar is created by lesson-card-topbar.js. If it has not
-            // been created yet, leave this card alone and the observer/retry
-            // will run again after the structure is ready.
             const topbar = card.querySelector(":scope > .lesson-card-inner > .lesson-card-topbar");
             if (!topbar) return;
 
             const badges = Array.from(topbar.querySelectorAll(`.${NUMBER_CLASS}`));
-
-            if (!normal) {
-                badges.forEach(badge => badge.remove());
-                return;
-            }
-
-            // Only one number is allowed per card.
             const badge = badges[0] || document.createElement("span");
             badges.slice(1).forEach(item => item.remove());
 
@@ -46,39 +108,32 @@ document.addEventListener("DOMContentLoaded", () => {
             badge.setAttribute("aria-hidden", "true");
             badge.textContent = String(number++);
 
-            if (badge.parentElement !== topbar) {
-                // Put it directly in the center slot of the topbar.
-                topbar.appendChild(badge);
-            }
+            if (badge.parentElement !== topbar) topbar.appendChild(badge);
         });
+    }
+
+    function refresh() {
+        persistOrRestoreShuffleOrder();
+        updateNumbers();
+        setTimeout(() => { persistOrRestoreShuffleOrder(); updateNumbers(); }, 20);
+        setTimeout(updateNumbers, 100);
+        setTimeout(updateNumbers, 300);
     }
 
     function queueUpdate() {
         clearTimeout(timer);
-        timer = setTimeout(() => {
-            updateNumbers();
-            // Topbar restructuring itself runs through a MutationObserver, so
-            // make sure we also run after that observer has completed.
-            setTimeout(updateNumbers, 20);
-            setTimeout(updateNumbers, 100);
-            setTimeout(updateNumbers, 300);
-        }, 0);
+        timer = setTimeout(refresh, 0);
     }
 
     mode.addEventListener("change", queueUpdate);
 
     const observer = new MutationObserver(queueUpdate);
-    observer.observe(grid, {
-        childList: true,
-        subtree: true
-    });
+    observer.observe(grid, { childList: true, subtree: true });
 
     document.addEventListener("lessonCardsRendered", queueUpdate);
     document.addEventListener("hardVocabularyUpdated", queueUpdate);
+    window.addEventListener("japaneseLangCloudLoaded", queueUpdate);
 
-    // Expose a small hook for the card-topbar script so it can request a
-    // numbering pass after it finishes restructuring newly-rendered cards.
     window.updateLessonCardNumbers = updateNumbers;
-
     queueUpdate();
 });
