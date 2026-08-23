@@ -72,23 +72,76 @@
       if(mobileBar && window.innerWidth<=520) mobileBar.appendChild(reset);
     }
 
-    if(!document.getElementById('toolbarToggle')){
+    // Put the shared toolbar into a fullscreen overlay. The toolbar itself is
+    // moved out of the page flow so it no longer sits underneath the header.
+    if(!document.getElementById('toolbarOverlay')){
+      const overlay = document.createElement('div');
+      overlay.id='toolbarOverlay';
+      overlay.className='toolbar-overlay';
+      overlay.setAttribute('aria-hidden','true');
+
+      const panel = document.createElement('div');
+      panel.className='toolbar-overlay-panel';
+      panel.setAttribute('role','dialog');
+      panel.setAttribute('aria-modal','true');
+      panel.setAttribute('aria-label','Filters and controls');
+
+      const header = document.createElement('div');
+      header.className='toolbar-overlay-header';
+      header.innerHTML='<span>Filters &amp; Controls</span>';
+
+      const close = document.createElement('button');
+      close.type='button';
+      close.id='toolbarClose';
+      close.className='toolbar-close';
+      close.setAttribute('aria-label','Close filters and controls');
+      close.title='Close';
+      close.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
+      header.appendChild(close);
+
+      panel.appendChild(header);
+      panel.appendChild(toolbar);
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+
       const toggle = document.createElement('button');
       toggle.type='button';
       toggle.id='toolbarToggle';
       toggle.className='toolbar-toggle';
       toggle.setAttribute('aria-expanded','false');
-      toggle.setAttribute('aria-label','Expand toolbar');
-      toggle.title='Expand toolbar';
-      toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>';
-      toolbar.parentNode.insertBefore(toggle, toolbar);
-      toolbar.classList.add('toolbar-collapsed');
-      toggle.addEventListener('click', function(){
-        const expanded = !toolbar.classList.toggle('toolbar-collapsed');
-        toggle.setAttribute('aria-expanded', String(expanded));
-        toggle.setAttribute('aria-label', expanded ? 'Collapse toolbar' : 'Expand toolbar');
-        toggle.title = expanded ? 'Collapse toolbar' : 'Expand toolbar';
-        toggle.classList.toggle('expanded', expanded);
+      toggle.setAttribute('aria-controls','toolbarOverlay');
+      toggle.setAttribute('aria-label','Open filters and controls');
+      toggle.title='Filters & Controls';
+      toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>';
+      document.body.appendChild(toggle);
+
+      function setOpen(open){
+        overlay.classList.toggle('open',open);
+        toggle.classList.toggle('active',open);
+        toggle.setAttribute('aria-expanded',String(open));
+        overlay.setAttribute('aria-hidden',String(!open));
+        toggle.setAttribute('aria-label',open ? 'Close filters and controls' : 'Open filters and controls');
+        if(open){
+          document.documentElement.classList.add('toolbar-overlay-open');
+          document.body.classList.add('toolbar-overlay-open');
+          setTimeout(function(){
+            const firstControl = toolbar.querySelector('button, select, input');
+            if(firstControl) firstControl.focus();
+          },50);
+        }else{
+          document.documentElement.classList.remove('toolbar-overlay-open');
+          document.body.classList.remove('toolbar-overlay-open');
+          toggle.focus({preventScroll:true});
+        }
+      }
+
+      toggle.addEventListener('click',function(){ setOpen(!overlay.classList.contains('open')); });
+      close.addEventListener('click',function(){ setOpen(false); });
+      overlay.addEventListener('click',function(event){
+        if(event.target === overlay) setOpen(false);
+      });
+      document.addEventListener('keydown',function(event){
+        if(event.key === 'Escape' && overlay.classList.contains('open')) setOpen(false);
       });
     }
 
