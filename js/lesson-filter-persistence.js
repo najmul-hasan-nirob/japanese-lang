@@ -1,51 +1,53 @@
 // =====================================================
 // Lesson filter persistence
 // =====================================================
-// Keeps the Lessons page selection in the existing local cache and lets
-// supabase-sync.js include the related UI state in Cloud Sync.
+// Keeps Lesson selection + Order mode in the existing local cache and lets
+// supabase-sync.js include the same state in Cloud Sync.
 // =====================================================
 (() => {
     const KEY = "japanese-lang-lesson-filter-v1";
-    const DEFAULT = { selectedLessons: ["lesson1"] };
+    const DEFAULT = { selectedLessons: ["lesson1"], orderMode: "normal" };
 
-    function getSaved() {
-        try {
-            const value = JSON.parse(localStorage.getItem(KEY) || "null");
-            if (!value || !Array.isArray(value.selectedLessons)) return DEFAULT;
-            const selectedLessons = value.selectedLessons.filter(
-                item => typeof item === "string" && /^lesson\d+$/.test(item)
-            );
-            return {
-                selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"]
-            };
-        } catch (_) {
-            return DEFAULT;
-        }
+    function normalize(value) {
+        if (!value || typeof value !== "object") return { ...DEFAULT };
+        const selectedLessons = Array.isArray(value.selectedLessons)
+            ? value.selectedLessons.filter(item => typeof item === "string" && /^lesson\d+$/.test(item))
+            : [];
+        const orderMode = value.orderMode === "shuffle" ? "shuffle" : "normal";
+        return {
+            selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
+            orderMode
+        };
     }
 
-    function saveSelectedLessons() {
+    function getSaved() {
+        try { return normalize(JSON.parse(localStorage.getItem(KEY) || "null")); }
+        catch (_) { return { ...DEFAULT }; }
+    }
+
+    function saveState() {
         const panel = document.getElementById("lessonPanel");
+        const mode = document.getElementById("mode");
         if (!panel) return;
+
         const selectedLessons = Array.from(
             panel.querySelectorAll("input[type=checkbox][value^='lesson']:checked")
         ).map(cb => cb.value);
 
-        // Preserve the other synced UI state. Changing Lesson selection should
-        // not accidentally turn off Screen Always On or erase the last shuffle.
-        let current = {};
-        try { current = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (_) {}
-
+        const current = getSaved();
         const value = {
+            ...current,
             selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
-            ...current
+            orderMode: mode?.value === "shuffle" ? "shuffle" : "normal"
         };
-        value.selectedLessons = selectedLessons.length ? selectedLessons : ["lesson1"];
 
         try { localStorage.setItem(KEY, JSON.stringify(value)); } catch (_) {}
+        window.dispatchEvent(new CustomEvent("lessonFilterStateChanged"));
     }
 
-    function restoreSelectedLessons() {
+    function restoreState() {
         const panel = document.getElementById("lessonPanel");
+        const mode = document.getElementById("mode");
         if (!panel) return false;
 
         const saved = getSaved();
@@ -67,9 +69,17 @@
         const all = panel.querySelector("input[type=checkbox][value='all']");
         if (all) all.checked = boxes.length > 0 && boxes.every(cb => cb.checked);
 
+        let modeChanged = false;
+        if (mode && (mode.value === "normal" || mode.value === "shuffle") && mode.value !== saved.orderMode) {
+            mode.value = saved.orderMode;
+            modeChanged = true;
+        }
+
         if (changed) {
             const target = boxes.find(cb => cb.checked) || boxes[0];
             target.dispatchEvent(new Event("change", { bubbles: true }));
+        } else if (modeChanged) {
+            mode.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
         return true;
@@ -77,17 +87,21 @@
 
     function init() {
         const panel = document.getElementById("lessonPanel");
+        const mode = document.getElementById("mode");
         if (!panel) return;
-        restoreSelectedLessons();
+
+        restoreState();
+
         panel.addEventListener("change", event => {
-            if (event.target?.matches("input[type=checkbox][value^='lesson']")) {
-                saveSelectedLessons();
-            }
+            if (event.target?.matches("input[type=checkbox][value^='lesson']")) saveState();
         });
+        mode?.addEventListener("change", saveState);
     }
 
     window.addEventListener("japaneseLangCloudLoaded", () => {
-        restoreSelectedLessons();
+        // Cloud Sync has already written the cloud values into localStorage.
+        // Restore both Lesson and Order after that pull, including Shuffle.
+        restoreState();
     });
 
     document.addEventListener("DOMContentLoaded", init);
