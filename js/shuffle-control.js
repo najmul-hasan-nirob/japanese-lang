@@ -1,5 +1,5 @@
 // Shared Shuffle button behavior for Numbers and Lessons.
-// Clicking Shuffle automatically switches Order to Shuffle and reshuffles.
+// Clicking Shuffle automatically switches Order to Shuffle and creates a new order.
 (function(){
     function initShuffleControls(){
         const mode = document.getElementById('mode');
@@ -16,8 +16,14 @@
             button.dataset.shuffleControlBound = 'true';
 
             button.addEventListener('click', function(){
-                // Selecting Shuffle automatically enables shuffle mode.
-                // Dispatching change also re-renders the current filtered set.
+                // Tell the shared Lesson shuffle() function that this is an
+                // explicit request for a NEW random order. A normal Order ->
+                // Shuffle transition/reload should instead restore the saved
+                // order from localStorage/cloud sync.
+                if (typeof lessonsData !== 'undefined') {
+                    window.lessonForceShuffle = true;
+                }
+
                 if (mode.value !== 'shuffle') {
                     mode.value = 'shuffle';
                 }
