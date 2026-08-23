@@ -39,9 +39,9 @@ html.toolbar-overlay-open,body.toolbar-overlay-open{overflow:hidden}
   .toolbar-overlay-header{margin-bottom:10px}
   .toolbar-overlay-title{gap:7px;flex-wrap:wrap}
   .toolbar-overlay-count{width:100%;font-size:10px}
-  .toolbar:not(.toolbar-collapsed){display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:6px;width:100%;max-width:100%;box-sizing:border-box;overflow:visible!important;position:relative;z-index:50}
-  .toolbar:not(.toolbar-collapsed)>.field{flex:1 1 0!important;min-width:0!important;width:0!important;max-width:none!important;margin:0!important}
-  .toolbar:not(.toolbar-collapsed)>.field.direction-field,.toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:1 1 0!important}
+  .toolbar:not(.toolbar-collapsed){display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:10px!important;width:100%!important;max-width:100%!important;box-sizing:border-box;overflow:visible!important;position:relative;z-index:50}
+  .toolbar:not(.toolbar-collapsed)>.field{flex:0 0 auto!important;min-width:0!important;width:100%!important;max-width:none!important;margin:0!important}
+  .toolbar:not(.toolbar-collapsed)>.field.direction-field,.toolbar:not(.toolbar-collapsed)>.field.shuffle-field{flex:0 0 auto!important;width:100%!important}
   .toolbar:not(.toolbar-collapsed)>.field>button,.toolbar:not(.toolbar-collapsed)>.field>select,.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn,.toolbar:not(.toolbar-collapsed)>.field>.direction-toggle,.toolbar:not(.toolbar-collapsed)>.field>.abacus{display:flex;width:100%!important;min-width:0!important;max-width:none!important;box-sizing:border-box}
   .toolbar:not(.toolbar-collapsed)>.field>select,.toolbar:not(.toolbar-collapsed)>.field>.multiselect-btn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .toolbar .field:has(.multiselect-panel.open){position:static;z-index:100}
