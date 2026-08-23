@@ -55,8 +55,11 @@ function buildLessonCards(key) {
     return cards;
 }
 
+// Use only immutable card identity here. Do NOT include the English/Bangla
+// meaning because those fields can be changed by data/meaning fixes without
+// changing which cards are in the shuffle set.
 function lessonShuffleId(card) {
-    return [card.lesson || "", card.type || "", card.jp || "", card.en || ""].join("\u001f");
+    return [card.lesson || "", card.type || "", card.jp || ""].join("\u001f");
 }
 
 const LESSON_SHUFFLE_STORAGE = "japanese-lang-lesson-shuffle-v1";
@@ -68,40 +71,40 @@ function lessonShuffleSetKey(array) {
 function readLessonShuffleStore() {
     try {
         const value = JSON.parse(localStorage.getItem(LESSON_SHUFFLE_STORAGE) || "null");
-        if (!value || typeof value !== "object") return { version: 3, states: {} };
+        if (!value || typeof value !== "object") return { version: 4, states: {} };
         if (Array.isArray(value.order) && Array.isArray(value.cards)) {
             const key = value.cards.slice().sort().join("\u001e");
-            return { version: 3, states: { [key]: { cards: value.cards, order: value.order, updatedAt: 0 } } };
+            return { version: 4, states: { [key]: { cards: value.cards, order: value.order, updatedAt: Number(value.updatedAt || 0) } } };
         }
         return value.states && typeof value.states === "object"
-            ? { version: 3, states: value.states }
-            : { version: 3, states: {} };
+            ? { version: 4, states: value.states }
+            : { version: 4, states: {} };
     } catch (_) {
-        return { version: 3, states: {} };
+        return { version: 4, states: {} };
     }
 }
 
 function writeLessonShuffleState(array) {
     try {
         const cards = array.map(lessonShuffleId);
-        const key = cards.slice().sort().join("\u001e");
+        const key = lessonShuffleSetKey(array);
         const store = readLessonShuffleStore();
-        store.states[key] = {
+        const state = {
             cards: cards.slice(),
             order: cards.slice(),
             updatedAt: Date.now()
         };
+        store.states[key] = state;
+        store.version = 4;
         localStorage.setItem(LESSON_SHUFFLE_STORAGE, JSON.stringify(store));
-
-        // Tell Cloud Sync that an explicit new shuffle was created. The
-        // sync layer can then immediately save the newest timestamp/order.
         window.dispatchEvent(new CustomEvent("lessonShuffleStateChanged"));
     } catch (_) {}
 }
 
 function readLessonShuffleState(array) {
     const store = readLessonShuffleStore();
-    const state = store.states[lessonShuffleSetKey(array)];
+    const key = lessonShuffleSetKey(array);
+    const state = store.states[key];
     return state && Array.isArray(state.order) ? state : null;
 }
 
@@ -117,13 +120,15 @@ function restoreLessonShuffle(array, state) {
 }
 
 function shuffle(array) {
-    // Only an actual click on the Shuffle button sets this flag. Normal page
-    // initialization and reloads must restore the saved order, not reshuffle.
+    // Only an explicit click on Shuffle is allowed to generate a new order.
+    // Every other call restores the saved order. This is deliberately strict:
+    // a reload must NEVER create another random order.
     const forceNew = window.lessonForceShuffle === true;
     window.lessonForceShuffle = false;
 
-    if (!forceNew && restoreLessonShuffle(array, readLessonShuffleState(array))) {
-        return array;
+    if (!forceNew) {
+        const saved = readLessonShuffleState(array);
+        if (saved && restoreLessonShuffle(array, saved)) return array;
     }
 
     for (let i = array.length - 1; i > 0; i--) {
