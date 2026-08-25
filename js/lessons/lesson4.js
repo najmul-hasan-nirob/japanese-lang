@@ -1,369 +1,69 @@
 // Lesson 4
 const lesson4 = {
   "vocabulary": [
-    {
-      "jp": "おきます",
-      "romaji": "okimasu",
-      "en": "get up, wake up",
-      "bn": "ঘুম থেকে ওঠা / জেগে ওঠা"
-    },
-    {
-      "jp": "ねます",
-      "romaji": "nemasu",
-      "en": "sleep, go to bed",
-      "bn": "ঘুমানো / ঘুমাতে যাওয়া"
-    },
-    {
-      "jp": "はたらきます",
-      "romaji": "hatarakimasu",
-      "en": "work",
-      "bn": "কাজ করা"
-    },
-    {
-      "jp": "やすみます",
-      "romaji": "yasumimasu",
-      "en": "take a rest, take a holiday",
-      "bn": "বিশ্রাম নেওয়া / ছুটি নেওয়া"
-    },
-    {
-      "jp": "べんきょうします",
-      "romaji": "benkyoushimasu",
-      "en": "study",
-      "bn": "পড়াশোনা করা"
-    },
-    {
-      "jp": "おわります",
-      "romaji": "owarimasu",
-      "en": "finish",
-      "bn": "শেষ করা"
-    },
-    {
-      "jp": "デパート",
-      "romaji": "depa-to",
-      "en": "department store",
-      "bn": "ডিপার্টমেন্ট স্টোর"
-    },
-    {
-      "jp": "ぎんこう",
-      "romaji": "ginkou",
-      "en": "bank",
-      "bn": "ব্যাংক"
-    },
-    {
-      "jp": "ゆうびんきょく",
-      "romaji": "yuubinkyoku",
-      "en": "post office",
-      "bn": "ডাকঘর"
-    },
-    {
-      "jp": "としょかん",
-      "romaji": "toshokan",
-      "en": "library",
-      "bn": "গ্রন্থাগার"
-    },
-    {
-      "jp": "びじゅつかん",
-      "romaji": "bijutsukan",
-      "en": "art museum, gallery",
-      "bn": "শিল্প জাদুঘর / গ্যালারি"
-    },
-    {
-      "jp": "いま",
-      "romaji": "ima",
-      "en": "now",
-      "bn": "এখন"
-    },
-    {
-      "jp": "～じ",
-      "romaji": "～ji",
-      "en": "~ o'clock",
-      "bn": "~টা বাজে"
-    },
-    {
-      "jp": "～ふん（ぷん）",
-      "romaji": "～fun（pun）",
-      "en": "~ minute",
-      "bn": "~ মিনিট"
-    },
-    {
-      "jp": "はん",
-      "romaji": "han",
-      "en": "half",
-      "bn": "আধা"
-    },
-    {
-      "jp": "なんじ",
-      "romaji": "nanji",
-      "en": "what time",
-      "bn": "কয়টা বাজে"
-    },
-    {
-      "jp": "なんぷん",
-      "romaji": "nanpun",
-      "en": "what minute",
-      "bn": "কত মিনিট"
-    },
-    {
-      "jp": "ごぜん",
-      "romaji": "gozen",
-      "en": "a.m., morning",
-      "bn": "সকাল / পূর্বাহ্ণ"
-    },
-    {
-      "jp": "ごご",
-      "romaji": "gogo",
-      "en": "p.m., afternoon",
-      "bn": "দুপুর / অপরাহ্ণ"
-    },
-    {
-      "jp": "あさ",
-      "romaji": "asa",
-      "en": "morning",
-      "bn": "সকাল"
-    },
-    {
-      "jp": "ひる",
-      "romaji": "hiru",
-      "en": "daytime, noon",
-      "bn": "দিন / দুপুর"
-    },
-    {
-      "jp": "ばん（よる）",
-      "romaji": "ban（yoru）",
-      "en": "night, evening",
-      "bn": "রাত / সন্ধ্যা"
-    },
-    {
-      "jp": "おととい",
-      "romaji": "ototoi",
-      "en": "the day before yesterday",
-      "bn": "পরশু"
-    },
-    {
-      "jp": "きのう",
-      "romaji": "kinou",
-      "en": "yesterday",
-      "bn": "গতকাল"
-    },
-    {
-      "jp": "きょう",
-      "romaji": "kyou",
-      "en": "today",
-      "bn": "আজ"
-    },
-    {
-      "jp": "あした",
-      "romaji": "ashita",
-      "en": "tomorrow",
-      "bn": "আগামীকাল"
-    },
-    {
-      "jp": "あさって",
-      "romaji": "asatte",
-      "en": "the day after tomorrow",
-      "bn": "আগামী পরশু"
-    },
-    {
-      "jp": "けさ",
-      "romaji": "kesa",
-      "en": "this morning",
-      "bn": "আজ সকালে"
-    },
-    {
-      "jp": "こんばん",
-      "romaji": "konban",
-      "en": "this evening, tonight",
-      "bn": "আজ সন্ধ্যায় / আজ রাতে"
-    },
-    {
-      "jp": "やすみ",
-      "romaji": "yasumi",
-      "en": "rest, a holiday, a day off",
-      "bn": "বিশ্রাম / ছুটি"
-    },
-    {
-      "jp": "ひるやすみ",
-      "romaji": "hiruyasumi",
-      "en": "lunchtime",
-      "bn": "দুপুরের খাবারের সময়"
-    },
-    {
-      "jp": "しけん",
-      "romaji": "shiken",
-      "en": "examination, test",
-      "bn": "পরীক্ষা"
-    },
-    {
-      "jp": "かいぎ",
-      "romaji": "kaigi",
-      "en": "meeting, conference (〜をします: hold a meeting)",
-      "bn": "মিটিং / সম্মেলন"
-    },
-    {
-      "jp": "えいが",
-      "romaji": "eiga",
-      "en": "film, movie",
-      "bn": "চলচ্চিত্র / সিনেমা"
-    },
-    {
-      "jp": "まいあさ",
-      "romaji": "maiasa",
-      "en": "every morning",
-      "bn": "প্রতিদিন সকালে"
-    },
-    {
-      "jp": "まいばん",
-      "romaji": "maiban",
-      "en": "every night",
-      "bn": "প্রতিদিন রাতে"
-    },
-    {
-      "jp": "まいにち",
-      "romaji": "mainichi",
-      "en": "every day",
-      "bn": "প্রতিদিন"
-    },
-    {
-      "jp": "げつようび",
-      "romaji": "getsuyoubi",
-      "en": "Monday",
-      "bn": "সোমবার"
-    },
-    {
-      "jp": "かようび",
-      "romaji": "kayoubi",
-      "en": "Tuesday",
-      "bn": "মঙ্গলবার"
-    },
-    {
-      "jp": "すいようび",
-      "romaji": "suiyoubi",
-      "en": "Wednesday",
-      "bn": "বুধবার"
-    },
-    {
-      "jp": "もくようび",
-      "romaji": "mokuyoubi",
-      "en": "Thursday",
-      "bn": "বৃহস্পতিবার"
-    },
-    {
-      "jp": "きんようび",
-      "romaji": "kinyoubi",
-      "en": "Friday",
-      "bn": "শুক্রবার"
-    },
-    {
-      "jp": "どようび",
-      "romaji": "doyoubi",
-      "en": "Saturday",
-      "bn": "শনিবার"
-    },
-    {
-      "jp": "にちようび",
-      "romaji": "nichiyoubi",
-      "en": "Sunday",
-      "bn": "রবিবার"
-    },
-    {
-      "jp": "なんようび",
-      "romaji": "nanyoubi",
-      "en": "what day of the week",
-      "bn": "দিন / সপ্তাহ"
-    },
-    {
-      "jp": "～から",
-      "romaji": "～kara",
-      "en": "from ~",
-      "bn": "~ থেকে"
-    },
-    {
-      "jp": "～まで",
-      "romaji": "～made",
-      "en": "up to ~, until ~",
-      "bn": "~ পর্যন্ত"
-    },
-    {
-      "jp": "～と～",
-      "romaji": "～to～",
-      "en": "and (used to connect nouns)",
-      "bn": "এবং / ও"
-    }
+    {"jp":"おきます","romaji":"okimasu","en":"get up, wake up","bn":"ঘুম থেকে ওঠা / জেগে ওঠা"},
+    {"jp":"ねます","romaji":"nemasu","en":"sleep, go to bed","bn":"ঘুমানো / ঘুমাতে যাওয়া"},
+    {"jp":"はたらきます","romaji":"hatarakimasu","en":"work","bn":"কাজ করা"},
+    {"jp":"やすみます","romaji":"yasumimasu","en":"take a rest, take a holiday","bn":"বিশ্রাম নেওয়া / ছুটি নেওয়া"},
+    {"jp":"べんきょうします","romaji":"benkyoushimasu","en":"study","bn":"পড়াশোনা করা"},
+    {"jp":"おわります","romaji":"owarimasu","en":"finish","bn":"শেষ হওয়া / শেষ করা"},
+    {"jp":"デパート","romaji":"depa-to","en":"department store","bn":"ডিপার্টমেন্ট স্টোর"},
+    {"jp":"ぎんこう","romaji":"ginkou","en":"bank","bn":"ব্যাংক"},
+    {"jp":"ゆうびんきょく","romaji":"yuubinkyoku","en":"post office","bn":"ডাকঘর"},
+    {"jp":"としょかん","romaji":"toshokan","en":"library","bn":"গ্রন্থাগার / লাইব্রেরি"},
+    {"jp":"びじゅつかん","romaji":"bijutsukan","en":"art museum, gallery","bn":"শিল্প জাদুঘর / আর্ট গ্যালারি"},
+    {"jp":"いま","romaji":"ima","en":"now","bn":"এখন"},
+    {"jp":"～じ","romaji":"～ji","en":"~ o'clock","bn":"~টা বাজে"},
+    {"jp":"～ふん（ぷん）","romaji":"～fun（pun）","en":"~ minute","bn":"~ মিনিট"},
+    {"jp":"はん","romaji":"han","en":"half","bn":"আধা / সাড়ে"},
+    {"jp":"なんじ","romaji":"nanji","en":"what time","bn":"কয়টা বাজে / কয়টা"},
+    {"jp":"なんぷん","romaji":"nanpun","en":"what minute","bn":"কত মিনিট"},
+    {"jp":"ごぜん","romaji":"gozen","en":"a.m., morning","bn":"পূর্বাহ্ণ / সকাল"},
+    {"jp":"ごご","romaji":"gogo","en":"p.m., afternoon","bn":"অপরাহ্ণ / দুপুরের পর"},
+    {"jp":"あさ","romaji":"asa","en":"morning","bn":"সকাল"},
+    {"jp":"ひる","romaji":"hiru","en":"daytime, noon","bn":"দিন / দুপুর"},
+    {"jp":"ばん（よる）","romaji":"ban（yoru）","en":"night, evening","bn":"সন্ধ্যা / রাত"},
+    {"jp":"おととい","romaji":"ototoi","en":"the day before yesterday","bn":"পরশু (গতকালের আগের দিন)"},
+    {"jp":"きのう","romaji":"kinou","en":"yesterday","bn":"গতকাল"},
+    {"jp":"きょう","romaji":"kyou","en":"today","bn":"আজ"},
+    {"jp":"あした","romaji":"ashita","en":"tomorrow","bn":"আগামীকাল"},
+    {"jp":"あさって","romaji":"asatte","en":"the day after tomorrow","bn":"আগামী পরশু (আগামীকালের পরের দিন)"},
+    {"jp":"けさ","romaji":"kesa","en":"this morning","bn":"আজ সকালে"},
+    {"jp":"こんばん","romaji":"konban","en":"this evening, tonight","bn":"আজ সন্ধ্যায় / আজ রাতে"},
+    {"jp":"やすみ","romaji":"yasumi","en":"rest, a holiday, a day off","bn":"বিশ্রাম / ছুটি"},
+    {"jp":"ひるやすみ","romaji":"hiruyasumi","en":"lunchtime","bn":"দুপুরের বিরতি / দুপুরের খাবারের সময়"},
+    {"jp":"しけん","romaji":"shiken","en":"examination, test","bn":"পরীক্ষা"},
+    {"jp":"かいぎ","romaji":"kaigi","en":"meeting, conference (〜をします: hold a meeting)","bn":"সভা / মিটিং / সম্মেলন"},
+    {"jp":"えいが","romaji":"eiga","en":"film, movie","bn":"চলচ্চিত্র / সিনেমা"},
+    {"jp":"まいあさ","romaji":"maiasa","en":"every morning","bn":"প্রতিদিন সকালে"},
+    {"jp":"まいばん","romaji":"maiban","en":"every night","bn":"প্রতিদিন রাতে"},
+    {"jp":"まいにち","romaji":"mainichi","en":"every day","bn":"প্রতিদিন"},
+    {"jp":"げつようび","romaji":"getsuyoubi","en":"Monday","bn":"সোমবার"},
+    {"jp":"かようび","romaji":"kayoubi","en":"Tuesday","bn":"মঙ্গলবার"},
+    {"jp":"すいようび","romaji":"suiyoubi","en":"Wednesday","bn":"বুধবার"},
+    {"jp":"もくようび","romaji":"mokuyoubi","en":"Thursday","bn":"বৃহস্পতিবার"},
+    {"jp":"きんようび","romaji":"kinyoubi","en":"Friday","bn":"শুক্রবার"},
+    {"jp":"どようび","romaji":"doyoubi","en":"Saturday","bn":"শনিবার"},
+    {"jp":"にちようび","romaji":"nichiyoubi","en":"Sunday","bn":"রবিবার"},
+    {"jp":"なんようび","romaji":"nanyoubi","en":"what day of the week","bn":"সপ্তাহের কোন দিন"},
+    {"jp":"～から","romaji":"～kara","en":"from ~","bn":"~ থেকে"},
+    {"jp":"～まで","romaji":"～made","en":"up to ~, until ~","bn":"~ পর্যন্ত"},
+    {"jp":"～と～","romaji":"～to～","en":"and (used to connect nouns)","bn":"~ এবং ~ / ~ ও ~"}
   ],
   "cpart": [
-    {
-      "jp": "たいへんですね。",
-      "romaji": "taihendesune。",
-      "en": "That's tough, isn't it? (used when expressing sympathy)",
-      "bn": "কঠিন ব্যাপার, তাই না? / সহানুভূতি প্রকাশের কথা"
-    },
-    {
-      "jp": "ばんごう",
-      "romaji": "bangou",
-      "en": "number",
-      "bn": "নম্বর / সংখ্যা"
-    },
-    {
-      "jp": "なんばん",
-      "romaji": "nanban",
-      "en": "what number",
-      "bn": "সংখ্যা"
-    },
-    {
-      "jp": "そちら",
-      "romaji": "sochira",
-      "en": "your place",
-      "bn": "জায়গা"
-    }
+    {"jp":"たいへんですね。","romaji":"taihendesune。","en":"That's tough, isn't it? (used when expressing sympathy)","bn":"কঠিন ব্যাপার, তাই না? / সহানুভূতি প্রকাশের কথা"},
+    {"jp":"ばんごう","romaji":"bangou","en":"number","bn":"নম্বর / সংখ্যা"},
+    {"jp":"なんばん","romaji":"nanban","en":"what number","bn":"কত নম্বর"},
+    {"jp":"そちら","romaji":"sochira","en":"your place","bn":"আপনার দিক / আপনার স্থান (ভদ্রভাবে)"}
   ],
   "country": [
-    {
-      "jp": "ニューヨーク",
-      "romaji": "niュ-yo-ku",
-      "en": "New York",
-      "bn": "নিউ ইয়র্ক"
-    },
-    {
-      "jp": "ペキン",
-      "romaji": "pekin",
-      "en": "Beijing",
-      "bn": "বেইজিং"
-    },
-    {
-      "jp": "ロサンゼルス",
-      "romaji": "rosanzerusu",
-      "en": "Los Angeles",
-      "bn": "লস অ্যাঞ্জেলেস"
-    },
-    {
-      "jp": "ロンドン",
-      "romaji": "rondon",
-      "en": "London",
-      "bn": "লন্ডন"
-    },
-    {
-      "jp": "あすか",
-      "romaji": "asuka",
-      "en": "a fictitious Japanese restaurant",
-      "bn": "কাল্পনিক Japanese restaurant"
-    },
-    {
-      "jp": "アップルぎんこう",
-      "romaji": "appuruginkou",
-      "en": "a fictitious bank",
-      "bn": "কাল্পনিক bank"
-    },
-    {
-      "jp": "みどりとしょかん",
-      "romaji": "midoritoshokan",
-      "en": "a fictitious library",
-      "bn": "কাল্পনিক library"
-    },
-    {
-      "jp": "やまとびじゅつかん",
-      "romaji": "yamatobijutsukan",
-      "en": "a fictitious art gallery",
-      "bn": "কাল্পনিক art gallery"
-    }
+    {"jp":"ニューヨーク","romaji":"niュ-yo-ku","en":"New York","bn":"নিউ ইয়র্ক"},
+    {"jp":"ペキン","romaji":"pekin","en":"Beijing","bn":"বেইজিং"},
+    {"jp":"ロサンゼルス","romaji":"rosanzerusu","en":"Los Angeles","bn":"লস অ্যাঞ্জেলেস"},
+    {"jp":"ロンドン","romaji":"rondon","en":"London","bn":"লন্ডন"},
+    {"jp":"あすか","romaji":"asuka","en":"a fictitious Japanese restaurant","bn":"কাল্পনিক জাপানি রেস্তোরাঁ"},
+    {"jp":"アップルぎんこう","romaji":"appuruginkou","en":"a fictitious bank","bn":"কাল্পনিক ব্যাংক"},
+    {"jp":"みどりとしょかん","romaji":"midoritoshokan","en":"a fictitious library","bn":"কাল্পনিক গ্রন্থাগার"},
+    {"jp":"やまとびじゅつかん","romaji":"yamatobijutsukan","en":"a fictitious art gallery","bn":"কাল্পনিক শিল্প গ্যালারি"}
   ]
 };
