@@ -83,7 +83,7 @@ const lesson2 = {
       "jp": "カード",
       "romaji": "ka-do",
       "en": "(credit) card",
-      "bn": "ক্রেডিট কার্ড"
+      "bn": "কার্ড / ক্রেডিট কার্ড"
     },
     {
       "jp": "えんぴつ",
@@ -197,19 +197,19 @@ const lesson2 = {
       "jp": "えいご",
       "romaji": "eigo",
       "en": "the English language",
-      "bn": "ভাষা"
+      "bn": "ইংরেজি ভাষা"
     },
     {
       "jp": "にほんご",
       "romaji": "nihongo",
       "en": "the Japanese language",
-      "bn": "ভাষা"
+      "bn": "জাপানি ভাষা"
     },
     {
       "jp": "～ご",
       "romaji": "～go",
       "en": "~ language",
-      "bn": "ভাষা"
+      "bn": "~ ভাষা / কোনো ভাষার নাম বোঝানো প্রত্যয়"
     },
     {
       "jp": "なん",
@@ -221,7 +221,7 @@ const lesson2 = {
       "jp": "そう",
       "romaji": "sou",
       "en": "so",
-      "bn": "তাই / এইভাবে"
+      "bn": "তাই / সেরকম / এমন"
     }
   ],
   "cpart": [
@@ -265,7 +265,7 @@ const lesson2 = {
       "jp": "これから おせわに なります。",
       "romaji": "korekara osewani narimasu。",
       "en": "Thank you in advance for your kindness.",
-      "bn": "আগাম আপনার সহযোগিতার জন্য ধন্যবাদ।"
+      "bn": "এখন থেকে আপনার সহযোগিতা ও যত্নের জন্য কৃতজ্ঞ থাকব।"
     },
     {
       "jp": "[どうも] ありがとう [ございます]。",
@@ -277,7 +277,7 @@ const lesson2 = {
       "jp": "こちらこそ [どうぞ] よろしく [おねがいします]。",
       "romaji": "kochirakoso [douzo] yoroshiku [onegaishimasu]。",
       "en": "Pleased to meet you, too.",
-      "bn": "দেখা করা"
+      "bn": "আমিও আপনার সঙ্গে পরিচিত হয়ে আনন্দিত। / আমিও আপনার সহযোগিতা কামনা করছি।"
     }
   ],
   "country": []
