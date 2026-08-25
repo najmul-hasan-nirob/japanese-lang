@@ -184,7 +184,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     display:none;
 }
 
-/* Lesson toolbar icons: inline SVGs inherit the logo accent color. */
 #backRomajiToggle,
 #direction,
 #shuffleBtn,
@@ -210,22 +209,19 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     color:inherit;
 }
 
-/* Prevent mobile overscroll from triggering browser pull-to-refresh. */
 html,
 body{
     overscroll-behavior-y: none;
 }
 
 @media only screen and (max-width:520px) {
-
     .toolbar .teacher-mode-btn, .toolbar .teacher-stop-btn{
-    display: none;
-}
+        display: none;
+    }
     html,
     body{
         overscroll-behavior-y: none;
     }
-
     .front{ font-size:18px; text-align:center; }
     .back{ font-size:16px; }
     .vocabulary-back .romaji,
@@ -293,7 +289,6 @@ body{
     .mobile-bottom-controls .abacus.right .bead{
         transform:translate(22px,-50%);
     }
-    
 }
 
 .recall-answer{
@@ -309,8 +304,6 @@ body{
 }
 
 /* ---------- LESSON CARD NATURAL HEIGHT ---------- */
-/* Override the legacy fixed-height rules and the card-structure script.
-   Each card now sizes itself from its own content. */
 .grid{
     align-items:start;
 }
@@ -375,4 +368,9 @@ body{
     .card.lesson-card-structured .lesson-card-content > .back{
         padding:44px 10px 10px !important;
     }
+}
+
+/* Lesson 10, card 28: remove only the duplicate visual illustration. */
+.grid > .card:nth-child(28) .back .lesson-illustration ~ .lesson-illustration{
+    display:none !important;
 }
