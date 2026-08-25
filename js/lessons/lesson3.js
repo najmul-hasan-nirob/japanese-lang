@@ -5,55 +5,55 @@ const lesson3 = {
       "jp": "ここ",
       "romaji": "koko",
       "en": "here, this place",
-      "bn": "এখানে"
+      "bn": "এখানে / এই জায়গায়"
     },
     {
       "jp": "そこ",
       "romaji": "soko",
       "en": "there, that place near the listener",
-      "bn": "সেখানে"
+      "bn": "সেখানে / ওই জায়গায়"
     },
     {
       "jp": "あそこ",
       "romaji": "asoko",
       "en": "that place over there",
-      "bn": "ওখানে"
+      "bn": "ওখানে / ওই দূরের জায়গায়"
     },
     {
       "jp": "どこ",
       "romaji": "doko",
       "en": "where, what place",
-      "bn": "কোথায়"
+      "bn": "কোথায় / কোন জায়গায়"
     },
     {
       "jp": "こちら",
       "romaji": "kochira",
       "en": "this way, this place (polite equivalent of ここ)",
-      "bn": "পথ / উপায় / জায়গা"
+      "bn": "এদিকে / এই জায়গায় (ভদ্রভাবে)"
     },
     {
       "jp": "そちら",
       "romaji": "sochira",
       "en": "that way, that place near the listener (polite equivalent of そこ)",
-      "bn": "পথ / উপায় / জায়গা"
+      "bn": "ওদিকে / ওই জায়গায় (ভদ্রভাবে)"
     },
     {
       "jp": "あちら",
       "romaji": "achira",
       "en": "that way, that place over there (polite equivalent of あそこ)",
-      "bn": "পথ / উপায় / জায়গা"
+      "bn": "ওইদিকে / ওই দূরের জায়গায় (ভদ্রভাবে)"
     },
     {
       "jp": "どちら",
       "romaji": "dochira",
       "en": "which way, where (polite equivalent of どこ)",
-      "bn": "পথ / উপায়"
+      "bn": "কোনদিকে / কোথায় (ভদ্রভাবে)"
     },
     {
       "jp": "きょうしつ",
       "romaji": "kyoushitsu",
       "en": "classroom",
-      "bn": "শ্রেণিকক্ষ"
+      "bn": "শ্রেণিকক্ষ / ক্লাসরুম"
     },
     {
       "jp": "しょくどう",
@@ -65,13 +65,13 @@ const lesson3 = {
       "jp": "じむしょ",
       "romaji": "jimusho",
       "en": "office",
-      "bn": "অফিস"
+      "bn": "অফিস / কার্যালয়"
     },
     {
       "jp": "かいぎしつ",
       "romaji": "kaigishitsu",
       "en": "conference room, meeting room",
-      "bn": "কক্ষ"
+      "bn": "সভাকক্ষ / মিটিং রুম"
     },
     {
       "jp": "うけつけ",
@@ -89,7 +89,7 @@ const lesson3 = {
       "jp": "へや",
       "romaji": "heya",
       "en": "room",
-      "bn": "কক্ষ / ঘর"
+      "bn": "ঘর / কক্ষ"
     },
     {
       "jp": "トイレ（おてあらい）",
@@ -107,7 +107,7 @@ const lesson3 = {
       "jp": "エレベーター",
       "romaji": "erebe-ta-",
       "en": "lift, elevator",
-      "bn": "লিফট"
+      "bn": "লিফট / এলিভেটর"
     },
     {
       "jp": "エスカレーター",
@@ -119,13 +119,13 @@ const lesson3 = {
       "jp": "じどうはんばいき",
       "romaji": "jidouhanbaiki",
       "en": "vending machine",
-      "bn": "ভেন্ডিং মেশিন"
+      "bn": "ভেন্ডিং মেশিন / স্বয়ংক্রিয় পণ্য বিক্রির মেশিন"
     },
     {
       "jp": "でんわ",
       "romaji": "denwa",
       "en": "telephone handset, telephone call",
-      "bn": "টেলিফোন সেট / ফোন কল"
+      "bn": "টেলিফোন / ফোন কল"
     },
     {
       "jp": "[お]くに",
@@ -137,7 +137,7 @@ const lesson3 = {
       "jp": "かいしゃ",
       "romaji": "kaisha",
       "en": "company",
-      "bn": "কোম্পানি"
+      "bn": "কোম্পানি / প্রতিষ্ঠান"
     },
     {
       "jp": "うち",
@@ -155,7 +155,7 @@ const lesson3 = {
       "jp": "ネクタイ",
       "romaji": "nekutai",
       "en": "tie, necktie",
-      "bn": "টাই"
+      "bn": "টাই / নেকটাই"
     },
     {
       "jp": "ワイン",
@@ -167,13 +167,13 @@ const lesson3 = {
       "jp": "うりば",
       "romaji": "uriba",
       "en": "department, counter (in a department store, etc.)",
-      "bn": "বিভাগ / কাউন্টার"
+      "bn": "বিক্রয় বিভাগ / পণ্য বিক্রির কাউন্টার"
     },
     {
       "jp": "ちか",
       "romaji": "chika",
       "en": "basement",
-      "bn": "বেসমেন্ট"
+      "bn": "ভূগর্ভস্থ তলা / বেসমেন্ট"
     },
     {
       "jp": "～かい（がい）",
@@ -185,7 +185,7 @@ const lesson3 = {
       "jp": "なんがい",
       "romaji": "nangai",
       "en": "what floor",
-      "bn": "কোন তলা / কত তলা"
+      "bn": "কোন তলা? / কত তলায়?"
     },
     {
       "jp": "～えん",
@@ -197,25 +197,25 @@ const lesson3 = {
       "jp": "いくら",
       "romaji": "ikura",
       "en": "how much",
-      "bn": "কত দাম / কত"
+      "bn": "কত? / কত দাম?"
     },
     {
       "jp": "ひゃく",
       "romaji": "hyaku",
       "en": "hundred",
-      "bn": "একশ"
+      "bn": "একশ / ১০০"
     },
     {
       "jp": "せん",
       "romaji": "sen",
       "en": "thousand",
-      "bn": "এক হাজার"
+      "bn": "এক হাজার / ১,০০০"
     },
     {
       "jp": "まん",
       "romaji": "man",
       "en": "ten thousand",
-      "bn": "দশ হাজার"
+      "bn": "দশ হাজার / ১০,০০০"
     }
   ],
   "cpart": [
@@ -235,13 +235,13 @@ const lesson3 = {
       "jp": "いらっしゃいませ。",
       "romaji": "irasshaimase。",
       "en": "Welcome./May I help you? (a greeting to a customer or a guest entering a shop, etc.)",
-      "bn": "সাহায্য করা"
+      "bn": "স্বাগতম / আসুন"
     },
     {
       "jp": "[～を] みせて ください。",
       "romaji": "[～o] misete kudasai。",
       "en": "Please show me [~].",
-      "bn": "দেখানো"
+      "bn": "দয়া করে [~] দেখান।"
     },
     {
       "jp": "じゃ",
@@ -253,7 +253,7 @@ const lesson3 = {
       "jp": "[～を] ください。",
       "romaji": "[～o] kudasai。",
       "en": "Give me [~], please.",
-      "bn": "দেওয়া"
+      "bn": "দয়া করে [~] দিন।"
     }
   ],
   "country": [
@@ -297,7 +297,7 @@ const lesson3 = {
       "jp": "しんおおさか",
       "romaji": "shinoosaka",
       "en": "name of a station in Osaka",
-      "bn": "নাম: a station in Osaka"
+      "bn": "শিন-ওসাকা স্টেশন"
     }
   ]
 };
