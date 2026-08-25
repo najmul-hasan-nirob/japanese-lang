@@ -307,3 +307,72 @@ body{
     margin: 0 auto 20px;
     text-align: center !important;
 }
+
+/* ---------- LESSON CARD NATURAL HEIGHT ---------- */
+/* Override the legacy fixed-height rules and the card-structure script.
+   Each card now sizes itself from its own content. */
+.grid{
+    align-items:start;
+}
+
+.grid > .card{
+    align-self:start;
+    min-height:0 !important;
+    height:auto !important;
+}
+
+.grid > .card:has(.lesson-illustration){
+    min-height:0 !important;
+}
+
+.card.lesson-card-structured{
+    min-height:0 !important;
+    height:auto !important;
+}
+
+.card.lesson-card-structured .lesson-card-inner{
+    position:relative !important;
+    inset:auto !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    display:grid !important;
+    overflow:visible !important;
+}
+
+.card.lesson-card-structured .lesson-card-content{
+    position:relative !important;
+    inset:auto !important;
+    grid-area:1 / 1 !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    display:grid !important;
+    overflow:visible !important;
+}
+
+.card.lesson-card-structured .lesson-card-content > .front,
+.card.lesson-card-structured .lesson-card-content > .back{
+    position:relative !important;
+    inset:auto !important;
+    grid-area:1 / 1 !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    padding:50px 10px 10px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-align:center !important;
+}
+
+.card.lesson-card-structured .lesson-card-content > .back{
+    transform:rotateY(180deg);
+}
+
+@media only screen and (max-width:520px){
+    .card.lesson-card-structured .lesson-card-content > .front,
+    .card.lesson-card-structured .lesson-card-content > .back{
+        padding:44px 10px 10px !important;
+    }
+}
