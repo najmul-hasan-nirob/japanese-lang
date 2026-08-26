@@ -376,9 +376,6 @@ body{
 }
 
 /* ---------- EQUAL HEIGHT PER GRID ROW ---------- */
-/* Let CSS Grid size each row from its tallest card, then stretch every
-   card in that row to exactly that height. This works for desktop and
-   the 2-column mobile layout without forcing one row's height onto another. */
 .grid{
     align-items:stretch;
 }
@@ -403,4 +400,9 @@ body{
 .card.lesson-card-structured .lesson-card-content > .front,
 .card.lesson-card-structured .lesson-card-content > .back{
     height:100% !important;
+}
+
+/* Remove only accidental duplicate illustrations on any lesson card. */
+.card .back .lesson-illustration ~ .lesson-illustration{
+    display:none !important;
 }
