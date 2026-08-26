@@ -112,7 +112,7 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     justify-content:center;
     text-align:center;
     gap:6px;
-    padding:10px;
+    padding:18px 10px 10px 10px;
 }
 
 .vocabulary-back .romaji{
