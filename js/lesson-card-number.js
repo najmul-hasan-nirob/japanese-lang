@@ -113,8 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------------------------------
     // Lesson card search — Japanese / Romaji / English / Bangla
     // -----------------------------------------------------
-    // Search is layered on top of the existing lesson/type filters. It only
-    // hides non-matching cards; it does not rebuild, reorder, or modify cards.
     const countDisplay = document.getElementById("countDisplay");
     if (!countDisplay) return;
 
@@ -164,8 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getCardSearchText(card){
         const item = card.__lessonItem || {};
-        // Prefer the explicit Romaji stored with the lesson data. Some entries
-        // have punctuation/kanji that cannot be reliably converted from jp alone.
         const romaji = item.romaji || (typeof toRomaji === "function" ? toRomaji(item.jp || "") : "");
         const bangla = card.__teacherBangla || item.bn || "";
         return normalizeSearch([item.jp, romaji, item.en, bangla, item.lesson, item.type].join(" "));
@@ -192,6 +188,17 @@ document.addEventListener("DOMContentLoaded", () => {
             message.textContent = `No cards found for “${searchInput.value.trim()}”`;
             grid.appendChild(message);
         }
+
+        // Keep the summary above the cards synchronized with the visible search results.
+        const visibleCards = cards.filter(card => card.style.display !== "none");
+        const vocabularyCount = visibleCards.filter(card => card.querySelector(".vocabulary-back")).length;
+        const hardCount = visibleCards.filter(card => {
+            const star = card.querySelector(".hard-star");
+            return star && star.classList.contains("active");
+        }).length;
+        countDisplay.textContent = hardCount
+            ? `Showing ${vocabularyCount} vocabulary + ${hardCount} hard vocabulary`
+            : `Showing ${vocabularyCount} vocabulary`;
     }
 
     searchInput.addEventListener("input", updateSearch);
@@ -201,8 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateSearch();
     });
 
-    // Existing filters rebuild the grid. Re-apply the current search after each
-    // render without changing their behavior.
     document.addEventListener("lessonCardsRendered", () => setTimeout(updateSearch, 0));
+    document.addEventListener("hardVocabularyUpdated", () => setTimeout(updateSearch, 0));
     window.addEventListener("japaneseLangCloudLoaded", () => setTimeout(updateSearch, 0));
 });
