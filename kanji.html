@@ -50,16 +50,18 @@ js:
 .kanji-card .front,.kanji-card .back{padding:10px;}
 .kanji-character{font-family:'Noto Sans JP','Noto Sans',sans-serif;font-size:76px;font-weight:500;line-height:1.05;}
 .kanji-character.small{font-size:42px;}
-.kanji-reading{font-family:'Zen Kaku Gothic New',sans-serif;font-size:18px;font-weight:600;line-height:1.45;}
-.kanji-romaji{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.4;opacity:.85;}
-.kanji-meaning{font-size:15px;line-height:1.4;}
+.kanji-details{width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;line-height:1.45;}
+.kanji-detail-reading,.kanji-detail-romaji,.kanji-detail-meaning{text-align:center;}
+.kanji-detail-reading strong,.kanji-detail-romaji strong,.kanji-detail-meaning strong{font-weight:700;}
+.kanji-detail-meta{display:flex;gap:12px;color:rgba(247,242,231,.65);font-family:'JetBrains Mono',monospace;font-size:10px;}
+.kanji-loading{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(247,242,231,.65);}
 .kanji-card .lesson-card-topbar{height:42px;}
 @media(max-width:520px){
     .kanji-toolbar{grid-template-columns:1fr 1fr;}
     .kanji-character{font-size:58px;}
     .kanji-character.small{font-size:34px;}
-    .kanji-reading{font-size:15px;}
-    .kanji-romaji,.kanji-meaning{font-size:12px;}
+    .kanji-details{font-size:12px;}
+    .kanji-detail-meta{font-size:9px;}
     .kanji-card .lesson-card-topbar{height:38px;}
 }
 </style>
