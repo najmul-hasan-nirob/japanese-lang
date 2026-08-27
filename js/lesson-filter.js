@@ -79,16 +79,19 @@ document.addEventListener("DOMContentLoaded", () => {
         cards.forEach(item=>{
             const card=document.createElement("div");
             card.className="card"+(item.type==="grammar"?" grammar":"");
+            const romaji=toRomaji(item.jp || "");
             // Keep the exact source item and the exact Bangla meaning on the DOM card.
             // Teacher Mode reads these properties instead of trying to reconstruct meaning from HTML.
             card.__lessonItem=item;
+            card.__lessonItem.romaji=romaji;
             card.__teacherBangla=banglaMeaning(item);
+            card.dataset.romaji=romaji;
             const tag=`${item.lesson} · ${item.type==="grammar"?"Grammar":"Vocabulary"}`;
             const isVocab=item.type==="vocabulary"||item.type==="cpart"||item.type==="country";
-            const frontText=showJapaneseFirst?item.jp:(isVocab?toRomaji(item.jp):item.en);
+            const frontText=showJapaneseFirst?item.jp:(isVocab?romaji:item.en);
             if(isVocab){
                 const hideRomaji=window.lessonBackRomajiVisible===false;
-                card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back vocabulary-back"><span class="romaji" style="display:${hideRomaji?'none':''}">${toRomaji(item.jp)}</span><span class="english">${item.en}</span><span class="bangla">${banglaMeaning(item)}</span></div></div>`;
+                card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back vocabulary-back"><span class="romaji" style="display:${hideRomaji?'none':''}">${romaji}</span><span class="english">${item.en}</span><span class="bangla">${banglaMeaning(item)}</span></div></div>`;
             }else{
                 const backText=showJapaneseFirst?item.en:item.jp;
                 card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div></div>`;
@@ -100,10 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         grid.appendChild(frag);
         const counter=document.getElementById("cardCount");if(counter)counter.textContent=`Showing ${cards.length} cards`;
-
-        // Tell the card-number controller that a fresh card set is ready.
-        // This fixes the transition Shuffle -> Normal where the old number
-        // elements were removed together with the shuffled cards.
         document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
     }
 
