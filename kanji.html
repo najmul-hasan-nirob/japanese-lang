@@ -1,0 +1,65 @@
+---
+layout: default
+title: Kanji
+css: /css/lessons.css
+js:
+- /js/main.js
+- /js/kanji-data.js
+- /js/kanji.js
+---
+
+<div class="toolbar kanji-toolbar">
+    <div class="field filter-field">
+        <label id="kanjiLevelLabel">Level</label>
+        <button type="button" class="multiselect-btn" id="kanjiLevelBtn" aria-haspopup="true" aria-expanded="false">N5 + N4</button>
+        <div class="multiselect-panel" id="kanjiLevelPanel">
+            <label><input type="checkbox" value="N5" checked> N5</label>
+            <label><input type="checkbox" value="N4" checked> N4</label>
+        </div>
+    </div>
+    <div class="field filter-field">
+        <label for="kanjiMode">Order</label>
+        <select id="kanjiMode">
+            <option value="normal">Normal</option>
+            <option value="shuffle">Shuffle</option>
+        </select>
+    </div>
+    <div class="field search-field">
+        <label for="kanjiSearch">Search</label>
+        <div class="kanji-search-wrap">
+            <input id="kanjiSearch" type="text" autocomplete="off" placeholder="Search Kanji or reading">
+            <button id="kanjiSearchClear" type="button" aria-label="Clear search" hidden>×</button>
+        </div>
+    </div>
+    <div class="field shuffle-field">
+        <button id="kanjiShuffleBtn" class="shuffle-btn" type="button">↗ Shuffle</button>
+    </div>
+    <div class="field direction-field">
+        <button id="kanjiDirection" class="direction-toggle" type="button" aria-pressed="false">Back</button>
+    </div>
+</div>
+
+<div class="count-display" id="kanjiCount" aria-live="polite"></div>
+<div class="grid" id="kanjiGrid"></div>
+
+<style>
+.kanji-search-wrap{position:relative;width:100%;}
+.kanji-search-wrap input{width:100%;box-sizing:border-box;padding:10px 34px 10px 10px;border:1px solid var(--paper-line);border-radius:6px;background:var(--paper-cell);color:var(--ink);font:inherit;outline:none;}
+.kanji-search-wrap input:focus{border-color:var(--vermilion);}
+.kanji-search-wrap button{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:26px;height:26px;padding:0;border:0;background:transparent;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;}
+.kanji-card .front,.kanji-card .back{padding:10px;}
+.kanji-character{font-family:'Noto Sans JP','Noto Sans',sans-serif;font-size:76px;font-weight:500;line-height:1.05;}
+.kanji-character.small{font-size:42px;}
+.kanji-reading{font-family:'Zen Kaku Gothic New',sans-serif;font-size:18px;font-weight:600;line-height:1.45;}
+.kanji-romaji{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.4;opacity:.85;}
+.kanji-meaning{font-size:15px;line-height:1.4;}
+.kanji-card .lesson-card-topbar{height:42px;}
+@media(max-width:520px){
+    .kanji-toolbar{grid-template-columns:1fr 1fr;}
+    .kanji-character{font-size:58px;}
+    .kanji-character.small{font-size:34px;}
+    .kanji-reading{font-size:15px;}
+    .kanji-romaji,.kanji-meaning{font-size:12px;}
+    .kanji-card .lesson-card-topbar{height:38px;}
+}
+</style>
