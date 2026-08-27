@@ -57,16 +57,43 @@
     function detailHtml(item) {
         const d = detailCache.get(item.kanji);
         if (!d) return '<span class="kanji-loading">Loading details…</span>';
-        const kun = (d.kun_readings || []).join('、');
-        const on = (d.on_readings || []).join('、');
-        const readings = [kun, on].filter(Boolean).join(' / ') || '—';
-        const romaji = kanaToRomaji([...(d.kun_readings || []), ...(d.on_readings || [])].join(' / '));
-        const meaning = (d.meanings || []).slice(0, 4).join(', ') || '—';
+
+        const kun = (d.kun_readings || []).filter(Boolean);
+        const on = (d.on_readings || []).filter(Boolean);
+        const banglaMeaning = item.meaning || d.bangla_meaning || '';
+        const englishMeaning = (d.meanings || []).filter(Boolean)[0] || '';
+
+        // The card now follows the requested reading hierarchy:
+        // meaning → Jap (Kun'yomi) → Chi (On'yomi), with a small gap before Chi.
+        // Example data can be supplied by the kanji dataset as `kun_example` /
+        // `on_example`, with `*_example_reading`, `*_example_romaji`, and
+        // `*_example_bangla` for the complete example line.
+        const kunReading = kun[0] || '';
+        const onReading = on[0] || '';
+        const kunRomaji = kunReading ? kanaToRomaji(kunReading) : '';
+        const onRomaji = onReading ? kanaToRomaji(onReading) : '';
+
+        const kunExample = item.kun_example || d.kun_example || '';
+        const onExample = item.on_example || d.on_example || '';
+        const kunExampleReading = item.kun_example_reading || d.kun_example_reading || '';
+        const onExampleReading = item.on_example_reading || d.on_example_reading || '';
+        const kunExampleRomaji = item.kun_example_romaji || d.kun_example_romaji || (kunExampleReading ? kanaToRomaji(kunExampleReading) : '');
+        const onExampleRomaji = item.on_example_romaji || d.on_example_romaji || (onExampleReading ? kanaToRomaji(onExampleReading) : '');
+        const kunExampleBangla = item.kun_example_bangla || d.kun_example_bangla || '';
+        const onExampleBangla = item.on_example_bangla || d.on_example_bangla || '';
+
+        const japLine = kunReading
+            ? `<div class="kanji-reading-line"><span class="kanji-reading-label">Jap-</span> ${kunReading}${kunExample ? ` <span class="kanji-example">${kunExample}${kunExampleReading ? ` (${kunExampleReading})` : ''}${kunExampleRomaji || kunExampleBangla ? ` (${kunExampleRomaji}${kunExampleBangla ? ` - ${kunExampleBangla}` : ''})` : ''}</span>` : ` (${kunRomaji})`}</div>`
+            : '';
+
+        const chiLine = onReading
+            ? `<div class="kanji-reading-line kanji-chi-line"><span class="kanji-reading-label">Chi-</span> ${onReading}${onExample ? ` <span class="kanji-example">${onExample}${onExampleReading ? ` (${onExampleReading})` : ''}${onExampleRomaji || onExampleBangla ? ` (${onExampleRomaji}${onExampleBangla ? ` - ${onExampleBangla}` : ''})` : ''}</span>` : ` (${onRomaji})`}</div>`
+            : '';
+
         return `
-            <div class="kanji-detail-reading"><strong>Reading:</strong> ${readings}</div>
-            <div class="kanji-detail-romaji"><strong>Romaji:</strong> ${romaji || '—'}</div>
-            <div class="kanji-detail-meaning"><strong>English:</strong> ${meaning}</div>
-            <div class="kanji-detail-meta"><span>Stroke: ${d.stroke_count ?? '—'}</span><span>Grade: ${d.grade ?? '—'}</span></div>
+            <div class="kanji-detail-meaning">${banglaMeaning || englishMeaning}</div>
+            ${japLine}
+            ${chiLine}
         `;
     }
 
@@ -101,7 +128,7 @@
                 if (!detailCache.has(card.dataset.kanji)) {
                     await loadDetail(card.dataset.kanji);
                     const back = card.querySelector('.kanji-details');
-                    if (back) back.innerHTML = detailHtml({ kanji: card.dataset.kanji });
+                    if (back) back.innerHTML = detailHtml(cards.find(item => item.kanji === card.dataset.kanji) || { kanji: card.dataset.kanji });
                 }
             });
         });
