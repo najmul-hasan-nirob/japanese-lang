@@ -12,6 +12,7 @@
 
     let cards = [...window.kanjiData];
     let showBack = false;
+    const detailCache = new Map();
 
     const kanaToRomaji = (text) => {
         const table = {
@@ -27,12 +28,13 @@
     };
 
     function selectedLevels() {
-        return Array.from(levelPanel.querySelectorAll('input:checked')).map(x => x.value);
+        return Array.from(levelPanel.querySelectorAll('input[type="checkbox"]:checked')).map(x => x.value);
     }
 
     function updateLevelLabel() {
         const selected = selectedLevels();
-        levelBtn.textContent = selected.length === 2 ? 'N5 + N4' : (selected[0] || 'All Levels');
+        const all = Array.from(levelPanel.querySelectorAll('input[type="checkbox"]'));
+        levelBtn.textContent = selected.length === all.length ? 'N5 + N4' : selected.length ? selected.join(' + ') : 'None';
     }
 
     function filteredCards() {
@@ -41,19 +43,35 @@
         return cards.filter(item => {
             if (levels.length && !levels.includes(item.level)) return false;
             if (!q) return true;
-            const romaji = kanaToRomaji(item.reading || '').toLowerCase();
-            return String(item.kanji).toLowerCase().includes(q) ||
-                String(item.no).includes(q) ||
-                String(item.reading || '').toLowerCase().includes(q) ||
-                romaji.includes(q);
+            const detail = detailCache.get(item.kanji) || {};
+            const readings = [item.reading, ...(detail.kun_readings || []), ...(detail.on_readings || [])].filter(Boolean).join(' ');
+            const romaji = kanaToRomaji(readings).toLowerCase();
+            const meanings = [item.meaning, ...(detail.meanings || [])].filter(Boolean).join(' ').toLowerCase();
+            return item.kanji.includes(q) || String(item.no).includes(q) || readings.toLowerCase().includes(q) || romaji.includes(q) || meanings.includes(q);
         });
+    }
+
+    function detailHtml(item) {
+        const d = detailCache.get(item.kanji);
+        if (!d) return '<span class="kanji-loading">Loading details…</span>';
+        const kun = (d.kun_readings || []).join('、');
+        const on = (d.on_readings || []).join('、');
+        const readings = [kun, on].filter(Boolean).join(' / ') || '—';
+        const romaji = kanaToRomaji([...(d.kun_readings || []), ...(d.on_readings || [])].join(' / '));
+        const meaning = (d.meanings || []).slice(0, 4).join(', ') || '—';
+        return `
+            <div class="kanji-detail-reading"><strong>Reading:</strong> ${readings}</div>
+            <div class="kanji-detail-romaji"><strong>Romaji:</strong> ${romaji || '—'}</div>
+            <div class="kanji-detail-meaning"><strong>English:</strong> ${meaning}</div>
+            <div class="kanji-detail-meta"><span>Stroke: ${d.stroke_count ?? '—'}</span><span>Grade: ${d.grade ?? '—'}</span></div>
+        `;
     }
 
     function render() {
         let visible = filteredCards();
         if (mode.value === 'shuffle') visible = [...visible].sort(() => Math.random() - 0.5);
         grid.innerHTML = visible.map(item => `
-            <div class="card kanji-card" data-no="${item.no}">
+            <div class="card kanji-card" data-no="${item.no}" data-kanji="${item.kanji}">
                 <div class="inner">
                     <div class="front">
                         <div class="lesson-card-topbar">
@@ -68,21 +86,57 @@
                             <span class="lesson-tag">${item.level}</span>
                         </div>
                         <div class="kanji-character small">${item.kanji}</div>
-                        <div class="kanji-reading">${item.reading || '—'}</div>
-                        <div class="kanji-romaji">${kanaToRomaji(item.reading || '')}</div>
-                        <div class="kanji-meaning">${item.meaning || '—'}</div>
+                        <div class="kanji-details">${detailHtml(item)}</div>
                     </div>
                 </div>
             </div>`).join('');
-        grid.querySelectorAll('.card').forEach(card => card.addEventListener('click', () => card.classList.toggle('flipped')));
+
+        grid.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', async (event) => {
+                if (event.target.closest('.speaker-btn')) return;
+                card.classList.toggle('flipped');
+                if (!detailCache.has(card.dataset.kanji)) {
+                    await loadDetail(card.dataset.kanji);
+                    const back = card.querySelector('.kanji-details');
+                    if (back) back.innerHTML = detailHtml({ kanji: card.dataset.kanji });
+                }
+            });
+        });
         if (showBack) grid.querySelectorAll('.card').forEach(card => card.classList.add('flipped'));
         count.textContent = `Showing ${visible.length} kanji`;
         clear.hidden = !search.value;
     }
 
+    async function loadDetail(kanji) {
+        if (detailCache.has(kanji)) return detailCache.get(kanji);
+        try {
+            const response = await fetch(`https://kanjiapi.dev/v1/kanji/${encodeURIComponent(kanji)}`);
+            if (!response.ok) throw new Error('Kanji API request failed');
+            const data = await response.json();
+            detailCache.set(kanji, data);
+            return data;
+        } catch (error) {
+            detailCache.set(kanji, {});
+            return {};
+        }
+    }
+
+    // The shared lesson multiselect logic is not loaded on this page, so Kanji owns its
+    // own small N5/N4 dropdown. This keeps the existing control markup unchanged.
+    levelBtn.addEventListener('click', event => {
+        event.stopPropagation();
+        const open = levelPanel.classList.toggle('open');
+        levelBtn.setAttribute('aria-expanded', String(open));
+    });
+    levelPanel.addEventListener('click', event => event.stopPropagation());
+    levelPanel.addEventListener('change', () => { updateLevelLabel(); render(); });
+    document.addEventListener('click', () => {
+        levelPanel.classList.remove('open');
+        levelBtn.setAttribute('aria-expanded', 'false');
+    });
+
     search.addEventListener('input', render);
     clear.addEventListener('click', () => { search.value = ''; render(); search.focus(); });
-    levelPanel.addEventListener('change', () => { updateLevelLabel(); render(); });
     mode.addEventListener('change', render);
     shuffleBtn.addEventListener('click', () => { mode.value = 'shuffle'; render(); });
     directionBtn.addEventListener('click', () => {
