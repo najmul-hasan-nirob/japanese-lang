@@ -11,6 +11,7 @@
     const LESSON_FILTER_KEY = "japanese-lang-lesson-filter-v1";
     const SHUFFLE_KEY = "japanese-lang-lesson-shuffle-v1";
     const SCREEN_KEY = "japanese-lang-screen-awake";
+    const UI_STATE_KEY = "japanese-lang-ui-state-v1";
     const DEFAULT_LESSON_FILTER = { selectedLessons: ["lesson1"], orderMode: "normal" };
     let client = null, syncTimer = null, lastSnapshot = "";
 
@@ -28,12 +29,11 @@
             selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
             orderMode: value.orderMode === "shuffle" ? "shuffle" : "normal",
             ...(value.shuffleState && typeof value.shuffleState === "object" ? { shuffleState: value.shuffleState } : {}),
-            ...(typeof value.screenAwake === "boolean" ? { screenAwake: value.screenAwake } : {})
+            ...(typeof value.screenAwake === "boolean" ? { screenAwake: value.screenAwake } : {}),
+            ...(value.pageStates && typeof value.pageStates === "object" ? { pageStates: value.pageStates } : {})
         };
     }
 
-    // Merge each card-set independently. The newest locally-created shuffle
-    // must never be replaced by an older cloud snapshot during page startup.
     function mergeShuffleStores(localValue, cloudValue) {
         const local = localValue && typeof localValue === "object" && localValue.states && typeof localValue.states === "object"
             ? localValue : { version: 3, states: {} };
@@ -55,7 +55,8 @@
             selectedLessons: saved.selectedLessons,
             orderMode: saved.orderMode,
             shuffleState: get(SHUFFLE_KEY, null),
-            screenAwake: get(SCREEN_KEY, false) === true
+            screenAwake: get(SCREEN_KEY, false) === true,
+            pageStates: get(UI_STATE_KEY, {})
         };
     }
     function snapshot() {
@@ -96,10 +97,8 @@
             });
             set(SHUFFLE_KEY, mergedShuffle);
             if (typeof cloudFilter.screenAwake === "boolean") applyCloudScreenState(cloudFilter.screenAwake);
+            if (cloudFilter.pageStates && typeof cloudFilter.pageStates === "object") set(UI_STATE_KEY, cloudFilter.pageStates);
 
-            // If local state was newer than the cloud state, the merged local
-            // shuffle is intentionally retained. The next polling cycle will
-            // push it to Supabase instead of losing it on another reload.
             void localFilter;
         }
         lastSnapshot = snapshot();
