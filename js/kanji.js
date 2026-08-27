@@ -15,6 +15,7 @@
     const detailCache = new Map();
     const UI_STATE_KEY = 'japanese-lang-ui-state-v1';
     const PAGE_KEY = (location.pathname || '/').replace(/\/+$/, '') || '/';
+    const FLIP_ICON = '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"></path></svg>';
 
     const kanaToRomaji = (text) => {
         const table = {
@@ -154,6 +155,20 @@
         updateLevelLabel();
     }
 
+    function updateDirectionUI() {
+        directionBtn.classList.toggle('right', showBack);
+        directionBtn.setAttribute('aria-pressed', String(showBack));
+        directionBtn.setAttribute('aria-label', showBack ? 'Show all cards Front' : 'Show all cards Back');
+        directionBtn.title = showBack ? 'Show Front' : 'Show Back';
+        directionBtn.innerHTML = '<span class="lesson-control-text">Front / Back</span>' + FLIP_ICON;
+    }
+
+    function toggleAllCards() {
+        showBack = !showBack;
+        updateDirectionUI();
+        grid.querySelectorAll('.card').forEach(card => card.classList.toggle('flipped', showBack));
+    }
+
     levelBtn.addEventListener('click', event => {
         event.stopPropagation();
         const open = levelPanel.classList.toggle('open');
@@ -170,16 +185,17 @@
         levelBtn.setAttribute('aria-expanded', 'false');
     });
 
+    directionBtn.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleAllCards();
+    });
+    updateDirectionUI();
+
     search.addEventListener('input', render);
     clear.addEventListener('click', () => { search.value = ''; render(); search.focus(); });
     mode.addEventListener('change', render);
     shuffleBtn.addEventListener('click', () => { mode.value = 'shuffle'; render(); });
-    directionBtn.addEventListener('click', () => {
-        showBack = !showBack;
-        directionBtn.setAttribute('aria-pressed', String(showBack));
-        directionBtn.textContent = showBack ? 'Front' : 'Back';
-        grid.querySelectorAll('.card').forEach(card => card.classList.toggle('flipped', showBack));
-    });
 
     restoreUIState();
     render();
