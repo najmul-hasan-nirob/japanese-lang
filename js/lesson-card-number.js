@@ -1,6 +1,8 @@
+// =====================================================
 // Lesson card sequence numbers + persisted Shuffle order — Lessons page only.
 // Serial numbers are shown for BOTH Normal and Shuffle orders.
 // Shuffle order is cached locally and included in Cloud Sync by supabase-sync.js.
+
 
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("grid");
@@ -138,6 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .lesson-search-box{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box}
         .lesson-search-box input{width:100%;height:42px;box-sizing:border-box;padding:8px 40px 8px 38px;border:1px solid var(--paper-line);border-radius:8px;background:var(--paper-cell);color:var(--ink);font:500 14px 'Zen Kaku Gothic New',sans-serif;outline:none;transition:border-color .2s ease,box-shadow .2s ease}
         .lesson-search-box input:focus{border-color:var(--vermilion);box-shadow:0 0 0 2px color-mix(in srgb,var(--vermilion) 15%,transparent)}
+        .lesson-search-box input::-webkit-search-cancel-button{display:none;-webkit-appearance:none;appearance:none}
+        .lesson-search-box input::-ms-clear{display:none}
         .lesson-search-icon{position:absolute;left:13px;z-index:1;font-size:22px;line-height:1;color:var(--ink-soft);pointer-events:none;transform:translateY(-1px)}
         .lesson-search-box button{position:absolute;right:6px;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink-soft);font-size:22px;line-height:1;cursor:pointer}
         .lesson-search-box button:hover{color:var(--vermilion);background:rgba(0,0,0,.05)}
@@ -160,7 +164,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getCardSearchText(card){
         const item = card.__lessonItem || {};
-        const romaji = typeof toRomaji === "function" ? toRomaji(item.jp || "") : "";
+        // Prefer the explicit Romaji stored with the lesson data. Some entries
+        // have punctuation/kanji that cannot be reliably converted from jp alone.
+        const romaji = item.romaji || (typeof toRomaji === "function" ? toRomaji(item.jp || "") : "");
         const bangla = card.__teacherBangla || item.bn || "";
         return normalizeSearch([item.jp, romaji, item.en, bangla, item.lesson, item.type].join(" "));
     }
