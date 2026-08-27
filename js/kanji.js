@@ -13,6 +13,8 @@
     let cards = [...window.kanjiData];
     let showBack = false;
     const detailCache = new Map();
+    const UI_STATE_KEY = 'japanese-lang-ui-state-v1';
+    const PAGE_KEY = (location.pathname || '/').replace(/\/+$/, '') || '/';
 
     const kanaToRomaji = (text) => {
         const table = {
@@ -121,15 +123,48 @@
         }
     }
 
-    // The shared lesson multiselect logic is not loaded on this page, so Kanji owns its
-    // own small N5/N4 dropdown. This keeps the existing control markup unchanged.
+    function readUIState() {
+        try {
+            const all = JSON.parse(localStorage.getItem(UI_STATE_KEY) || '{}');
+            return all && typeof all === 'object' ? all : {};
+        } catch (_) { return {}; }
+    }
+
+    function saveUIState() {
+        try {
+            const all = readUIState();
+            const previous = all[PAGE_KEY] && typeof all[PAGE_KEY] === 'object' ? all[PAGE_KEY] : {};
+            const controls = previous.controls && typeof previous.controls === 'object' ? { ...previous.controls } : {};
+            levelPanel.querySelectorAll('input[type="checkbox"]').forEach(el => {
+                if (el.id) controls[el.id] = { type: 'checkbox', checked: el.checked };
+            });
+            all[PAGE_KEY] = { updatedAt: Date.now(), controls };
+            localStorage.setItem(UI_STATE_KEY, JSON.stringify(all));
+            window.dispatchEvent(new CustomEvent('japaneseLangUIStateChanged'));
+        } catch (_) {}
+    }
+
+    function restoreUIState() {
+        const saved = readUIState()[PAGE_KEY];
+        const controls = saved && saved.controls && typeof saved.controls === 'object' ? saved.controls : {};
+        levelPanel.querySelectorAll('input[type="checkbox"]').forEach(el => {
+            const state = el.id ? controls[el.id] : null;
+            if (state && state.type === 'checkbox' && typeof state.checked === 'boolean') el.checked = state.checked;
+        });
+        updateLevelLabel();
+    }
+
     levelBtn.addEventListener('click', event => {
         event.stopPropagation();
         const open = levelPanel.classList.toggle('open');
         levelBtn.setAttribute('aria-expanded', String(open));
     });
     levelPanel.addEventListener('click', event => event.stopPropagation());
-    levelPanel.addEventListener('change', () => { updateLevelLabel(); render(); });
+    levelPanel.addEventListener('change', () => {
+        updateLevelLabel();
+        saveUIState();
+        render();
+    });
     document.addEventListener('click', () => {
         levelPanel.classList.remove('open');
         levelBtn.setAttribute('aria-expanded', 'false');
@@ -146,6 +181,10 @@
         grid.querySelectorAll('.card').forEach(card => card.classList.toggle('flipped', showBack));
     });
 
-    updateLevelLabel();
+    restoreUIState();
     render();
+    window.addEventListener('japaneseLangCloudLoaded', () => {
+        restoreUIState();
+        render();
+    });
 })();
