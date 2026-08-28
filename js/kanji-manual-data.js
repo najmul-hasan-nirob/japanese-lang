@@ -32,18 +32,15 @@ window.kanjiManualData = [
     no: 1,
     kanji: "山",
     level: "N5",
-    meaning: "পাহাড়",
-    kun: ["やま"],
-    on: ["サン"],
+    banglaPronounciation: "পাহাড়",
+    kunyomiPronunciation: ["やま"],
+    onyomiPronunciation: ["サン"],
     examples: [
       {
-        word: "富士山",
-        reading: "ふじさん",
-        romaji: "fujisan",
-        meaning: "ফুজি পাহাড়",
-        furigana: [
-          { kanji: "富士", reading: "ふじ" }
-        ]
+        wordWithKanji: "ふじ山",
+        readingPronunciation: "ふじさん",
+        readingRomaji: "fujisan",
+        banglaPronounciation: "ফুজি পাহাড়",
       }
     ]
   }
