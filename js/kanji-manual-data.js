@@ -10,9 +10,8 @@ window.kanjiManualData = [
     englishPronunciation: "person", banglaPronounciation: "ব্যক্তি",
     kunyomiPronunciation: ["ひと"], onyomiPronunciation: ["ジン", "ニン"],
     examples: [
-      { wordWithKanji: "ひと", readingPronunciation: "ひと", banglaPronounciation: "ব্যক্তি" },
-      { wordWithKanji: "カナダじん", readingPronunciation: "カナダじん", banglaPronounciation: "কানাডিয়ান" },
-      { wordWithKanji: "三にん", readingPronunciation: "さんにん", banglaPronounciation: "তিনজন" }
+      { wordWithKanji: "カナダ人", readingPronunciation: "カナダじん", banglaPronounciation: "কানাডিয়ান" },
+      { wordWithKanji: "さん人", readingPronunciation: "さんにん", banglaPronounciation: "তিনজন" }
     ]
   },
   {
@@ -20,10 +19,10 @@ window.kanjiManualData = [
     englishPronunciation: "day; sun", banglaPronounciation: "দিন; সূর্য",
     kunyomiPronunciation: ["ひ", "か"], onyomiPronunciation: ["ニチ"],
     examples: [
-      { wordWithKanji: "そのひ", readingPronunciation: "そのひ", banglaPronounciation: "সেই দিন" },
-      { wordWithKanji: "三か", readingPronunciation: "みっか", banglaPronounciation: "তিন দিন; মাসের তৃতীয় দিন" },
-      { wordWithKanji: "十五にち", readingPronunciation: "じゅうごにち", banglaPronounciation: "পনেরো দিন; মাসের পনেরো তারিখ" },
-      { wordWithKanji: "日ようび", readingPronunciation: "にちようび", banglaPronounciation: "রবিবার" }
+      { wordWithKanji: "その日", readingPronunciation: "そのひ", banglaPronounciation: "সেই দিন" },
+      { wordWithKanji: "みっ日", readingPronunciation: "みっか", banglaPronounciation: "তিন দিন; মাসের তৃতীয় দিন" },
+      { wordWithKanji: "じゅうご日", readingPronunciation: "じゅうごにち", banglaPronounciation: "পনেরো দিন; মাসের পনেরো তারিখ" },
+      { wordWithKanji: "日よう日", readingPronunciation: "にちようび", banglaPronounciation: "রবিবার" }
     ]
   },
   {
@@ -31,11 +30,11 @@ window.kanjiManualData = [
     englishPronunciation: "one", banglaPronounciation: "এক",
     kunyomiPronunciation: ["ひと（つ）"], onyomiPronunciation: ["イチ", "イッ"],
     examples: [
-      { wordWithKanji: "ひとつ", readingPronunciation: "ひとつ", banglaPronounciation: "একটি" },
-      { wordWithKanji: "ひとり", readingPronunciation: "ひとり", banglaPronounciation: "একজন" },
-      { wordWithKanji: "いち日", readingPronunciation: "いちにち", banglaPronounciation: "এক দিন" },
-      { wordWithKanji: "ついたち", readingPronunciation: "ついたち", banglaPronounciation: "মাসের প্রথম দিন" },
-      { wordWithKanji: "いっ分", readingPronunciation: "いっぷん", banglaPronounciation: "এক মিনিট" }
+      { wordWithKanji: "一つ", readingPronunciation: "ひとつ", banglaPronounciation: "একটি" },
+      { wordWithKanji: "一り", readingPronunciation: "ひとり", banglaPronounciation: "একজন" },
+      { wordWithKanji: "一にち", readingPronunciation: "いちにち", banglaPronounciation: "এক দিন" },
+      { wordWithKanji: "一たち", readingPronunciation: "ついたち", banglaPronounciation: "মাসের প্রথম দিন" },
+      { wordWithKanji: "一ぷん", readingPronunciation: "いっぷん", banglaPronounciation: "এক মিনিট" }
     ]
   },
   {
