@@ -23,11 +23,10 @@
                 onyomi: Array.isArray(item.onyomiPronunciation) ? item.onyomiPronunciation.join('、') : (item.onyomiPronunciation || ''),
                 meaning: item.meaning || '',
                 examples: Array.isArray(item.examples) ? item.examples.map(function (e) {
-                    if (typeof e === 'string') return { word: e, reading: '', romaji: '', meaning: '', furigana: [] };
+                    if (typeof e === 'string') return { word: e, reading: '', meaning: '' };
                     return {
                         word: e.wordWithKanji || '',
                         reading: e.readingPronunciation || '',
-                        romaji: e.readingRomaji || '',
                         meaning: e.banglaPronounciation || ''
                     };
                 }) : []
@@ -75,7 +74,7 @@
                 if (levels.length && !levels.includes(item.level)) return false;
                 if (!q) return true;
                 const text = [item.kanji, item.kunyomi, item.onyomi, item.englishPronunciation, item.banglaPronounciation, kanaToRomaji(item.kunyomi), kanaToRomaji(item.onyomi)]
-                    .concat(item.examples.flatMap(function (e) { return [e.word, e.reading, e.meaning, e.romaji || kanaToRomaji(e.reading)]; }))
+                    .concat(item.examples.flatMap(function (e) { return [e.word, e.reading, e.meaning, kanaToRomaji(e.reading)]; }))
                     .join(' ').toLowerCase();
                 return text.includes(q) || String(item.no).includes(q);
             });
@@ -97,7 +96,7 @@
             const chi = on ? '<div class="kanji-reading-line kanji-chi-line"><span class="kanji-reading-label">Chi:</span> ' + on + (bangla ? ' - ' + escapeHtml(bangla) : '') + '</div>' : '';
             const examplesHtml = item.examples.filter(function (e) { return e.word && e.word !== item.kanji; }).map(function (e) {
                 const reading = e.reading || '';
-                const romaji = e.romaji || kanaToRomaji(reading);
+                const romaji = kanaToRomaji(reading);
                 return '<div class="kanji-reading-line kanji-example-line"><span class="kanji-reading-label">Ex:</span> ' + escapeHtml(e.word) + (reading ? ' - ' + escapeHtml(reading) + ' (' + escapeHtml(romaji) + ')' : '') + (e.meaning ? ' - ' + escapeHtml(e.meaning) : '') + '</div>';
             }).join('');
             return jap + chi + examplesHtml;
