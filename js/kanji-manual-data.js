@@ -32,6 +32,7 @@ window.kanjiManualData = [
     no: 1,
     kanji: "山",
     level: "N5",
+    englishPronunciation: "mountain",
     banglaPronounciation: "পাহাড়",
     kunyomiPronunciation: ["やま"],
     onyomiPronunciation: ["サン"],

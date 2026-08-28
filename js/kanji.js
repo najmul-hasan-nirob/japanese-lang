@@ -19,6 +19,8 @@
                 kanji: item.kanji || '',
                 level: item.level || 'N5',
                 kunyomi: Array.isArray(item.kunyomiPronunciation) ? item.kunyomiPronunciation.join('、') : (item.kunyomiPronunciation || ''),
+                englishPronunciation: item.englishPronunciation || '',
+                banglaPronounciation: item.banglaPronounciation || '',
                 onyomi: Array.isArray(item.onyomiPronunciation) ? item.onyomiPronunciation.join('、') : (item.onyomiPronunciation || ''),
                 meaning: item.meaning || '',
                 examples: Array.isArray(item.examples) ? item.examples.map(function (e) {
