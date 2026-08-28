@@ -380,9 +380,10 @@ body{
     align-items:stretch;
 }
 
-.grid > .card{
-    align-self:stretch;
-    height:auto !important;
+.grid > .card {
+    align-self: stretch;
+    height: auto !important;
+    display: flex;
 }
 
 .card.lesson-card-structured{
