@@ -29,7 +29,7 @@
 
 window.kanjiManualData = [
   {
-    no: 1,
+    no: 35,
     kanji: "山",
     level: "N5",
     englishPronunciation: "mountain",
