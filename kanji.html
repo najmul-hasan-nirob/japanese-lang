@@ -36,7 +36,7 @@ js:
 <div class="lesson-search-wrap" id="kanjiSearchWrap">
     <div class="lesson-search-box">
         <span class="lesson-search-icon" aria-hidden="true">⌕</span>
-        <input id="kanjiSearch" type="search" autocomplete="off" spellcheck="false" placeholder="Search Japanese, Romaji or Bangla..." aria-label="Search lesson cards">
+        <input id="kanjiSearch" type="search" autocomplete="off" spellcheck="false" placeholder="Search Japanese, Romaji or Bangla..." aria-label="Search Kanji cards">
         <button id="kanjiSearchClear" type="button" aria-label="Clear search" hidden>×</button>
     </div>
 </div>
@@ -45,6 +45,106 @@ js:
 <div class="grid" id="kanjiGrid"></div>
 
 <style>
+/* ---------- KANJI SEARCH ---------- */
+#kanjiSearchWrap{
+    width:100%;
+    max-width:var(--layout-width);
+    margin:0 auto 18px;
+}
+
+#kanjiSearchWrap .lesson-search-box{
+    position:relative;
+    width:100%;
+    height:44px;
+    display:flex;
+    align-items:center;
+    box-sizing:border-box;
+    background:var(--paper-cell);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    transition:border-color .2s ease, box-shadow .2s ease;
+}
+
+#kanjiSearchWrap .lesson-search-box:focus-within{
+    border-color:var(--vermilion);
+    box-shadow:0 0 0 2px var(--vermilion-soft);
+}
+
+#kanjiSearchWrap .lesson-search-icon{
+    position:absolute;
+    left:13px;
+    top:50%;
+    transform:translateY(-50%);
+    width:18px;
+    height:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--ink-soft);
+    font-family:Arial,sans-serif;
+    font-size:23px;
+    line-height:1;
+    pointer-events:none;
+}
+
+#kanjiSearchWrap #kanjiSearch{
+    width:100%;
+    height:100%;
+    min-width:0;
+    margin:0;
+    padding:0 44px 0 40px;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:14px;
+    line-height:44px;
+    box-sizing:border-box;
+    appearance:none;
+    -webkit-appearance:none;
+}
+
+#kanjiSearchWrap #kanjiSearch::placeholder{
+    color:var(--ink-soft);
+    opacity:1;
+}
+
+#kanjiSearchWrap #kanjiSearch::-webkit-search-cancel-button,
+#kanjiSearchWrap #kanjiSearch::-webkit-search-decoration{
+    -webkit-appearance:none;
+}
+
+#kanjiSearchWrap #kanjiSearchClear{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    width:30px;
+    height:30px;
+    margin:0;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:0;
+    border-radius:5px;
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:Arial,sans-serif;
+    font-size:22px;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:none;
+}
+
+#kanjiSearchWrap #kanjiSearchClear:hover{
+    color:var(--vermilion);
+    background:var(--vermilion-soft);
+}
+
+/* ---------- KANJI CARDS ---------- */
 .kanji-card .front,.kanji-card .back{padding:10px;}
 .kanji-character{font-family:'Noto Sans JP','Noto Sans',sans-serif;font-size:35px;font-weight:500;line-height:1.05;}
 .kanji-character.small{font-size:42px;}
@@ -57,6 +157,7 @@ js:
 .kanji-example-line{margin-top:2px;}
 .kanji-example-line ruby{ruby-position:over;}
 .kanji-example-line rt{font-size:.55em;line-height:1;}
+
 @media only screen and (max-width:520px){
     .kanji-toolbar{grid-template-columns:1fr 1fr;}
     #kanjiGrid{grid-template-columns:repeat(2,minmax(0,1fr));}
@@ -64,7 +165,10 @@ js:
     .kanji-character.small{font-size:34px;}
     .kanji-details{font-size:12px;}
     .kanji-card .lesson-card-topbar{height:38px;}
-    .lesson-search-wrap{margin-bottom:10px;}
-    .lesson-search-box input{height:40px;font-size:13px;padding-left:36px;}
+    #kanjiSearchWrap{margin-bottom:10px;}
+    #kanjiSearchWrap .lesson-search-box{height:40px;border-radius:7px;}
+    #kanjiSearchWrap #kanjiSearch{height:40px;font-size:13px;line-height:40px;padding-left:36px;padding-right:40px;}
+    #kanjiSearchWrap .lesson-search-icon{left:11px;font-size:21px;}
+    #kanjiSearchWrap #kanjiSearchClear{right:5px;width:28px;height:28px;}
 }
 </style>

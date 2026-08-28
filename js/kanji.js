@@ -12,7 +12,6 @@
 
         if (!grid || !levelPanel || !Array.isArray(window.kanjiManualData)) return;
 
-        // Manual-only source. All Kanji information comes from js/kanji-manual-data.js.
         const cards = window.kanjiManualData.map(function (item, index) {
             return {
                 no: item.no || index + 1,
@@ -75,7 +74,7 @@
             return cards.filter(function (item) {
                 if (levels.length && !levels.includes(item.level)) return false;
                 if (!q) return true;
-                const text = [item.kanji, item.kunyomi, item.onyomi, item.meaning, kanaToRomaji(item.kunyomi), kanaToRomaji(item.onyomi)]
+                const text = [item.kanji, item.kunyomi, item.onyomi, item.englishPronunciation, item.banglaPronounciation, kanaToRomaji(item.kunyomi), kanaToRomaji(item.onyomi)]
                     .concat(item.examples.flatMap(function (e) { return [e.word, e.reading, e.meaning, e.romaji || kanaToRomaji(e.reading)]; }))
                     .join(' ').toLowerCase();
                 return text.includes(q) || String(item.no).includes(q);
@@ -88,26 +87,18 @@
             }).join(', ');
         }
 
-        function furiganaHtml(example) {
-            if (!Array.isArray(example.furigana) || !example.furigana.length) return escapeHtml(example.word);
-            const parts = [];
-            example.furigana.forEach(function (part) {
-                if (part && part.kanji) {
-                    parts.push('<ruby>' + escapeHtml(part.kanji) + '<rt>' + escapeHtml(part.reading || '') + '</rt></ruby>');
-                }
-            });
-            return parts.length ? parts.join('') : escapeHtml(example.word);
-        }
-
         function detailHtml(item) {
             const kun = readingsHtml(item.kunyomi);
             const on = readingsHtml(item.onyomi);
-            const jap = kun ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> ' + kun + ' - ' + escapeHtml(item.meaning) + '</div>' : (item.meaning ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> - ' + escapeHtml(item.meaning) + '</div>' : '');
-            const chi = on ? '<div class="kanji-reading-line kanji-chi-line"><span class="kanji-reading-label">Chi:</span> ' + on + '</div>' : '';
+            const english = item.englishPronunciation || '';
+            const bangla = item.banglaPronounciation || '';
+            const japParts = [kun, english ? escapeHtml(english) : '', bangla ? escapeHtml(bangla) : ''].filter(Boolean);
+            const jap = japParts.length ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> ' + japParts.join(' - ') + '</div>' : '';
+            const chi = on ? '<div class="kanji-reading-line kanji-chi-line"><span class="kanji-reading-label">Chi:</span> ' + on + (bangla ? ' - ' + escapeHtml(bangla) : '') + '</div>' : '';
             const examplesHtml = item.examples.filter(function (e) { return e.word && e.word !== item.kanji; }).map(function (e) {
                 const reading = e.reading || '';
                 const romaji = e.romaji || kanaToRomaji(reading);
-                return '<div class="kanji-reading-line kanji-example-line"><span class="kanji-reading-label">Ex:</span> ' + furiganaHtml(e) + (reading ? ' - ' + escapeHtml(reading) + ' (' + escapeHtml(romaji) + ')' : '') + (e.meaning ? ' - ' + escapeHtml(e.meaning) : '') + '</div>';
+                return '<div class="kanji-reading-line kanji-example-line"><span class="kanji-reading-label">Ex:</span> ' + escapeHtml(e.word) + (reading ? ' - ' + escapeHtml(reading) + ' (' + escapeHtml(romaji) + ')' : '') + (e.meaning ? ' - ' + escapeHtml(e.meaning) : '') + '</div>';
             }).join('');
             return jap + chi + examplesHtml;
         }
