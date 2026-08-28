@@ -4,7 +4,7 @@
 // furigana is optional. Use [{ kanji: "電", reading: "でん" }, ...] when readings should appear above Kanji.
 
 window.kanjiManualData = [
-  { no: 1, kanji: "人", level: "N5", meaning: "", kun: [], on: [], examples: [] },
+  { no: 1, kanji: "人", level: "N5", meaning: "Meaning", kun: ["Hello kun"], on: ["Hello On"], examples: ["Example"] },
   { no: 2, kanji: "日", level: "N5", meaning: "", kun: [], on: [], examples: [] },
   { no: 3, kanji: "一", level: "N5", meaning: "", kun: [], on: [], examples: [] },
   { no: 4, kanji: "二", level: "N5", meaning: "", kun: [], on: [], examples: [] },
