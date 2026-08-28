@@ -4,7 +4,7 @@ title: Kanji
 css: /css/lessons.css
 js:
 - /js/main.js
-- /js/kanji-data.js
+- /js/kanji-manual-data.js
 - /js/kanji-examples.js
 - /js/kanji.js
 - /js/kanji-controls.js
@@ -58,8 +58,6 @@ js:
 .kanji-example-line{margin-top:2px;}
 .kanji-loading{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(247,242,231,.65);}
 .kanji-card .lesson-card-topbar{height:42px;}
-
-/* Same search component and placement used by the Lesson page. */
 .lesson-search-wrap{max-width:var(--layout-width);margin:0 auto 14px;padding:0 0;box-sizing:border-box;}
 .lesson-search-box{position:relative;width:100%;display:flex;align-items:center;box-sizing:border-box;}
 .lesson-search-box input{width:100%;height:42px;box-sizing:border-box;padding:8px 40px 8px 38px;border:1px solid var(--paper-line);border-radius:8px;background:var(--paper-cell);color:var(--ink);font:500 14px 'Zen Kaku Gothic New',sans-serif;outline:none;transition:border-color .2s ease,box-shadow .2s ease;}
@@ -70,7 +68,6 @@ js:
 .lesson-search-box button{position:absolute;right:6px;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink-soft);font-size:22px;line-height:1;cursor:pointer;}
 .lesson-search-box button:hover{color:var(--vermilion);background:rgba(0,0,0,.05);}
 body.dark .lesson-search-box button:hover{background:rgba(255,255,255,.08);}
-
 @media only screen and (max-width:520px){
     .kanji-toolbar{grid-template-columns:1fr 1fr;}
     #kanjiGrid{grid-template-columns:repeat(2,minmax(0,1fr));}
