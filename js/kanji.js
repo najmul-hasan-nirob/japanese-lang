@@ -9,24 +9,31 @@
         const shuffleBtn = document.getElementById('kanjiShuffleBtn');
         const directionBtn = document.getElementById('kanjiDirection');
         const count = document.getElementById('kanjiCount');
-        if (!grid || !levelPanel || !Array.isArray(window.kanjiData)) return;
 
-        const source = window.kanjiData;
-        const examples = window.KANJI_EXAMPLES || {};
-        const cards = source.map(function (item, index) {
-            const ex = examples[item.kanji];
+        if (!grid || !levelPanel || !Array.isArray(window.kanjiManualData)) return;
+
+        // Manual-only source. All Kanji information comes from js/kanji-manual-data.js.
+        const cards = window.kanjiManualData.map(function (item, index) {
             return {
                 no: item.no || index + 1,
                 kanji: item.kanji || '',
-                level: item.level || (index < 120 ? 'N5' : 'N4'),
-                kunyomi: item.kunyomi || item.reading || '',
-                onyomi: item.onyomi || '',
+                level: item.level || 'N5',
+                kunyomi: Array.isArray(item.kun) ? item.kun.join('、') : (item.kun || ''),
+                onyomi: Array.isArray(item.on) ? item.on.join('、') : (item.on || ''),
                 meaning: item.meaning || '',
-                examples: ex && ex.example ? [{ word: ex.example, reading: ex.reading || '', meaning: ex.meaning || '' }] : []
+                examples: Array.isArray(item.examples) ? item.examples.map(function (e) {
+                    if (typeof e === 'string') return { word: e, reading: '', romaji: '', meaning: '', furigana: [] };
+                    return {
+                        word: e.word || '',
+                        reading: e.reading || '',
+                        romaji: e.romaji || '',
+                        meaning: e.meaning || '',
+                        furigana: Array.isArray(e.furigana) ? e.furigana : []
+                    };
+                }) : []
             };
-        });
+        }).filter(function (item) { return item.kanji; });
 
-        const detailCache = new Map();
         let showBack = false;
         const UI_STATE_KEY = 'japanese-lang-ui-state-v1';
         const PAGE_KEY = (location.pathname || '/').replace(/\/+$/, '') || '/';
@@ -38,16 +45,28 @@
             let out = '';
             for (let i = 0; i < text.length; i++) {
                 if (text[i] === 'っ') { const n = table[text.slice(i + 1, i + 3)] || table[text[i + 1]] || ''; if (n) out += n.charAt(0); continue; }
-                const p = text.slice(i, i + 2);
-                if (table[p]) { out += table[p]; i++; continue; }
+                const pair = text.slice(i, i + 2);
+                if (table[pair]) { out += table[pair]; i++; continue; }
                 out += table[text[i]] ?? text[i];
             }
             return out;
         }
 
-        function escapeHtml(value) { return String(value == null ? '' : value).replace(/[&<>\'"]/g, function (ch) { return ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]); }); }
-        function selectedLevels() { return Array.from(levelPanel.querySelectorAll('input[type="checkbox"]:checked')).map(function (x) { return x.value; }); }
-        function updateLevelLabel() { const selected = selectedLevels(); const all = Array.from(levelPanel.querySelectorAll('input[type="checkbox"]')); levelBtn.textContent = selected.length === all.length ? 'N5 + N4' : selected.length ? selected.join(' + ') : 'None'; }
+        function escapeHtml(value) {
+            return String(value == null ? '' : value).replace(/[&<>\'"]/g, function (ch) {
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]);
+            });
+        }
+
+        function selectedLevels() {
+            return Array.from(levelPanel.querySelectorAll('input[type="checkbox"]:checked')).map(function (x) { return x.value; });
+        }
+
+        function updateLevelLabel() {
+            const selected = selectedLevels();
+            const all = Array.from(levelPanel.querySelectorAll('input[type="checkbox"]'));
+            levelBtn.textContent = selected.length === all.length ? 'N5 + N4' : selected.length ? selected.join(' + ') : 'None';
+        }
 
         function filteredCards() {
             const q = search.value.trim().toLowerCase();
@@ -55,59 +74,41 @@
             return cards.filter(function (item) {
                 if (levels.length && !levels.includes(item.level)) return false;
                 if (!q) return true;
-                const text = [item.kanji, item.kunyomi, item.onyomi, item.meaning, kanaToRomaji(item.kunyomi), kanaToRomaji(item.onyomi)].concat(item.examples.flatMap(function (e) { return [e.word, e.reading, e.meaning, e.romaji || kanaToRomaji(e.reading)]; })).join(' ').toLowerCase();
+                const text = [item.kanji, item.kunyomi, item.onyomi, item.meaning, kanaToRomaji(item.kunyomi), kanaToRomaji(item.onyomi)]
+                    .concat(item.examples.flatMap(function (e) { return [e.word, e.reading, e.meaning, e.romaji || kanaToRomaji(e.reading)]; }))
+                    .join(' ').toLowerCase();
                 return text.includes(q) || String(item.no).includes(q);
             });
         }
 
         function readingsHtml(value) {
-            return String(value || '').split(/[、,\s]+/).filter(Boolean).map(function (kana) { return escapeHtml(kana) + ' (' + escapeHtml(kanaToRomaji(kana)) + ')'; }).join(', ');
+            return String(value || '').split(/[、,\s]+/).filter(Boolean).map(function (kana) {
+                return escapeHtml(kana) + ' (' + escapeHtml(kanaToRomaji(kana)) + ')';
+            }).join(', ');
+        }
+
+        function furiganaHtml(example) {
+            if (!Array.isArray(example.furigana) || !example.furigana.length) return escapeHtml(example.word);
+            const parts = [];
+            example.furigana.forEach(function (part) {
+                if (part && part.kanji) {
+                    parts.push('<ruby>' + escapeHtml(part.kanji) + '<rt>' + escapeHtml(part.reading || '') + '</rt></ruby>');
+                }
+            });
+            return parts.length ? parts.join('') : escapeHtml(example.word);
         }
 
         function detailHtml(item) {
             const kun = readingsHtml(item.kunyomi);
             const on = readingsHtml(item.onyomi);
             const jap = kun ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> ' + kun + ' - ' + escapeHtml(item.meaning) + '</div>' : (item.meaning ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> - ' + escapeHtml(item.meaning) + '</div>' : '');
-            const chi = item.onyomi ? '<div class="kanji-reading-line kanji-chi-line"><span class="kanji-reading-label">Chi:</span> ' + on + '</div>' : '';
+            const chi = on ? '<div class="kanji-reading-line kanji-chi-line"><span class="kanji-reading-label">Chi:</span> ' + on + '</div>' : '';
             const examplesHtml = item.examples.filter(function (e) { return e.word && e.word !== item.kanji; }).map(function (e) {
                 const reading = e.reading || '';
                 const romaji = e.romaji || kanaToRomaji(reading);
-                return '<div class="kanji-reading-line kanji-example-line"><span class="kanji-reading-label">Ex:</span> ' + escapeHtml(e.word) + ' - ' + escapeHtml(reading) + ' (' + escapeHtml(romaji) + ')' + (e.meaning ? ' - ' + escapeHtml(e.meaning) : '') + '</div>';
+                return '<div class="kanji-reading-line kanji-example-line"><span class="kanji-reading-label">Ex:</span> ' + furiganaHtml(e) + (reading ? ' - ' + escapeHtml(reading) + ' (' + escapeHtml(romaji) + ')' : '') + (e.meaning ? ' - ' + escapeHtml(e.meaning) : '') + '</div>';
             }).join('');
             return jap + chi + examplesHtml;
-        }
-
-        async function loadDetail(kanji) {
-            if (detailCache.has(kanji)) return detailCache.get(kanji);
-            try {
-                const response = await fetch('https://kanjiapi.dev/v1/kanji/' + encodeURIComponent(kanji));
-                if (!response.ok) throw new Error('Kanji API request failed');
-                const data = await response.json();
-                const item = cards.find(function (c) { return c.kanji === kanji; });
-                if (item) {
-                    item.kunyomi = (data.kun_readings || []).join('、');
-                    item.onyomi = (data.on_readings || []).join('、');
-                    if (!item.meaning) item.meaning = (data.meanings || [])[0] || '';
-                }
-                detailCache.set(kanji, data);
-                return data;
-            } catch (error) {
-                detailCache.set(kanji, {});
-                return {};
-            }
-        }
-
-        async function loadCardDetail(card) {
-            const kanji = card.dataset.kanji;
-            const item = cards.find(function (c) { return c.kanji === kanji; });
-            if (!item) return;
-            if (!detailCache.has(kanji)) {
-                const details = card.querySelector('.kanji-details');
-                if (details) details.innerHTML = '<span class="kanji-loading">Loading details…</span>';
-                await loadDetail(kanji);
-            }
-            const details = card.querySelector('.kanji-details');
-            if (details) details.innerHTML = detailHtml(item);
         }
 
         function render() {
@@ -117,34 +118,76 @@
                 return '<div class="card kanji-card" data-no="' + item.no + '" data-kanji="' + escapeHtml(item.kanji) + '"><div class="inner"><div class="front"><div class="lesson-card-topbar"><span class="lesson-card-number">' + item.no + '</span><span class="lesson-tag">' + escapeHtml(item.level) + '</span></div><div class="kanji-character">' + escapeHtml(item.kanji) + '</div></div><div class="back"><div class="lesson-card-topbar"><span class="lesson-card-number">' + item.no + '</span><span class="lesson-tag">' + escapeHtml(item.level) + '</span></div><div class="kanji-character small">' + escapeHtml(item.kanji) + '</div><div class="kanji-details">' + detailHtml(item) + '</div></div></div></div>';
             }).join('');
             grid.querySelectorAll('.card').forEach(function (card) {
-                card.addEventListener('click', async function (event) {
+                card.addEventListener('click', function (event) {
                     if (event.target.closest('.speaker-btn')) return;
                     card.classList.toggle('flipped');
-                    await loadCardDetail(card);
                 });
             });
-            if (showBack) grid.querySelectorAll('.card').forEach(function (card) { card.classList.add('flipped'); loadCardDetail(card); });
+            if (showBack) grid.querySelectorAll('.card').forEach(function (card) { card.classList.add('flipped'); });
             count.textContent = 'Showing ' + visible.length + ' kanji';
             clear.hidden = !search.value;
         }
 
-        function readUIState() { try { const all = JSON.parse(localStorage.getItem(UI_STATE_KEY) || '{}'); return all && typeof all === 'object' ? all : {}; } catch (_) { return {}; } }
-        function saveUIState() { try { const all = readUIState(), previous = all[PAGE_KEY] && typeof all[PAGE_KEY] === 'object' ? all[PAGE_KEY] : {}, controls = previous.controls && typeof previous.controls === 'object' ? { ...previous.controls } : {}; levelPanel.querySelectorAll('input[type="checkbox"]').forEach(function (el) { if (el.id) controls[el.id] = { type:'checkbox', checked:el.checked }; }); all[PAGE_KEY] = { updatedAt:Date.now(), controls:controls }; localStorage.setItem(UI_STATE_KEY, JSON.stringify(all)); } catch (_) {} }
-        function restoreUIState() { const saved = readUIState()[PAGE_KEY], controls = saved && saved.controls && typeof saved.controls === 'object' ? saved.controls : {}; levelPanel.querySelectorAll('input[type="checkbox"]').forEach(function (el) { const state = el.id ? controls[el.id] : null; if (state && state.type === 'checkbox' && typeof state.checked === 'boolean') el.checked = state.checked; }); updateLevelLabel(); }
-        function updateDirectionUI() { directionBtn.classList.toggle('right', showBack); directionBtn.setAttribute('aria-pressed', String(showBack)); directionBtn.setAttribute('aria-label', showBack ? 'Show all cards Front' : 'Show all cards Back'); directionBtn.title = showBack ? 'Show Front' : 'Show Back'; directionBtn.innerHTML = '<span class="lesson-control-text">Front / Back</span>' + FLIP_ICON; }
-        function toggleAllCards() { showBack = !showBack; updateDirectionUI(); grid.querySelectorAll('.card').forEach(function (card) { card.classList.toggle('flipped', showBack); if (showBack) loadCardDetail(card); }); }
+        function readUIState() {
+            try {
+                const all = JSON.parse(localStorage.getItem(UI_STATE_KEY) || '{}');
+                return all && typeof all === 'object' ? all : {};
+            } catch (_) { return {}; }
+        }
 
-        levelBtn.addEventListener('click', function (event) { event.stopPropagation(); const open = levelPanel.classList.toggle('open'); levelBtn.setAttribute('aria-expanded', String(open)); });
+        function saveUIState() {
+            try {
+                const all = readUIState();
+                const previous = all[PAGE_KEY] && typeof all[PAGE_KEY] === 'object' ? all[PAGE_KEY] : {};
+                const controls = previous.controls && typeof previous.controls === 'object' ? { ...previous.controls } : {};
+                levelPanel.querySelectorAll('input[type="checkbox"]').forEach(function (el) {
+                    if (el.id) controls[el.id] = { type:'checkbox', checked:el.checked };
+                });
+                all[PAGE_KEY] = { updatedAt:Date.now(), controls:controls };
+                localStorage.setItem(UI_STATE_KEY, JSON.stringify(all));
+            } catch (_) {}
+        }
+
+        function restoreUIState() {
+            const saved = readUIState()[PAGE_KEY];
+            const controls = saved && saved.controls && typeof saved.controls === 'object' ? saved.controls : {};
+            levelPanel.querySelectorAll('input[type="checkbox"]').forEach(function (el) {
+                const state = el.id ? controls[el.id] : null;
+                if (state && state.type === 'checkbox' && typeof state.checked === 'boolean') el.checked = state.checked;
+            });
+            updateLevelLabel();
+        }
+
+        function updateDirectionUI() {
+            directionBtn.classList.toggle('right', showBack);
+            directionBtn.setAttribute('aria-pressed', String(showBack));
+            directionBtn.setAttribute('aria-label', showBack ? 'Show all cards Front' : 'Show all cards Back');
+            directionBtn.title = showBack ? 'Show Front' : 'Show Back';
+            directionBtn.innerHTML = '<span class="lesson-control-text">Front / Back</span>' + FLIP_ICON;
+        }
+
+        function toggleAllCards() {
+            showBack = !showBack;
+            updateDirectionUI();
+            grid.querySelectorAll('.card').forEach(function (card) { card.classList.toggle('flipped', showBack); });
+        }
+
+        levelBtn.addEventListener('click', function (event) {
+            event.stopPropagation();
+            const open = levelPanel.classList.toggle('open');
+            levelBtn.setAttribute('aria-expanded', String(open));
+        });
         levelPanel.addEventListener('click', function (event) { event.stopPropagation(); });
         levelPanel.addEventListener('change', function () { updateLevelLabel(); saveUIState(); render(); });
         document.addEventListener('click', function () { levelPanel.classList.remove('open'); levelBtn.setAttribute('aria-expanded', 'false'); });
         directionBtn.addEventListener('click', function (event) { event.preventDefault(); event.stopPropagation(); toggleAllCards(); });
-        updateDirectionUI();
         search.addEventListener('input', render);
         clear.addEventListener('click', function () { search.value = ''; render(); search.focus(); });
         mode.addEventListener('change', render);
         shuffleBtn.addEventListener('click', function () { mode.value = 'shuffle'; render(); });
+
         restoreUIState();
+        updateDirectionUI();
         render();
     }
 
