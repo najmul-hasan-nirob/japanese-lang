@@ -75,7 +75,7 @@
             return cards.filter(function (item) {
                 if (levels.length && !levels.includes(item.level)) return false;
                 if (!q) return true;
-                const text = [item.kanji, item.kunyomi, item.onyomi, item.meaning, kanaToRomaji(item.kunyomi), kanaToRomaji(item.onyomi)]
+                const text = [item.kanji, item.kunyomi, item.onyomi, item.englishPronunciation, item.banglaPronounciation, kanaToRomaji(item.kunyomi), kanaToRomaji(item.onyomi)]
                     .concat(item.examples.flatMap(function (e) { return [e.word, e.reading, e.meaning, e.romaji || kanaToRomaji(e.reading)]; }))
                     .join(' ').toLowerCase();
                 return text.includes(q) || String(item.no).includes(q);
@@ -102,7 +102,10 @@
         function detailHtml(item) {
             const kun = readingsHtml(item.kunyomi);
             const on = readingsHtml(item.onyomi);
-            const jap = kun ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> ' + kun + ' - ' + escapeHtml(item.meaning) + '</div>' : (item.meaning ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> - ' + escapeHtml(item.meaning) + '</div>' : '');
+            const english = item.englishPronunciation || '';
+            const bangla = item.banglaPronounciation || '';
+            const japParts = [kun, english ? escapeHtml(english) : '', bangla ? escapeHtml(bangla) : ''].filter(Boolean);
+            const jap = japParts.length ? '<div class="kanji-reading-line"><span class="kanji-reading-label">Jap:</span> ' + japParts.join(' - ') + '</div>' : '';
             const chi = on ? '<div class="kanji-reading-line kanji-chi-line"><span class="kanji-reading-label">Chi:</span> ' + on + '</div>' : '';
             const examplesHtml = item.examples.filter(function (e) { return e.word && e.word !== item.kanji; }).map(function (e) {
                 const reading = e.reading || '';
