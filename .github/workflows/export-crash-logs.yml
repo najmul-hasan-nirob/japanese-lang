@@ -1,0 +1,46 @@
+name: Export crash diagnostics
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch crash logs from Supabase
+        env:
+          SUPABASE_URL: https://levpdywhnikadumfocao.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          mkdir -p debug
+          curl --fail-with-body -sS \
+            "$SUPABASE_URL/rest/v1/crash_logs?select=*&order=detected_at.desc&limit=100" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Accept: application/json" \
+            -o /tmp/crash-rows.json
+          jq --arg exportedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{exportedAt:$exportedAt, count:length, logs:.}' \
+            /tmp/crash-rows.json > debug/crash-logs.json
+
+      - name: Commit new diagnostics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add debug/crash-logs.json
+          if git diff --cached --quiet; then
+            echo "No new crash diagnostics."
+            exit 0
+          fi
+          git commit -m "Update crash diagnostics"
+          git push
