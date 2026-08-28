@@ -18,17 +18,16 @@
                 no: item.no || index + 1,
                 kanji: item.kanji || '',
                 level: item.level || 'N5',
-                kunyomi: Array.isArray(item.kun) ? item.kun.join('、') : (item.kun || ''),
-                onyomi: Array.isArray(item.on) ? item.on.join('、') : (item.on || ''),
+                kunyomi: Array.isArray(item.kunyomiPronunciation) ? item.kunyomiPronunciation.join('、') : (item.kunyomiPronunciation || ''),
+                onyomi: Array.isArray(item.onyomiPronunciation) ? item.onyomiPronunciation.join('、') : (item.onyomiPronunciation || ''),
                 meaning: item.meaning || '',
                 examples: Array.isArray(item.examples) ? item.examples.map(function (e) {
                     if (typeof e === 'string') return { word: e, reading: '', romaji: '', meaning: '', furigana: [] };
                     return {
-                        word: e.word || '',
-                        reading: e.reading || '',
-                        romaji: e.romaji || '',
-                        meaning: e.meaning || '',
-                        furigana: Array.isArray(e.furigana) ? e.furigana : []
+                        word: e.wordWithKanji || '',
+                        reading: e.readingPronunciation || '',
+                        romaji: e.readingRomaji || '',
+                        meaning: e.banglaPronounciation || ''
                     };
                 }) : []
             };
