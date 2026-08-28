@@ -23,10 +23,10 @@ const lesson13 = {
     {"jp":"～ごろ","romaji":"～goro","en":"about ~ (time)","bn":"প্রায় ~টা / প্রায় ~ সময়ে"},
     {"jp":"なにか","romaji":"nanika","en":"something","bn":"কিছু / কোনো কিছু"},
     {"jp":"どこか","romaji":"dokoka","en":"somewhere, some place","bn":"কোথাও / কোনো এক জায়গায়"},
-    {"jp":"のどが かわきます","romaji":"nodoga kawakimasu","en":"get thirsty","bn":"তৃষ্ণার্ত হওয়া / গলা শুকিয়ে যাওয়া"},
-    {"jp":"おなかが すきます","romaji":"onakaga sukimasu","en":"get hungry","bn":"ক্ষুধার্ত হওয়া / পেট খিদে পাওয়া"}
   ],
   "cpart": [
+        {"jp":"のどが かわきます","romaji":"nodoga kawakimasu","en":"get thirsty","bn":"তৃষ্ণার্ত হওয়া / গলা শুকিয়ে যাওয়া"},
+    {"jp":"おなかが すきます","romaji":"onakaga sukimasu","en":"get hungry","bn":"ক্ষুধার্ত হওয়া / পেট খিদে পাওয়া"},
     {"jp":"そう しましょう。","romaji":"sou shimashou。","en":"Let's do that. (used when agreeing with someone's suggestion)","bn":"তাই করি / ঠিক আছে, তাই করা যাক।"},
     {"jp":"ごちゅうもんは？","romaji":"gochuumonha？","en":"May I take your order?","bn":"আপনার অর্ডার কী? / কী অর্ডার করবেন?"},
     {"jp":"ていしょく","romaji":"teishoku","en":"set meal, table d'hôte","bn":"সেট খাবার / নির্দিষ্ট মেনুর খাবার"},
