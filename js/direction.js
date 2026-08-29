@@ -12,9 +12,6 @@
         const grid = document.getElementById('grid');
         if (!direction || !grid) return;
 
-        // Use the button's actual visual state as the source of truth. This
-        // keeps the reverse Teacher Mode trigger synchronized even if another
-        // script changes the direction state before this handler runs.
         let showBack = direction.classList.contains('right') || direction.getAttribute('aria-pressed') === 'true';
 
         function updateUI() {
@@ -38,13 +35,17 @@
         }
 
         function toggle() {
-            // Capture the state BEFORE changing it. If we were on Back and
-            // are now returning to Front, Teacher Mode must run:
-            // Bangla -> 4 seconds -> Japanese -> 1 second -> next card.
             const wasBack = showBack;
             showBack = !showBack;
             updateUI();
             applyState();
+
+            // Tell the UI-state persistence layer about the new direction.
+            // This is needed because the click handler intentionally stops
+            // propagation to prevent duplicate direction handlers.
+            window.dispatchEvent(new CustomEvent('japaneseLangDirectionChanged', {
+                detail: { showBack }
+            }));
 
             if (wasBack && !showBack) {
                 runReverseTeacherMode();
