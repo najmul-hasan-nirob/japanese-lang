@@ -10,8 +10,6 @@
     const PRACTICE_KEY = "japanese-lang-practice-lessons-v1";
     const LESSON_FILTER_KEY = "japanese-lang-lesson-filter-v1";
     const SHUFFLE_KEY = "japanese-lang-lesson-shuffle-v1";
-    const SCREEN_KEY = "japanese-lang-screen-awake";
-    const UI_STATE_KEY = "japanese-lang-ui-state-v1";
     const DEFAULT_LESSON_FILTER = { selectedLessons: ["lesson1"], orderMode: "normal" };
     let client = null, syncTimer = null, lastSnapshot = "";
 
@@ -28,9 +26,7 @@
         return {
             selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
             orderMode: value.orderMode === "shuffle" ? "shuffle" : "normal",
-            ...(value.shuffleState && typeof value.shuffleState === "object" ? { shuffleState: value.shuffleState } : {}),
-            ...(typeof value.screenAwake === "boolean" ? { screenAwake: value.screenAwake } : {}),
-            ...(value.pageStates && typeof value.pageStates === "object" ? { pageStates: value.pageStates } : {})
+            ...(value.shuffleState && typeof value.shuffleState === "object" ? { shuffleState: value.shuffleState } : {})
         };
     }
 
@@ -49,16 +45,17 @@
         return { version: 3, states };
     }
 
+    // IMPORTANT: toolbar/mobile control state is local-only.
+    // Only actual lesson-filter data belongs in the cloud.
     function buildLessonFilterSnapshot() {
         const saved = normalizeLessonFilter(get(LESSON_FILTER_KEY, DEFAULT_LESSON_FILTER));
         return {
             selectedLessons: saved.selectedLessons,
             orderMode: saved.orderMode,
-            shuffleState: get(SHUFFLE_KEY, null),
-            screenAwake: get(SCREEN_KEY, false) === true,
-            pageStates: get(UI_STATE_KEY, {})
+            shuffleState: get(SHUFFLE_KEY, null)
         };
     }
+
     function snapshot() {
         return JSON.stringify({
             hard: get(HARD_KEY, []),
@@ -67,14 +64,7 @@
             lessonFilter: buildLessonFilterSnapshot()
         });
     }
-    function applyCloudScreenState(enabled) {
-        const toggle = document.getElementById("screenWakeToggle");
-        if (toggle) {
-            const current = toggle.getAttribute("aria-pressed") === "true";
-            if (current !== enabled) toggle.click();
-        }
-        set(SCREEN_KEY, enabled);
-    }
+
     async function pullCloud(userId) {
         if (!client || !userId) return;
         const { data, error } = await client.from(TABLE)
@@ -87,7 +77,6 @@
         if (Array.isArray(data.practice_lessons)) set(PRACTICE_KEY, data.practice_lessons);
         if (data.lesson_filter && typeof data.lesson_filter === "object") {
             const cloudFilter = normalizeLessonFilter(data.lesson_filter);
-            const localFilter = normalizeLessonFilter(get(LESSON_FILTER_KEY, DEFAULT_LESSON_FILTER));
             const mergedShuffle = mergeShuffleStores(get(SHUFFLE_KEY, null), cloudFilter.shuffleState);
 
             set(LESSON_FILTER_KEY, {
@@ -96,14 +85,11 @@
                 shuffleState: mergedShuffle
             });
             set(SHUFFLE_KEY, mergedShuffle);
-            if (typeof cloudFilter.screenAwake === "boolean") applyCloudScreenState(cloudFilter.screenAwake);
-            if (cloudFilter.pageStates && typeof cloudFilter.pageStates === "object") set(UI_STATE_KEY, cloudFilter.pageStates);
-
-            void localFilter;
         }
         lastSnapshot = snapshot();
         window.dispatchEvent(new CustomEvent("japaneseLangCloudLoaded"));
     }
+
     async function pushCloud(userId, force = false) {
         if (!client || !userId) return;
         const snap = snapshot();
@@ -121,12 +107,14 @@
         lastSnapshot = snap;
         window.dispatchEvent(new CustomEvent("japaneseLangCloudSaved"));
     }
+
     async function syncUser(userId) {
         if (!client || !userId) return;
         if (snapshot() !== lastSnapshot) await pushCloud(userId); else await pullCloud(userId);
     }
     function startPolling(userId) { clearInterval(syncTimer); syncTimer = setInterval(() => syncUser(userId), 1500); }
     function stopPolling() { clearInterval(syncTimer); syncTimer = null; }
+
     function createAuthUI() {
         if (document.getElementById("jlCloudAuth")) return;
         const wrap = document.createElement("div"); wrap.id = "jlCloudAuth";
@@ -154,6 +142,7 @@
         placeAuth(); window.addEventListener("resize", placeAuth);
         document.addEventListener("click", (e) => { if (window.innerWidth <= 520 && !wrap.contains(e.target)) { wrap.classList.remove("jl-mobile-open"); panel.hidden = true; } });
     }
+
     async function auth(signUp) { const email = document.getElementById("jlEmail").value.trim(), password = document.getElementById("jlPassword").value, msg = document.getElementById("jlCloudMessage"); if (!email || !password) { msg.textContent = "Enter email and password."; return; } const result = signUp ? await client.auth.signUp({ email, password }) : await client.auth.signInWithPassword({ email, password }); msg.textContent = result.error ? result.error.message : (signUp ? "Account created. Check your email if confirmation is enabled." : "Signed in."); }
     function updateUI(session) { const status = document.getElementById("jlCloudStatus"); if (!status) return; const signed = !!session?.user; status.textContent = signed ? `Synced: ${session.user.email}` : "Not signed in"; document.getElementById("jlSignIn").hidden = signed; document.getElementById("jlSignUp").hidden = signed; document.getElementById("jlSignOut").hidden = !signed; }
     async function init() {
