@@ -17,9 +17,6 @@
         if (loaded.has(key)) return true;
         if (loading.has(key)) return loading.get(key);
 
-        // Use the current page's base URL so this also works on GitHub Pages
-        // project sites such as /japanese-lang/. A leading / would incorrectly
-        // request /js/lessons/... from the domain root and return 404.
         const lessonUrl = new URL(`js/lessons/${key}.js`, document.baseURI).href;
 
         const promise = fetch(lessonUrl, { cache: 'force-cache' })
@@ -28,12 +25,16 @@
                 return response.text();
             })
             .then(source => {
-                const match = source.match(/^\s*const\s+(lesson\d+)\s*=\s*/);
+                // Lesson files start with a comment, e.g. "// Lesson 1", before
+                // the const declaration. The previous parser incorrectly
+                // required const to be the first non-whitespace token.
+                const match = source.match(/(?:^|\n)\s*const\s+(lesson\d+)\s*=\s*/);
                 if (!match || match[1] !== key) throw new Error(`Invalid lesson data format: ${key}`);
 
-                // Lesson files are data-only. Put the selected lesson into the
-                // shared registry without creating a permanent script element.
-                const executable = source.replace(match[0], `window.__lessonDataStore.${key} = `);
+                const replacement = match[0].startsWith('\n')
+                    ? '\nwindow.__lessonDataStore.' + key + ' = '
+                    : 'window.__lessonDataStore.' + key + ' = ';
+                const executable = source.replace(match[0], replacement);
                 new Function(executable)();
 
                 if (!store[key]) throw new Error(`Lesson data did not initialize: ${key}`);
@@ -60,8 +61,6 @@
 
         const wanted = new Set(selected.length ? selected : ['lesson1']);
 
-        // Drop data for lessons that are no longer selected. This keeps the
-        // active JavaScript memory footprint limited to the user's selection.
         Object.keys(store).forEach(key => {
             if (!wanted.has(key)) delete store[key];
         });
@@ -71,8 +70,6 @@
 
         const results = await Promise.all(Array.from(wanted, loadLesson));
         if (results.every(Boolean)) {
-            // lesson-filter.js already owns rendering. Trigger its existing
-            // type change listener after the requested lesson data is ready.
             const typePanel = document.getElementById('typePanel');
             if (typePanel) typePanel.dispatchEvent(new Event('change', { bubbles: true }));
             document.dispatchEvent(new CustomEvent('lessonDataLoaded', {
@@ -91,8 +88,6 @@
     }, true);
 
     document.addEventListener('DOMContentLoaded', () => {
-        // lesson-filter.js builds the lesson checkboxes during DOMContentLoaded.
-        // Run immediately after that listener has completed.
         setTimeout(syncSelectedLessons, 0);
     });
 })();
