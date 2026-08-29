@@ -1,21 +1,13 @@
 // Lesson data registry
-// Each lesson is stored in its own file under /js/lessons/.
-// The lesson files are loaded by lessons.html BEFORE this file.
+// Lesson files are now loaded on demand by lesson-loader.js.
+// Only the lesson(s) selected by the user are kept in memory.
 
-const lessonsData = {
-    lesson1, lesson2, lesson3, lesson4, lesson5,
-    lesson6, lesson7, lesson8, lesson9, lesson10,
-    lesson11, lesson12, lesson13, lesson14, lesson15,
-    lesson16, lesson17, lesson18, lesson19, lesson20,
-    lesson21, lesson22, lesson23, lesson24, lesson25
-};
+const LESSON_KEYS = Array.from({ length: 25 }, (_, i) => `lesson${i + 1}`);
+const lessonsData = {};
+window.__lessonDataStore = lessonsData;
 
 function sortedLessonKeys() {
-    return Object.keys(lessonsData).sort((a, b) => {
-        const na = parseInt(a.replace("lesson", ""), 10);
-        const nb = parseInt(b.replace("lesson", ""), 10);
-        return na - nb;
-    });
+    return LESSON_KEYS.slice();
 }
 
 function lessonLabel(key) {
@@ -120,13 +112,8 @@ function shuffle(array) {
     const forceNew = window.lessonForceShuffle === true;
     window.lessonForceShuffle = false;
 
-    // A saved order is authoritative. Reloads, cloud restoration, and
-    // ordinary re-renders must never replace it with a new random order.
     const saved = readLessonShuffleState(array);
     if (!forceNew && saved && restoreLessonShuffle(array, saved)) return array;
-
-    // No saved order + no explicit user request: keep deterministic source
-    // order. Randomization is ONLY allowed after a real user shuffle action.
     if (!forceNew) return array;
 
     for (let i = array.length - 1; i > 0; i--) {
