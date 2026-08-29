@@ -4,43 +4,13 @@ title: Japanese Lessons
 css: /css/lessons.css
 js:
 - /js/main.js
-- /js/lessons/lesson1.js
-- /js/lessons/lesson2.js
-- /js/lessons/lesson3.js
-- /js/lessons/lesson4.js
-- /js/lessons/lesson5.js
-- /js/lessons/lesson6.js
-- /js/lessons/lesson7.js
-- /js/lessons/lesson8.js
-- /js/lessons/lesson9.js
-- /js/lessons/lesson10.js
-- /js/lessons/lesson11.js
-- /js/lessons/lesson12.js
-- /js/lessons/lesson13.js
-- /js/lessons/lesson14.js
-- /js/lessons/lesson15.js
-- /js/lessons/lesson16.js
-- /js/lessons/lesson17.js
-- /js/lessons/lesson18.js
-- /js/lessons/lesson19.js
-- /js/lessons/lesson20.js
-- /js/lessons/lesson21.js
-- /js/lessons/lesson22.js
-- /js/lessons/lesson23.js
-- /js/lessons/lesson24.js
-- /js/lessons/lesson25.js
-- /js/lessons/bangla-meanings.js
-- /js/lessons/bangla-context-fixes.js
-- /js/lessons/bangla-grammar-fixes.js
 - /js/lessons.js
+- /js/lesson-loader.js
 - /js/lesson-shuffle-guard.js
 - /js/lesson-filter.js
 - /js/lesson-filter-persistence.js
 - /js/lesson-type.js
 - /js/lesson-controls.js
-- /js/lesson1-webp.js
-- /js/lesson-illustrations.js
-- /js/lesson7-illustrations.js
 - /js/hard-vocabulary.js
 - /js/lesson-card-number.js
 - /js/lesson-card-topbar.js
@@ -85,10 +55,6 @@ js:
 <div class="grid" id="grid"></div>
 
 <style>
-    .lesson-illustration { display: flex; object-fit: contain; flex: 0 0 auto; margin: 6px auto 8px; border-radius: 12px; }
-    .card:has(.lesson-illustration) { min-height: 270px; }
-    .front .lesson-illustration { display: none !important; }
-    .back .lesson-illustration { display: flex; }
     .hard-star { position: absolute; top: 8px; left: 8px; z-index: 5; width: 30px; height: 30px; padding: 0; border: 0; background: transparent; color: #9a9a9a; font-size: 25px; line-height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: .85; transition: transform .15s ease, opacity .15s ease, color .15s ease; }
     .hard-star:hover, .hard-star:focus-visible { opacity: 1; transform: scale(1.08); outline: none; }
     .hard-star.active { color: #f5b301; opacity: 1; }
@@ -108,8 +74,6 @@ js:
     @media (max-width:520px) {
         .lesson-card-inner { padding-top: 38px !important; }
         .grid { grid-template-columns: repeat(2, 1fr); }
-        .lesson-illustration { margin: 4px auto 6px; }
-        .card:has(.lesson-illustration) { min-height: 230px; }
         .hard-star { top: 6px; left: 6px; width: 28px; height: 28px; font-size: 23px; line-height: 28px; }
         .lesson-card-number { top: 6px; min-width: 22px; height: 22px; font-size: 12px; }
         .lesson-card-topbar { height: 38px; }
@@ -117,9 +81,7 @@ js:
         .mobile-bottom-controls .teacher-stop-btn .lesson-control-text { display: inline-flex; }
     }
     .lesson-card-inner { padding-top: 30px !important; }
-    .lesson-tag{
-        margin-left: 5px;
-    }
+    .lesson-tag { margin-left: 5px; }
 </style>
 
 <script>
