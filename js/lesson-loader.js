@@ -17,7 +17,12 @@
         if (loaded.has(key)) return true;
         if (loading.has(key)) return loading.get(key);
 
-        const promise = fetch(`/js/lessons/${key}.js`, { cache: 'force-cache' })
+        // Use the current page's base URL so this also works on GitHub Pages
+        // project sites such as /japanese-lang/. A leading / would incorrectly
+        // request /js/lessons/... from the domain root and return 404.
+        const lessonUrl = new URL(`js/lessons/${key}.js`, document.baseURI).href;
+
+        const promise = fetch(lessonUrl, { cache: 'force-cache' })
             .then(response => {
                 if (!response.ok) throw new Error(`Failed to load ${key}: HTTP ${response.status}`);
                 return response.text();
