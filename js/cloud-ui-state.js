@@ -1,5 +1,9 @@
 // =====================================================
-// Japanese Lang — Cloud-synced toolbar / mobile control state
+// Japanese Lang — Local-only toolbar / mobile control state
+// =====================================================
+// Toolbar and mobile sticky-button state is intentionally NOT cloud synced.
+// Supabase Cloud Sync is reserved for learning data and lesson-filter state.
+// This file keeps the existing localStorage persistence only.
 // =====================================================
 (() => {
     const KEY = "japanese-lang-ui-state-v1";
@@ -27,7 +31,10 @@
     function controls() {
         const result = [];
         const seen = new Set();
-        document.querySelectorAll(".toolbar select, .toolbar input[type=checkbox], .toolbar button[aria-pressed], .toolbar .abacus[aria-pressed], .mobile-bottom-controls select, .mobile-bottom-controls input[type=checkbox], .mobile-bottom-controls button[aria-pressed], .mobile-bottom-controls .abacus[aria-pressed]").forEach(el => {
+        document.querySelectorAll(
+            ".toolbar select, .toolbar input[type=checkbox], .toolbar button[aria-pressed], .toolbar .abacus[aria-pressed], " +
+            ".mobile-bottom-controls select, .mobile-bottom-controls input[type=checkbox], .mobile-bottom-controls button[aria-pressed], .mobile-bottom-controls .abacus[aria-pressed]"
+        ).forEach(el => {
             if (!el.id || seen.has(el.id)) return;
             if (el.id === "screenWakeToggle") return;
             if (el.closest("#lessonPanel")) return;
@@ -45,7 +52,10 @@
             } else if (el.matches("input[type=checkbox]")) {
                 state[el.id] = { type: "checkbox", checked: el.checked };
             } else if (el.getAttribute("aria-pressed") !== null) {
-                state[el.id] = { type: "pressed", pressed: el.getAttribute("aria-pressed") === "true" };
+                state[el.id] = {
+                    type: "pressed",
+                    pressed: el.getAttribute("aria-pressed") === "true"
+                };
             }
         });
         return state;
@@ -54,19 +64,24 @@
     function save() {
         if (restoring) return;
         const all = read();
-        all[pageKey()] = { updatedAt: Date.now(), controls: capture() };
+        all[pageKey()] = {
+            updatedAt: Date.now(),
+            controls: capture()
+        };
         write(all);
     }
 
     function restore() {
         const saved = read()[pageKey()];
         if (!saved || !saved.controls) return;
+
         const map = saved.controls;
         restoring = true;
         try {
             controls().forEach(el => {
                 const state = map[el.id];
                 if (!state) return;
+
                 if (state.type === "select" && el.value !== state.value) {
                     const option = Array.from(el.options).find(o => o.value === state.value);
                     if (option) {
@@ -87,36 +102,43 @@
     }
 
     function init() {
-        // Capture clicks before individual controls can stop propagation.
-        // This is important for controls such as the Front/Back switch that
-        // use stopImmediatePropagation() in their own handlers.
+        // Capture phase ensures controls that stop propagation are still saved.
         document.addEventListener("click", event => {
             if (restoring) return;
-            const control = event.target.closest(".toolbar button[aria-pressed], .toolbar .abacus[aria-pressed], .mobile-bottom-controls button[aria-pressed], .mobile-bottom-controls .abacus[aria-pressed]");
+            const control = event.target.closest(
+                ".toolbar button[aria-pressed], .toolbar .abacus[aria-pressed], " +
+                ".mobile-bottom-controls button[aria-pressed], .mobile-bottom-controls .abacus[aria-pressed]"
+            );
             if (control && control.id !== "screenWakeToggle") setTimeout(save, 0);
         }, true);
 
         document.addEventListener("change", event => {
             if (restoring) return;
-            if (event.target.closest(".toolbar, .mobile-bottom-controls") && !event.target.closest("#lessonPanel")) save();
+            if (
+                event.target.closest(".toolbar, .mobile-bottom-controls") &&
+                !event.target.closest("#lessonPanel")
+            ) save();
         });
 
-        // Direction.js dispatches this after updating Front/Back state.
+        // Custom direction event is local-only; it never enters Supabase.
         window.addEventListener("japaneseLangDirectionChanged", () => {
             if (!restoring) save();
         });
 
-        // Keep the existing bubble listener as a fallback for controls whose
-        // click handler does not stop propagation.
+        // Fallback bubble listener for controls that allow propagation.
         document.addEventListener("click", event => {
             if (restoring) return;
-            const control = event.target.closest(".toolbar button[aria-pressed], .toolbar .abacus[aria-pressed], .mobile-bottom-controls button[aria-pressed], .mobile-bottom-controls .abacus[aria-pressed]");
+            const control = event.target.closest(
+                ".toolbar button[aria-pressed], .toolbar .abacus[aria-pressed], " +
+                ".mobile-bottom-controls button[aria-pressed], .mobile-bottom-controls .abacus[aria-pressed]"
+            );
             if (control && control.id !== "screenWakeToggle") setTimeout(save, 0);
         });
 
+        // Restore ONLY from localStorage on page load.
+        // Deliberately do not listen for japaneseLangCloudLoaded.
         restore();
     }
 
-    window.addEventListener("japaneseLangCloudLoaded", restore);
     document.addEventListener("DOMContentLoaded", init);
 })();
