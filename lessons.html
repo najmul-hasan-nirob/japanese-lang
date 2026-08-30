@@ -14,6 +14,7 @@ js:
 - /js/lesson-card-number.js
 - /js/lesson-card-topbar.js
 - /js/lesson-teacher-mode.js
+- /js/lesson-controls.js
 ---
 
 <div class="toolbar">
@@ -24,10 +25,7 @@ js:
     </div>
     <div class="field filter-field">
         <label for="mode">Order</label>
-        <select id="mode">
-            <option value="normal">Normal</option>
-            <option value="shuffle">Shuffle</option>
-        </select>
+        <select id="mode"><option value="normal">Normal</option><option value="shuffle">Shuffle</option></select>
     </div>
     <div class="field filter-field">
         <label id="typeLabel">Type</label>
@@ -39,63 +37,17 @@ js:
             <label><input type="checkbox" value="grammar"> Grammar</label>
         </div>
     </div>
-    <div class="field shuffle-field">
-        <button id="shuffleBtn" class="shuffle-btn" type="button"></button>
-    </div>
-    <div class="field romaji-field">
-        <button id="backRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true"></button>
-    </div>
-    <div class="field direction-field">
-        <button id="direction" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back"></button>
-    </div>
+    <div class="field shuffle-field"><button id="shuffleBtn" class="shuffle-btn" type="button"></button></div>
+    <div class="field romaji-field"><button id="backRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true"></button></div>
+    <div class="field direction-field"><button id="direction" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back"></button></div>
 </div>
-
 <div class="count-display" id="countDisplay" aria-live="polite"></div>
 <div class="grid" id="grid"></div>
 
 <style>
-    .hard-star { position: absolute; top: 8px; left: 8px; z-index: 5; width: 30px; height: 30px; padding: 0; border: 0; background: transparent; color: #9a9a9a; font-size: 25px; line-height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: .85; transition: transform .15s ease, opacity .15s ease, color .15s ease; }
-    .hard-star:hover, .hard-star:focus-visible { opacity: 1; transform: scale(1.08); outline: none; }
-    .hard-star.active { color: #f5b301; opacity: 1; }
-    .lesson-card-number { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 4; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 999px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; font-size: 13px; font-weight: 700; line-height: 1; pointer-events: none; user-select: none; }
-    .lesson-card-topbar { position: absolute; top: 0; left: 0; right: 0; height: 42px; z-index: 20; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; justify-items: center; pointer-events: none; background-color: #18212c; padding: 5px; }
-    .lesson-card-topbar .hard-star, .lesson-card-topbar .lesson-card-number, .lesson-card-topbar .speaker-btn, .lesson-card-topbar .speak-btn, .lesson-card-topbar .pronunciation-btn { position: static !important; transform: none !important; margin: 0 !important; }
-    .lesson-card-topbar .hard-star, .lesson-card-topbar .speaker-btn, .lesson-card-topbar .speak-btn, .lesson-card-topbar .pronunciation-btn { pointer-events: auto; }
-    .lesson-card-topbar .hard-star { grid-column: 1; }
-    .lesson-card-topbar .lesson-card-number { grid-column: 2; }
-    .lesson-card-topbar .speaker-btn, .lesson-card-topbar .speak-btn, .lesson-card-topbar .pronunciation-btn { grid-column: 3; display: flex !important; visibility: visible !important; opacity: 1 !important; }
-    .card .front, .card .back { text-align: center; }
-    .card .front> :not(.lesson-card-topbar), .card .back> :not(.lesson-card-topbar) { margin-left: auto; margin-right: auto; }
-    .card.teacher-active { outline: 2px solid var(--vermilion); outline-offset: 2px; }
-    .teacher-mode-field { display: flex; gap: 6px; }
-    .teacher-mode-field > button { flex: 1 1 0; min-width: 0; }
-    .teacher-stop-btn:disabled { opacity: .45; cursor: default; }
-    @media (max-width:520px) {
-        .lesson-card-inner { padding-top: 38px !important; }
-        .grid { grid-template-columns: repeat(2, 1fr); }
-        .hard-star { top: 6px; left: 6px; width: 28px; height: 28px; font-size: 23px; line-height: 28px; }
-        .lesson-card-number { top: 6px; min-width: 22px; height: 22px; font-size: 12px; }
-        .lesson-card-topbar { height: 38px; }
-        .mobile-bottom-controls .teacher-mode-btn .lesson-control-text,
-        .mobile-bottom-controls .teacher-stop-btn .lesson-control-text { display: inline-flex; }
-    }
-    .lesson-card-inner { padding-top: 30px !important; }
-    .lesson-tag { margin-left: 5px; }
+.hard-star{position:absolute;top:8px;left:8px;z-index:5;width:30px;height:30px;padding:0;border:0;background:transparent;color:#9a9a9a;font-size:25px;line-height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85;transition:transform .15s ease,opacity .15s ease,color .15s ease}.hard-star:hover,.hard-star:focus-visible{opacity:1;transform:scale(1.08);outline:none}.hard-star.active{color:#f5b301;opacity:1}.lesson-card-number{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:4;min-width:24px;height:24px;padding:0 6px;border-radius:999px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-size:13px;font-weight:700;line-height:1;pointer-events:none;user-select:none}.lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:42px;z-index:20;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;justify-items:center;pointer-events:none;background-color:#18212c;padding:5px}.lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-card-number,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{position:static!important;transform:none!important;margin:0!important}.lesson-card-topbar .hard-star,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{pointer-events:auto}.lesson-card-topbar .hard-star{grid-column:1}.lesson-card-topbar .lesson-card-number{grid-column:2}.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{grid-column:3;display:flex!important;visibility:visible!important;opacity:1!important}.card .front,.card .back{text-align:center}.card .front> :not(.lesson-card-topbar),.card .back> :not(.lesson-card-topbar){margin-left:auto;margin-right:auto}.card.teacher-active{outline:2px solid var(--vermilion);outline-offset:2px}.teacher-mode-field{display:flex;gap:6px}.teacher-mode-field>button{flex:1 1 0;min-width:0}.teacher-stop-btn:disabled{opacity:.45;cursor:default}@media(max-width:520px){.lesson-card-inner{padding-top:38px!important}.grid{grid-template-columns:repeat(2,1fr)}.hard-star{top:6px;left:6px;width:28px;height:28px;font-size:23px;line-height:28px}.lesson-card-number{top:6px;min-width:22px;height:22px;font-size:12px}.lesson-card-topbar{height:38px}.mobile-bottom-controls .teacher-mode-btn .lesson-control-text,.mobile-bottom-controls .teacher-stop-btn .lesson-control-text{display:inline-flex}}.lesson-card-inner{padding-top:30px!important}.lesson-tag{margin-left:5px}
 </style>
 
 <script>
-(function () {
-    const grid = document.getElementById('grid');
-    const count = document.getElementById('countDisplay');
-    const typePanel = document.getElementById('typePanel');
-    function getVisibleCount() { if (!grid) return 0; return grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length; }
-    function getSelectedNormalTypes() { if (!typePanel) return []; return Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).filter(box => box.value !== 'hard' && box.checked).map(box => ({ value: box.value, label: box.closest('label')?.textContent.trim() || box.value })); }
-    function getHardCountForCurrentCards() { if (!grid) return 0; return Array.from(grid.querySelectorAll(':scope > .card')).filter(card => card.querySelector('.hard-star.active')).length; }
-    function getCountLabel() { if (!typePanel) return null; const hard = Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).find(box => box.value === 'hard'); if (!hard?.checked) return null; const selected = getSelectedNormalTypes(); if (selected.length === 1 && selected[0].value === 'vocabulary') return 'Hard Vocabulary'; const typeName = selected.length ? selected.map(item => item.label).join(' + ') : 'Vocabulary'; return `Hard ${typeName} Vocabulary`; }
-    function updateCount() { if (!grid || !count) return; const total = getVisibleCount(); const hardLabel = getCountLabel(); if (!hardLabel) { const selected = getSelectedNormalTypes(); if (selected.length === 1 && selected[0].value === 'vocabulary') { const hardCount = getHardCountForCurrentCards(); count.textContent = hardCount > 0 ? `Showing ${total} vocabulary + ${hardCount} hard vocabulary` : `Showing ${total} vocabulary`; return; } } count.textContent = hardLabel ? `Showing ${total} ${hardLabel}` : `Showing ${total} ${total === 1 ? 'card' : 'cards'}`; }
-    updateCount();
-    if (grid) new MutationObserver(updateCount).observe(grid, { childList: true, attributes: true, attributeFilter: ['style'] });
-    if (typePanel) typePanel.addEventListener('change', () => setTimeout(updateCount, 0));
-    document.addEventListener('hardVocabularyUpdated', updateCount);
-})();
+(function(){const grid=document.getElementById('grid'),count=document.getElementById('countDisplay'),typePanel=document.getElementById('typePanel');function getVisibleCount(){return grid?grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length:0}function getSelectedNormalTypes(){return typePanel?Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).filter(box=>box.value!=='hard'&&box.checked).map(box=>({value:box.value,label:box.closest('label')?.textContent.trim()||box.value})):[]}function getHardCountForCurrentCards(){return grid?Array.from(grid.querySelectorAll(':scope > .card')).filter(card=>card.querySelector('.hard-star.active')).length:0}function getCountLabel(){if(!typePanel)return null;const hard=Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).find(box=>box.value==='hard');if(!hard?.checked)return null;const selected=getSelectedNormalTypes();if(selected.length===1&&selected[0].value==='vocabulary')return'Hard Vocabulary';const typeName=selected.length?selected.map(item=>item.label).join(' + '):'Vocabulary';return`Hard ${typeName} Vocabulary`}function updateCount(){if(!grid||!count)return;const total=getVisibleCount(),hardLabel=getCountLabel();if(!hardLabel){const selected=getSelectedNormalTypes();if(selected.length===1&&selected[0].value==='vocabulary'){const hardCount=getHardCountForCurrentCards();count.textContent=hardCount>0?`Showing ${total} vocabulary + ${hardCount} hard vocabulary`:`Showing ${total} vocabulary`;return}}count.textContent=hardLabel?`Showing ${total} ${hardLabel}`:`Showing ${total} ${total===1?'card':'cards'}`}updateCount();if(grid)new MutationObserver(updateCount).observe(grid,{childList:true,attributes:true,attributeFilter:['style']});if(typePanel)typePanel.addEventListener('change',()=>setTimeout(updateCount,0));document.addEventListener('hardVocabularyUpdated',updateCount)})();
 </script>
