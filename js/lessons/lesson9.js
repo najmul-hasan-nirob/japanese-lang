@@ -8,16 +8,3 @@ const lesson9 = {
   ],
   "country": []
 };
-
-// Load Lesson 9 visual-memory illustrations after the lesson cards exist.
-(function () {
-  function load() {
-    if (document.querySelector('script[data-lesson9-illustration]')) return;
-    const s = document.createElement('script');
-    s.src = '/js/lessons/lesson9-illustration.js';
-    s.dataset.lesson9Illustration = 'true';
-    document.head.appendChild(s);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
-  else load();
-})();

@@ -10,16 +10,3 @@ const lesson8 = {
     {"jp":"シャンハイ","romaji":"shanhai","en":"Shanghai","bn":"সাংহাই"},{"jp":"きんかくじ","romaji":"kinkakuji","en":"Kinkakuji Temple (the Golden Pavilion)","bn":"কিনকাকুজি মন্দির / গোল্ডেন প্যাভিলিয়ন"},{"jp":"ならこうえん","romaji":"narakouen","en":"Nara Park","bn":"নারা পার্ক"},{"jp":"ふじさん","romaji":"fujisan","en":"Mt. Fuji, the highest mountain in Japan","bn":"মাউন্ট ফুজি, জাপানের সর্বোচ্চ পর্বত"},{"jp":"「しちにんのさむらい」","romaji":"「shichininnosamurai」","en":"'The Seven Samurai', a classic movie by Akira Kurosawa","bn":"‘দ্য সেভেন সামুরাই’, আকিরা কুরোসাওয়ার বিখ্যাত চলচ্চিত্র"}
   ]
 };
-
-// Load Lesson 8 visual-memory illustrations after the lesson cards exist.
-(function () {
-  function load() {
-    if (document.querySelector('script[data-lesson8-illustration]')) return;
-    const s = document.createElement('script');
-    s.src = '/js/lessons/lesson8-illustration.js';
-    s.dataset.lesson8Illustration = 'true';
-    document.head.appendChild(s);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
-  else load();
-})();

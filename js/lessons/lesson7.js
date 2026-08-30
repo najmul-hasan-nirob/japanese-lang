@@ -10,16 +10,3 @@ const lesson7 = {
     {"jp":"スペイン","romaji":"supein","en":"Spain","bn":"স্পেন"}
   ]
 };
-
-// Load Lesson 7 visual-memory illustrations after the lesson cards exist.
-(function () {
-  function load() {
-    if (document.querySelector('script[data-lesson7-illustration]')) return;
-    const s = document.createElement('script');
-    s.src = '/js/lessons/lesson7-illustration.js';
-    s.dataset.lesson7Illustration = 'true';
-    document.head.appendChild(s);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
-  else load();
-})();
