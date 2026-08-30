@@ -35,7 +35,6 @@
     grid-area:1 / 1;
     width:100%;
     box-sizing:border-box;
-    /* border-radius:var(--radius); */
     display:flex;
     flex-direction:column;
     justify-content:center;
@@ -68,14 +67,8 @@
     transform:rotateY(180deg);
     border-color:transparent;
 }
-.back .bangla{
-    color: #59cb75
-}
-
-.card:hover{
-    border-color:var(--vermilion);
-}
-
+.back .bangla{ color:#59cb75; }
+.card:hover{ border-color:var(--vermilion); }
 .card.grammar .front{ color:var(--vermilion); }
 body.dark .card.grammar .front{ color:var(--vermilion); }
 
@@ -95,7 +88,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     letter-spacing:.06em;
     color:var(--ink-soft);
 }
-
 .back .lesson-tag{ color:rgba(247,242,231,.65); }
 
 .field{
@@ -114,19 +106,13 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     gap:6px;
     padding:18px 10px 10px 10px;
 }
-
 .vocabulary-back .romaji{
     font-family:'JetBrains Mono', monospace;
     font-size:14px;
     font-weight:700;
     letter-spacing:.03em;
 }
-
-.vocabulary-back .english{
-    font-size:14px;
-    font-weight:500;
-}
-
+.vocabulary-back .english{ font-size:14px; font-weight:500; }
 .vocabulary-back .bangla{
     font-family:'Noto Sans Bengali','Noto Sans',sans-serif;
     font-size:14px;
@@ -148,13 +134,7 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     color:#F7F2E7;
     opacity:.94;
 }
-
-.lesson-illustration svg{
-    width:70px;
-    height:70px;
-    display:block;
-}
-
+.lesson-illustration svg{ width:70px; height:70px; display:block; }
 .front .lesson-illustration{ display:none !important; }
 
 .lesson-reset-btn{
@@ -172,7 +152,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     cursor:pointer;
     transition:transform .2s ease, border-color .25s ease, background-color .25s ease;
 }
-
 .lesson-reset-btn:hover,
 .lesson-reset-btn:focus-visible{
     border-color:var(--vermilion);
@@ -180,17 +159,13 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     outline:none;
 }
 
-.mobile-bottom-controls{
-    display:none;
-}
+.mobile-bottom-controls{ display:none; }
 
 #backRomajiToggle,
 #direction,
 #shuffleBtn,
 #lessonResetBtn,
-.mobile-bottom-controls > button{
-    color:var(--vermilion) !important;
-}
+.mobile-bottom-controls > button{ color:var(--vermilion) !important; }
 
 .lesson-control-svg{
     width:20px !important;
@@ -204,42 +179,19 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     stroke-linecap:round;
     stroke-linejoin:round;
 }
-
-.lesson-control-label{
-    color:inherit;
-}
-
-html,
-body{
-    overscroll-behavior-y: none;
-}
+.lesson-control-label{ color:inherit; }
+html, body{ overscroll-behavior-y:none; }
 
 @media only screen and (max-width:520px) {
-    .toolbar .teacher-mode-btn, .toolbar .teacher-stop-btn{
-        display: none;
-    }
-    html,
-    body{
-        overscroll-behavior-y: none;
-    }
+    .toolbar .teacher-mode-btn, .toolbar .teacher-stop-btn{ display:none; }
+    html, body{ overscroll-behavior-y:none; }
     .front{ font-size:18px; text-align:center; }
     .back{ font-size:16px; }
     .vocabulary-back .romaji,
     .vocabulary-back .english,
     .vocabulary-back .bangla{ font-size:13px; }
-
-    .lesson-illustration{
-        width:52px;
-        height:52px;
-        flex-basis:52px;
-        margin-top:4px;
-        border-radius:10px;
-    }
-
-    .lesson-illustration svg{
-        width:40px;
-        height:40px;
-    }
+    .lesson-illustration{ width:52px; height:52px; flex-basis:52px; margin-top:4px; border-radius:10px; }
+    .lesson-illustration svg{ width:40px; height:40px; }
 
     .mobile-bottom-controls{
         position:fixed;
@@ -258,7 +210,8 @@ body{
     }
 
     .mobile-bottom-controls > button,
-    .mobile-bottom-controls > .abacus{
+    .mobile-bottom-controls > .abacus,
+    .mobile-bottom-controls > .screen-wake-field{
         flex:1 1 0;
         width:auto;
         min-width:0;
@@ -267,62 +220,48 @@ body{
         border-radius:6px;
     }
 
-    .mobile-bottom-controls .lesson-reset-btn{
-        font-size:22px;
+    /* The shared .field rule hides fields on mobile. The screen control is
+       intentionally moved into the sticky bar, so explicitly keep it visible. */
+    .mobile-bottom-controls > .screen-wake-field{
+        display:flex !important;
+        flex-direction:column;
+        align-items:stretch;
+        justify-content:stretch;
+    }
+
+    .mobile-bottom-controls .screen-wake-field > button{
+        width:100%;
+        min-width:0;
+        height:100%;
+        min-height:44px;
         padding:6px;
+        background:transparent;
+        box-shadow:none;
+        white-space:nowrap;
+        color:var(--vermilion) !important;
     }
 
-    .mobile-bottom-controls .romaji-toggle{
-        font-size:20px;
+    /* Sticky controls are icon-first and compact; don't duplicate the desktop
+       "Screen" label inside the already-labelled bottom button. */
+    .mobile-bottom-controls .screen-wake-field .lesson-control-text{
+        display:none !important;
     }
 
-    .mobile-bottom-controls #shuffleBtn{
-        display:flex;
-        align-items:center;
-        justify-content:center;
-    }
-
-    .mobile-bottom-controls .rod{
-        width:42px;
-    }
-
-    .mobile-bottom-controls .abacus.right .bead{
-        transform:translate(22px,-50%);
-    }
+    .mobile-bottom-controls .lesson-reset-btn{ font-size:22px; padding:6px; }
+    .mobile-bottom-controls .romaji-toggle{ font-size:20px; }
+    .mobile-bottom-controls #shuffleBtn{ display:flex; align-items:center; justify-content:center; }
+    .mobile-bottom-controls .rod{ width:42px; }
+    .mobile-bottom-controls .abacus.right .bead{ transform:translate(22px,-50%); }
 }
 
-.recall-answer{
-    display: flex;
-    flex-direction: column;
-    padding-top: 10px
-}
-
-.count-display{
-    max-width: var(--layout-width);
-    margin: 0 auto 20px;
-    text-align: center !important;
-}
+.recall-answer{ display:flex; flex-direction:column; padding-top:10px; }
+.count-display{ max-width:var(--layout-width); margin:0 auto 20px; text-align:center !important; }
 
 /* ---------- LESSON CARD NATURAL HEIGHT ---------- */
-.grid{
-    align-items:start;
-}
-
-.grid > .card{
-    align-self:start;
-    min-height:0 !important;
-    height:auto !important;
-}
-
-.grid > .card:has(.lesson-illustration){
-    min-height:0 !important;
-}
-
-.card.lesson-card-structured{
-    min-height:0 !important;
-    height:auto !important;
-}
-
+.grid{ align-items:start; }
+.grid > .card{ align-self:start; min-height:0 !important; height:auto !important; }
+.grid > .card:has(.lesson-illustration){ min-height:0 !important; }
+.card.lesson-card-structured{ min-height:0 !important; height:auto !important; }
 .card.lesson-card-structured .lesson-card-inner{
     position:relative !important;
     inset:auto !important;
@@ -332,7 +271,6 @@ body{
     display:grid !important;
     overflow:visible !important;
 }
-
 .card.lesson-card-structured .lesson-card-content{
     position:relative !important;
     inset:auto !important;
@@ -343,7 +281,6 @@ body{
     display:grid !important;
     overflow:visible !important;
 }
-
 .card.lesson-card-structured .lesson-card-content > .front,
 .card.lesson-card-structured .lesson-card-content > .back{
     position:relative !important;
@@ -358,52 +295,19 @@ body{
     justify-content:center !important;
     text-align:center !important;
 }
-
-.card.lesson-card-structured .lesson-card-content > .back{
-    transform:rotateY(180deg);
-}
-
+.card.lesson-card-structured .lesson-card-content > .back{ transform:rotateY(180deg); }
 @media only screen and (max-width:520px){
     .card.lesson-card-structured .lesson-card-content > .front,
-    .card.lesson-card-structured .lesson-card-content > .back{
-        padding:44px 10px 10px !important;
-    }
+    .card.lesson-card-structured .lesson-card-content > .back{ padding:44px 10px 10px !important; }
 }
-
-/* Lesson 10, card 28: remove only the duplicate visual illustration. */
-.grid > .card:nth-child(28) .back .lesson-illustration ~ .lesson-illustration{
-    display:none !important;
-}
+.grid > .card:nth-child(28) .back .lesson-illustration ~ .lesson-illustration{ display:none !important; }
 
 /* ---------- EQUAL HEIGHT PER GRID ROW ---------- */
-.grid{
-    align-items:stretch;
-}
-
-.grid > .card {
-    align-self: stretch;
-    height: auto !important;
-    display: flex;
-}
-
-.card.lesson-card-structured{
-    height:auto !important;
-}
-
-.card.lesson-card-structured .lesson-card-inner{
-    height:100% !important;
-}
-
-.card.lesson-card-structured .lesson-card-content{
-    height:100% !important;
-}
-
+.grid{ align-items:stretch; }
+.grid > .card{ align-self:stretch; height:auto !important; display:flex; }
+.card.lesson-card-structured{ height:auto !important; }
+.card.lesson-card-structured .lesson-card-inner{ height:100% !important; }
+.card.lesson-card-structured .lesson-card-content{ height:100% !important; }
 .card.lesson-card-structured .lesson-card-content > .front,
-.card.lesson-card-structured .lesson-card-content > .back{
-    height:100% !important;
-}
-
-/* Remove only accidental duplicate illustrations on any lesson card. */
-.card .back .lesson-illustration ~ .lesson-illustration{
-    display:none !important;
-}
+.card.lesson-card-structured .lesson-card-content > .back{ height:100% !important; }
+.card .back .lesson-illustration ~ .lesson-illustration{ display:none !important; }
