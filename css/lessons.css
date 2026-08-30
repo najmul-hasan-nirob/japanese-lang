@@ -120,23 +120,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     line-height:1.5;
 }
 
-.lesson-illustration{
-    width:70px;
-    height:70px;
-    flex:0 0 64px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:5px auto 0;
-    border:1px solid rgba(247,242,231,.18);
-    border-radius:12px;
-    background:rgba(247,242,231,.06);
-    color:#F7F2E7;
-    opacity:.94;
-}
-.lesson-illustration svg{ width:70px; height:70px; display:block; }
-.front .lesson-illustration{ display:none !important; }
-
 .lesson-reset-btn{
     width:100%;
     min-height:38px;
@@ -190,8 +173,6 @@ html, body{ overscroll-behavior-y:none; }
     .vocabulary-back .romaji,
     .vocabulary-back .english,
     .vocabulary-back .bangla{ font-size:13px; }
-    .lesson-illustration{ width:52px; height:52px; flex-basis:52px; margin-top:4px; border-radius:10px; }
-    .lesson-illustration svg{ width:40px; height:40px; }
 
     .mobile-bottom-controls{
         position:fixed;
@@ -260,7 +241,6 @@ html, body{ overscroll-behavior-y:none; }
 /* ---------- LESSON CARD NATURAL HEIGHT ---------- */
 .grid{ align-items:start; }
 .grid > .card{ align-self:start; min-height:0 !important; height:auto !important; }
-.grid > .card:has(.lesson-illustration){ min-height:0 !important; }
 .card.lesson-card-structured{ min-height:0 !important; height:auto !important; }
 .card.lesson-card-structured .lesson-card-inner{
     position:relative !important;
@@ -300,7 +280,6 @@ html, body{ overscroll-behavior-y:none; }
     .card.lesson-card-structured .lesson-card-content > .front,
     .card.lesson-card-structured .lesson-card-content > .back{ padding:44px 10px 10px !important; }
 }
-.grid > .card:nth-child(28) .back .lesson-illustration ~ .lesson-illustration{ display:none !important; }
 
 /* ---------- EQUAL HEIGHT PER GRID ROW ---------- */
 .grid{ align-items:stretch; }
@@ -310,4 +289,3 @@ html, body{ overscroll-behavior-y:none; }
 .card.lesson-card-structured .lesson-card-content{ height:100% !important; }
 .card.lesson-card-structured .lesson-card-content > .front,
 .card.lesson-card-structured .lesson-card-content > .back{ height:100% !important; }
-.card .back .lesson-illustration ~ .lesson-illustration{ display:none !important; }
