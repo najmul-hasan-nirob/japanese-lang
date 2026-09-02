@@ -252,6 +252,7 @@ html, body{ overscroll-behavior-y:none; }
     flex:1 1 auto !important;
     overflow:visible !important;
     box-sizing:border-box !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
 }
 
 /* ---------- EQUAL HEIGHT PER GRID ROW ---------- */
