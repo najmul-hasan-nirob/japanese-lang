@@ -17,6 +17,8 @@
     min-height:0;
     position:relative;
     display:grid;
+    flex:1 1 auto;
+    align-self:stretch;
     transition:transform .5s cubic-bezier(.4,.1,.2,1);
     transform-style:preserve-3d;
 }
@@ -201,8 +203,6 @@ html, body{ overscroll-behavior-y:none; }
         border-radius:6px;
     }
 
-    /* The shared .field rule hides fields on mobile. The screen control is
-       intentionally moved into the sticky bar, so explicitly keep it visible. */
     .mobile-bottom-controls > .screen-wake-field{
         display:flex !important;
         flex-direction:column;
@@ -222,8 +222,6 @@ html, body{ overscroll-behavior-y:none; }
         color:var(--vermilion) !important;
     }
 
-    /* Sticky controls are icon-first and compact; don't duplicate the desktop
-       "Screen" label inside the already-labelled bottom button. */
     .mobile-bottom-controls .screen-wake-field .lesson-control-text{
         display:none !important;
     }
@@ -238,54 +236,46 @@ html, body{ overscroll-behavior-y:none; }
 .recall-answer{ display:flex; flex-direction:column; padding-top:10px; }
 .count-display{ max-width:var(--layout-width); margin:0 auto 20px; text-align:center !important; }
 
-/* ---------- LESSON CARD NATURAL HEIGHT ---------- */
-.grid{ align-items:start; }
-.grid > .card{ align-self:start; min-height:0 !important; height:auto !important; }
+/* ---------- LESSON CARD NATURAL HEIGHT + EQUAL GRID ROWS ---------- */
+.grid{ align-items:stretch; }
+.grid > .card{ align-self:stretch; min-height:0 !important; height:auto !important; }
 .card.lesson-card-structured{ min-height:0 !important; height:auto !important; }
+
 .card.lesson-card-structured .lesson-card-inner{
     position:relative !important;
     inset:auto !important;
     width:100% !important;
     height:auto !important;
     min-height:0 !important;
-    display:grid !important;
-    overflow:visible !important;
-}
-.card.lesson-card-structured .lesson-card-content{
-    position:relative !important;
-    inset:auto !important;
-    grid-area:1 / 1 !important;
-    width:100% !important;
-    height:auto !important;
-    min-height:0 !important;
-    display:grid !important;
-    overflow:visible !important;
-}
-.card.lesson-card-structured .lesson-card-content > .front,
-.card.lesson-card-structured .lesson-card-content > .back{
-    position:relative !important;
-    inset:auto !important;
-    grid-area:1 / 1 !important;
-    width:100% !important;
-    height:auto !important;
-    min-height:0 !important;
-    padding:50px 10px 10px !important;
     display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    text-align:center !important;
-}
-.card.lesson-card-structured .lesson-card-content > .back{ transform:rotateY(180deg); }
-@media only screen and (max-width:520px){
-    .card.lesson-card-structured .lesson-card-content > .front,
-    .card.lesson-card-structured .lesson-card-content > .back{ padding:44px 10px 10px !important; }
+    flex-direction:column !important;
+    flex:1 1 auto !important;
+    overflow:visible !important;
+    box-sizing:border-box !important;
 }
 
-/* ---------- EQUAL HEIGHT PER GRID ROW ---------- */
-.grid{ align-items:stretch; }
-.grid > .card{ align-self:stretch; height:auto !important; display:flex; }
-.card.lesson-card-structured{ height:auto !important; }
-.card.lesson-card-structured .lesson-card-inner{ height:100% !important; }
-.card.lesson-card-structured .lesson-card-content{ height:100% !important; }
-.card.lesson-card-structured .lesson-card-content > .front,
-.card.lesson-card-structured .lesson-card-content > .back{ height:100% !important; }
+/* .inner is the actual front/back wrapper. It must stretch to the full
+   height of the grid row, while remaining content-sized when the row grows. */
+.card.lesson-card-structured .lesson-card-inner > .inner{
+    width:100% !important;
+    height:auto !important;
+    min-height:100% !important;
+    flex:1 1 auto !important;
+    align-self:stretch !important;
+}
+
+.card.lesson-card-structured .lesson-card-content{
+    position:relative !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    display:grid !important;
+    flex:0 0 auto !important;
+    overflow:visible !important;
+}
+
+@media only screen and (max-width:520px){
+    .card.lesson-card-structured .lesson-card-inner > .inner{
+        min-height:100% !important;
+    }
+}
