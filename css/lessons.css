@@ -289,3 +289,20 @@ html, body{ overscroll-behavior-y:none; }
 .card.lesson-card-structured .lesson-card-content{ height:100% !important; }
 .card.lesson-card-structured .lesson-card-content > .front,
 .card.lesson-card-structured .lesson-card-content > .back{ height:100% !important; }
+
+/* ---------- FILL THE STRETCHED CARD ---------- */
+/* The grid stretches the .card to the tallest item in each row. The card's
+   flip container must also stretch, otherwise its front/back backgrounds stop
+   at their own intrinsic content height and leave a visible gap inside the
+   stretched card. */
+.grid > .card > .inner{
+    width:100%;
+    height:100%;
+    min-height:0;
+    align-self:stretch;
+}
+.grid > .card > .inner > .front,
+.grid > .card > .inner > .back{
+    height:100%;
+    min-height:0;
+}
