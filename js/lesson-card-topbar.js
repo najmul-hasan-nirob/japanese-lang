@@ -76,16 +76,24 @@
     position:relative;
     overflow:hidden;
     border-radius:var(--radius);
+    display:flex;
+    align-items:stretch;
 }
 
+/* Keep the inner wrapper in normal flow so its content determines the
+   card's intrinsic height. The grid then stretches both cards in a row. */
 .lesson-card-inner {
-    position:absolute;
-    inset:0;
+    position:relative;
     width:100%;
-    height:100%;
-    overflow:hidden;
+    height:auto;
+    min-height:0;
+    overflow:visible;
     border-radius:inherit;
     box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    flex:1 1 auto;
+    transform-style:preserve-3d;
 }
 
 .lesson-card-topbar {
@@ -105,21 +113,28 @@
 }
 
 .lesson-card-content {
-    position:absolute;
-    inset:0;
+    position:relative;
     width:100%;
-    height:100%;
+    height:auto;
+    min-height:0;
     box-sizing:border-box;
-    overflow:hidden;
+    overflow:visible;
+    display:grid;
+    flex:1 1 auto;
+    grid-template-columns:minmax(0, 1fr);
+    grid-template-rows:1fr;
+    align-items:stretch;
     pointer-events:none;
 }
 
 .lesson-card-content > .front,
 .lesson-card-content > .back {
-    position:absolute;
-    inset:0;
+    position:relative;
+    inset:auto;
+    grid-area:1 / 1;
     width:100%;
-    height:100%;
+    height:auto;
+    min-height:0;
     box-sizing:border-box;
     padding-top:50px !important;
     padding-bottom:14px;
