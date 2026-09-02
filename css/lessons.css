@@ -13,7 +13,7 @@
 
 .inner{
     width:100%;
-    height:auto;
+    height:100%;
     min-height:0;
     position:relative;
     display:grid;
@@ -254,8 +254,11 @@ html, body{ overscroll-behavior-y:none; }
     box-sizing:border-box !important;
 }
 
-/* .inner is the actual front/back wrapper. It must stretch to the full
-   height of the grid row, while remaining content-sized when the row grows. */
+/* ---------- EQUAL HEIGHT PER GRID ROW ---------- */
+.grid{ align-items:stretch; }
+.grid > .card{ align-self:stretch; height:auto !important; display:flex; flex-direction:column; }
+.card.lesson-card-structured{ height:auto !important; }
+.card.lesson-card-structured .lesson-card-inner{ height:100% !important; }
 .card.lesson-card-structured .lesson-card-inner > .inner{
     width:100% !important;
     height:auto !important;
@@ -263,19 +266,25 @@ html, body{ overscroll-behavior-y:none; }
     flex:1 1 auto !important;
     align-self:stretch !important;
 }
+.card.lesson-card-structured .lesson-card-content{ position:relative !important; width:100% !important; height:100% !important; min-height:0 !important; display:grid !important; flex:0 0 auto !important; overflow:visible !important; }
+.card.lesson-card-structured .lesson-card-content > .front,
+.card.lesson-card-structured .lesson-card-content > .back{ height:100% !important; }
 
-.card.lesson-card-structured .lesson-card-content{
-    position:relative !important;
-    width:100% !important;
-    height:auto !important;
-    min-height:0 !important;
-    display:grid !important;
-    flex:0 0 auto !important;
-    overflow:visible !important;
+/* ---------- GENERIC INNER ROW FILL ---------- */
+/* The grid row determines the card height from the tallest card. The generic
+   .inner then stretches inside that card without using a fixed pixel height. */
+.grid > .card > .inner{
+    flex:1 1 auto;
+    width:100%;
+    min-height:0;
+    height:auto;
+    align-self:stretch;
 }
 
 @media only screen and (max-width:520px){
     .card.lesson-card-structured .lesson-card-inner > .inner{
         min-height:100% !important;
     }
+}
+
 }
