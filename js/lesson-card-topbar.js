@@ -20,6 +20,93 @@
         speaker.style.setProperty('pointer-events', 'auto', 'important');
     }
 
+    function isBackCard(card) {
+        return !!card && (card.classList.contains('flipped') || card.getAttribute('data-flipped') === 'true');
+    }
+
+    function teacherModeIsActive(card) {
+        return !!card?.classList.contains('teacher-active');
+    }
+
+    function getSpeechVoice(langPrefix) {
+        if (!window.speechSynthesis) return null;
+        const prefix = String(langPrefix || '').toLowerCase();
+        return window.speechSynthesis.getVoices().find(v => String(v.lang || '').toLowerCase().startsWith(prefix)) || null;
+    }
+
+    function speakBackSequence(card) {
+        const bangla = card.querySelector('.bangla')?.textContent.replace(/\s+/g, ' ').trim() || '';
+        const english = card.querySelector('.english')?.textContent.replace(/\s+/g, ' ').trim() || '';
+        if (!bangla && !english) return;
+
+        if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+            const s = window.speechSynthesis;
+            try { s.cancel(); s.resume(); } catch (e) {}
+
+            const queue = [];
+            if (bangla) {
+                const u = new SpeechSynthesisUtterance(bangla);
+                u.lang = 'bn-BD';
+                u.rate = 1.0;
+                const voice = getSpeechVoice('bn');
+                if (voice) u.voice = voice;
+                queue.push(u);
+            }
+            if (bangla && english) {
+                const u = new SpeechSynthesisUtterance('বা');
+                u.lang = 'bn-BD';
+                u.rate = 1.0;
+                const voice = getSpeechVoice('bn');
+                if (voice) u.voice = voice;
+                queue.push(u);
+            }
+            if (english) {
+                const u = new SpeechSynthesisUtterance(english);
+                u.lang = 'en-US';
+                u.rate = 1.0;
+                const voice = getSpeechVoice('en');
+                if (voice) u.voice = voice;
+                queue.push(u);
+            }
+
+            queue.forEach(u => s.speak(u));
+            return;
+        }
+
+        // Android bridge fallback. It does not expose speech completion, so use
+        // a conservative delay between the Bangla and English utterances.
+        if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
+            if (bangla) {
+                try { window.AndroidTTS.speak(bangla); } catch (e) {}
+            }
+            if (bangla && english) {
+                const delay = Math.max(900, Math.min(5000, bangla.replace(/\s/g, '').length * 55 + 500));
+                setTimeout(() => {
+                    try { window.AndroidTTS.speak('বা'); } catch (e) {}
+                    setTimeout(() => {
+                        try { window.AndroidTTS.speak(english); } catch (e) {}
+                    }, 500);
+                }, delay);
+            } else if (english) {
+                try { window.AndroidTTS.speak(english); } catch (e) {}
+            }
+        }
+    }
+
+    function setupSpeakerBehavior(card, speaker) {
+        if (!speaker || speaker.dataset.backSpeechReady === 'true') return;
+        speaker.dataset.backSpeechReady = 'true';
+
+        // Capture phase runs before the existing normal Japanese speaker handler.
+        // On the back side, replace that handler with Bangla → বা → English.
+        speaker.addEventListener('click', event => {
+            if (!isBackCard(card) || teacherModeIsActive(card)) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            speakBackSequence(card);
+        }, true);
+    }
+
     function setupCard(card) {
         if (!card) return;
 
@@ -62,7 +149,10 @@
             }
         });
 
-        if (speaker) makeVisibleSpeaker(speaker);
+        if (speaker) {
+            makeVisibleSpeaker(speaker);
+            setupSpeakerBehavior(card, speaker);
+        }
         card.classList.add('lesson-card-structured');
     }
 
