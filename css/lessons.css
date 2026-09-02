@@ -201,8 +201,6 @@ html, body{ overscroll-behavior-y:none; }
         border-radius:6px;
     }
 
-    /* The shared .field rule hides fields on mobile. The screen control is
-       intentionally moved into the sticky bar, so explicitly keep it visible. */
     .mobile-bottom-controls > .screen-wake-field{
         display:flex !important;
         flex-direction:column;
@@ -222,8 +220,6 @@ html, body{ overscroll-behavior-y:none; }
         color:var(--vermilion) !important;
     }
 
-    /* Sticky controls are icon-first and compact; don't duplicate the desktop
-       "Screen" label inside the already-labelled bottom button. */
     .mobile-bottom-controls .screen-wake-field .lesson-control-text{
         display:none !important;
     }
@@ -289,3 +285,18 @@ html, body{ overscroll-behavior-y:none; }
 .card.lesson-card-structured .lesson-card-content{ height:100% !important; }
 .card.lesson-card-structured .lesson-card-content > .front,
 .card.lesson-card-structured .lesson-card-content > .back{ height:100% !important; }
+
+/* ---------- GENERIC INNER ROW FILL ---------- */
+/* The grid row determines the card height from the tallest card. The generic
+   .inner then stretches inside that card without using a fixed pixel height. */
+.grid > .card{
+    display:flex;
+    flex-direction:column;
+}
+.grid > .card > .inner{
+    flex:1 1 auto;
+    width:100%;
+    min-height:0;
+    height:auto;
+    align-self:stretch;
+}
