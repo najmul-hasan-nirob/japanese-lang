@@ -80,9 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const badges = Array.from(topbar.querySelectorAll(`.${NUMBER_CLASS}`));
             const badge = badges[0] || document.createElement("span");
             badges.slice(1).forEach(item => item.remove());
+            const nextNumber = String(number++);
             badge.className = NUMBER_CLASS;
             badge.setAttribute("aria-hidden", "true");
-            badge.textContent = String(number++);
+            if (badge.textContent !== nextNumber) badge.textContent = nextNumber;
             if (badge.parentElement !== topbar) topbar.appendChild(badge);
         });
     }
