@@ -239,9 +239,9 @@ html, body{ overscroll-behavior-y:none; }
 .grid > .card{ align-self:stretch; min-height:0 !important; height:auto !important; }
 .card.lesson-card-structured{ min-height:0 !important; height:auto !important; }
 
-/* The inner wrapper must stay in normal flow. Its content determines the
-   row's natural height; CSS Grid then stretches the shorter card in that row.
-   This is important because the front/back backgrounds live inside .inner. */
+/* Keep the structured inner wrapper in normal flow and make it fill the
+   complete stretched grid row. The topbar is absolute, while the content
+   area occupies all remaining height below the inner's top padding. */
 .card.lesson-card-structured .lesson-card-inner{
     position:relative !important;
     inset:auto !important;
@@ -252,6 +252,7 @@ html, body{ overscroll-behavior-y:none; }
     flex-direction:column !important;
     flex:1 1 auto !important;
     overflow:visible !important;
+    box-sizing:border-box !important;
 }
 
 .card.lesson-card-structured .lesson-card-content{
@@ -262,9 +263,11 @@ html, body{ overscroll-behavior-y:none; }
     min-height:0 !important;
     display:grid !important;
     grid-template-columns:minmax(0,1fr) !important;
-    grid-template-rows:auto !important;
+    grid-template-rows:minmax(0,1fr) !important;
     flex:1 1 auto !important;
     overflow:visible !important;
+    align-items:stretch !important;
+    box-sizing:border-box !important;
 }
 
 .card.lesson-card-structured .lesson-card-content > .front,
@@ -273,8 +276,9 @@ html, body{ overscroll-behavior-y:none; }
     inset:auto !important;
     grid-area:1 / 1 !important;
     width:100% !important;
-    height:auto !important;
-    min-height:0 !important;
+    height:100% !important;
+    min-height:100% !important;
+    box-sizing:border-box !important;
     padding:50px 10px 10px !important;
     display:flex !important;
     align-items:center !important;
