@@ -24,44 +24,100 @@ if(themeBtn){
 }
 
 // =====================================================
-// Screen Wake Lock — keep display awake while studying
+// Screen Wake Lock — safe, page-lifecycle aware
 // =====================================================
 (function(){
     const STORAGE_KEY="japanese-lang-screen-awake";
+    const FAIL_KEY="japanese-lang-screen-awake-failures";
+    const FAIL_WINDOW_KEY="japanese-lang-screen-awake-failure-window";
+    const MAX_VISIBLE_FAILURES=2;
+    const FAILURE_WINDOW_MS=30000;
     let wakeLock=null;
+    let requestInFlight=null;
     let button=null;
+    let intentionallyReleasing=false;
+    let disabledForSession=false;
 
-    function isEnabled(){ return localStorage.getItem(STORAGE_KEY)==="on"; }
+    function isEnabled(){
+        return !disabledForSession && localStorage.getItem(STORAGE_KEY)==="on";
+    }
+
+    function markFailure(){
+        const now=Date.now();
+        const windowStart=Number(sessionStorage.getItem(FAIL_WINDOW_KEY)||0);
+        let failures=Number(sessionStorage.getItem(FAIL_KEY)||0);
+        if(!windowStart || now-windowStart>FAILURE_WINDOW_MS){
+            sessionStorage.setItem(FAIL_WINDOW_KEY,String(now));
+            failures=0;
+        }
+        failures++;
+        sessionStorage.setItem(FAIL_KEY,String(failures));
+        if(failures>=MAX_VISIBLE_FAILURES) disabledForSession=true;
+    }
+
+    function clearFailures(){
+        sessionStorage.removeItem(FAIL_KEY);
+        sessionStorage.removeItem(FAIL_WINDOW_KEY);
+    }
 
     async function requestWakeLock(){
-        if(!('wakeLock' in navigator)) return false;
-        try{
-            wakeLock=await navigator.wakeLock.request('screen');
-            wakeLock.addEventListener('release',()=>{
+        if(!isEnabled() || document.visibilityState!=="visible") return false;
+        if(!navigator.wakeLock || typeof navigator.wakeLock.request!=="function") return false;
+        if(wakeLock) return true;
+        if(requestInFlight) return requestInFlight;
+
+        requestInFlight=(async()=>{
+            try{
+                const lock=await navigator.wakeLock.request("screen");
+                if(!isEnabled() || document.visibilityState!=="visible"){
+                    intentionallyReleasing=true;
+                    try{ await lock.release(); }catch(e){}
+                    intentionallyReleasing=false;
+                    return false;
+                }
+                wakeLock=lock;
+                lock.addEventListener("release",()=>{
+                    const expected=intentionallyReleasing || document.visibilityState!=="visible";
+                    wakeLock=null;
+                    updateButton();
+                    if(!expected && isEnabled()) markFailure();
+                },{once:true});
+                clearFailures();
+                return true;
+            }catch(e){
                 wakeLock=null;
-                updateButton();
-            });
-            return true;
-        }catch(e){
-            wakeLock=null;
-            return false;
-        }
+                markFailure();
+                return false;
+            }finally{
+                requestInFlight=null;
+            }
+        })();
+
+        return requestInFlight;
     }
 
     async function releaseWakeLock(){
-        if(wakeLock){
-            try{ await wakeLock.release(); }catch(e){}
-            wakeLock=null;
-        }
+        if(!wakeLock) return;
+        const lock=wakeLock;
+        wakeLock=null;
+        intentionallyReleasing=true;
+        try{ await lock.release(); }catch(e){}
+        finally{ intentionallyReleasing=false; }
+        updateButton();
     }
 
-    async function applyState(){
-        if(isEnabled()){
-            const ok=await requestWakeLock();
-            if(!ok) localStorage.setItem(STORAGE_KEY,"off");
-        }else{
+    async function syncWakeLock(){
+        if(!isEnabled() || document.visibilityState!=="visible"){
             await releaseWakeLock();
+            updateButton();
+            return;
         }
+        if(disabledForSession){
+            await releaseWakeLock();
+            updateButton();
+            return;
+        }
+        await requestWakeLock();
         updateButton();
     }
 
@@ -104,20 +160,29 @@ if(themeBtn){
 
         button.addEventListener('click',async()=>{
             const next=!isEnabled();
+            if(next){
+                disabledForSession=false;
+                clearFailures();
+            }
             localStorage.setItem(STORAGE_KEY,next?'on':'off');
-            await applyState();
+            await syncWakeLock();
         });
 
         updateButton();
-        if(isEnabled()) applyState();
+        if(isEnabled() && document.visibilityState==='visible') syncWakeLock();
     }
 
-    function resumeOnVisibility(){
-        if(document.visibilityState==='visible' && isEnabled() && !wakeLock) applyState();
+    function handleVisibility(){
+        if(document.visibilityState==='hidden'){
+            releaseWakeLock();
+        }else if(document.visibilityState==='visible'){
+            syncWakeLock();
+        }
     }
 
-    document.addEventListener('visibilitychange',resumeOnVisibility);
-    window.addEventListener('pageshow',resumeOnVisibility);
+    document.addEventListener('visibilitychange',handleVisibility);
+    window.addEventListener('pageshow',()=>{ if(document.visibilityState==='visible') syncWakeLock(); });
+    window.addEventListener('pagehide',()=>{ releaseWakeLock(); });
 
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',createControl);
     else createControl();
