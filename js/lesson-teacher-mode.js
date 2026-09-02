@@ -1,7 +1,7 @@
 // =====================================================
 // Lessons — Teacher Mode
-// Normal: Japanese → 4 seconds → Bangla finishes → 1 second → next card.
-// Reverse: Bangla → 4 seconds → Japanese finishes → 1 second → next card.
+// Front: Japanese → 4 seconds → Bangla → 1 second → next.
+// Back: English → "বা" → Bangla → 4 seconds → Japanese → 1 second → next.
 // =====================================================
 (function () {
     const WAIT_MS = 4000;
@@ -15,17 +15,44 @@
     const synth=()=>window.speechSynthesis||null;
     function getCurrentCards(){return Array.from(document.querySelectorAll('#grid > .card')).filter(c=>{const s=getComputedStyle(c);return s.display!=='none'&&c.offsetParent!==null;});}
     function japaneseText(card){const clone=(card.querySelector('.front')||card).cloneNode(true);clone.querySelectorAll('.lesson-card-topbar,.speaker-btn,.speak-btn,.pronunciation-btn,.romaji,.hard-star,.lesson-card-number,img,svg,button').forEach(e=>e.remove());return clone.textContent.replace(/[^\u3040-\u30ff\u3400-\u9fff\uff66-\uff9fー々〆〇・「」『』【】［］（）！？。、「」\s]/g,'').replace(/\s+/g,' ').trim();}
+    function englishText(card){
+        const selectors=['.english','.en','.back .english','.back .en'];
+        for(const selector of selectors){const el=card.querySelector(selector);if(el){const text=el.textContent.replace(/\s+/g,' ').trim();if(text)return text;}}
+        const back=card.querySelector('.back');
+        if(!back)return '';
+        const clone=back.cloneNode(true);
+        clone.querySelectorAll('.lesson-card-topbar,.speaker-btn,.speak-btn,.pronunciation-btn,.romaji,.hard-star,.lesson-card-number,img,svg,button').forEach(e=>e.remove());
+        return clone.textContent.replace(/\s+/g,' ').trim();
+    }
     function banglaText(card){const el=card.querySelector('.bangla');if(!el)return '';return el.textContent.replace(/\s*\/\s*/g,' অথবা ').replace(/\s+/g,' ').trim();}
+    function isBackCard(card){return !!card&&(card.classList.contains('flipped')||card.getAttribute('data-flipped')==='true');}
     function setActiveCard(card){document.querySelectorAll('#grid > .card.teacher-active').forEach(e=>e.classList.remove('teacher-active'));if(!card)return;card.classList.add('teacher-active');const r=card.getBoundingClientRect();if(r.top<50||r.bottom>innerHeight-50)card.scrollIntoView({behavior:'smooth',block:'center'});}
     function getVoices(){return synth()?synth().getVoices():[];}
     function findVoice(prefix){const p=prefix.toLowerCase();return getVoices().find(v=>String(v.lang||'').toLowerCase().startsWith(p))||null;}
     function browserSpeak(text,lang){return new Promise(resolve=>{const s=synth();if(!s||!text||typeof SpeechSynthesisUtterance==='undefined'){resolve(false);return;}let finished=false,started=false;const finish=ok=>{if(finished)return;finished=true;resolve(ok);};const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=lang.startsWith('ja')?.9:.95;const voice=findVoice(lang.split('-')[0]);if(voice)u.voice=voice;u.onstart=()=>{started=true;};u.onend=()=>finish(started);u.onerror=()=>finish(false);try{s.cancel();s.resume();s.speak(u);}catch(e){finish(false);}setTimeout(()=>{if(!started)try{s.cancel();}catch(e){};finish(false);},7000);});}
     async function speakJapanese(text){if(!text)return false;if(window.AndroidTTS&&typeof window.AndroidTTS.speak==='function'){try{window.AndroidTTS.speak(text);return true;}catch(e){}}return browserSpeak(text,'ja-JP');}
+    async function speakEnglish(text){
+        if(!text)return false;
+        if(window.AndroidTTS&&typeof window.AndroidTTS.speakEnglish==='function'){
+            try{window.AndroidTTS.speakEnglish(text);return true;}catch(e){console.warn('Teacher Mode: Android English TTS failed, falling back to Web Speech API.',e);}
+        }
+        return browserSpeak(text,'en-US');
+    }
+    async function speakBa(){
+        if(window.AndroidTTS&&typeof window.AndroidTTS.speak==='function'){
+            try{window.AndroidTTS.speak('বা');return true;}catch(e){}
+        }
+        return browserSpeak('বা','bn-BD');
+    }
 
     function getBanglaWaitMs(text){
         const words=String(text||'').trim().split(/\s+/).filter(Boolean).length;
         const chars=String(text||'').replace(/\s/g,'').length;
         return Math.max(1400,Math.min(9000,Math.round(words*420+chars*35+500)));
+    }
+    function getEnglishWaitMs(text){
+        const words=String(text||'').trim().split(/\s+/).filter(Boolean).length;
+        return Math.max(900,Math.min(6500,Math.round(words*420+500)));
     }
 
     function speakBangla(text,id){
@@ -50,13 +77,98 @@
     }
 
     function scheduleBangla(delay,id){clearTimeout(waitTimer);state='waiting';waitRemaining=delay;waitStartedAt=Date.now();updateUI();waitTimer=setTimeout(()=>{if(id!==runId||state==='stopped'||state==='paused')return;waitTimer=null;waitRemaining=0;speakBanglaForCard(id);},delay);}
-    async function speakJapaneseForCard(){if(state==='stopped')return;const id=runId,card=cards[index];if(!card)return finish();setActiveCard(card);state='japanese';updateUI();await speakJapanese(japaneseText(card));if(id!==runId||state==='stopped'||state==='paused')return;scheduleBangla(WAIT_MS,id);}
-    async function speakBanglaForCard(id){if(id!==runId||state==='stopped'||state==='paused')return;const card=cards[index];if(!card)return finish();const text=banglaText(card);if(!text){console.warn('Teacher Mode: no Bangla text found on current card.');retryBangla(id);return;}state='bangla';updateUI();try{const ok=await speakBangla(text,id);if(id!==runId||state==='stopped'||state==='paused')return;if(!ok){retryBangla(id);return;}setTimeout(()=>{if(id!==runId||state==='stopped'||state==='paused')return;index++;if(index>=cards.length)finish();else speakJapaneseForCard();},AFTER_SPEECH_MS);}catch(e){console.error('Teacher Mode Bengali TTS error:',e);retryBangla(id);}}
+
+    async function speakJapaneseForCard(){
+        if(state==='stopped')return;
+        const id=runId,card=cards[index];
+        if(!card)return finish();
+        setActiveCard(card);state='japanese';updateUI();
+        await speakJapanese(japaneseText(card));
+        if(id!==runId||state==='stopped'||state==='paused')return;
+        scheduleBangla(WAIT_MS,id);
+    }
+
+    async function speakBanglaForCard(id){
+        if(id!==runId||state==='stopped'||state==='paused')return;
+        const card=cards[index];if(!card)return finish();
+        const text=banglaText(card);
+        if(!text){console.warn('Teacher Mode: no Bangla text found on current card.');retryBangla(id);return;}
+        state='bangla';updateUI();
+        try{
+            const ok=await speakBangla(text,id);
+            if(id!==runId||state==='stopped'||state==='paused')return;
+            if(!ok){retryBangla(id);return;}
+            setTimeout(()=>{
+                if(id!==runId||state==='stopped'||state==='paused')return;
+                index++;
+                if(index>=cards.length)finish();
+                else speakCurrentCard();
+            },AFTER_SPEECH_MS);
+        }catch(e){console.error('Teacher Mode Bengali TTS error:',e);retryBangla(id);}
+    }
+
     function retryBangla(id){if(id!==runId||state!=='bangla')return;setTimeout(()=>{if(id===runId&&state==='bangla')speakBanglaForCard(id);},RETRY_MS);}
 
-    // Called by direction.js when Front/Back changes Back -> Front while
-    // Teacher Mode is running. This uses the same internal card/index state,
-    // so the next card is always correct.
+    async function speakReverseCard(card,id){
+        const english=englishText(card);
+        const bangla=banglaText(card);
+        const japanese=japaneseText(card);
+        if(!english){console.warn('Teacher Mode: no English text found on current card.');return false;}
+
+        state='english';updateUI();
+        const englishOk=await speakEnglish(english);
+        if(id!==runId||state==='stopped'||state==='paused')return false;
+        if(!englishOk)return false;
+
+        await new Promise(resolve=>setTimeout(resolve,getEnglishWaitMs(english)));
+        if(id!==runId||state==='stopped'||state==='paused')return false;
+
+        state='connector';updateUI();
+        await speakBa();
+        if(id!==runId||state==='stopped'||state==='paused')return false;
+        await new Promise(resolve=>setTimeout(resolve,500));
+
+        if(bangla){
+            state='bangla';updateUI();
+            const banglaOk=await speakBangla(bangla,id);
+            if(id!==runId||state==='stopped'||state==='paused')return false;
+            if(!banglaOk)return false;
+        }
+
+        await new Promise(resolve=>setTimeout(resolve,WAIT_MS));
+        if(id!==runId||state==='stopped'||state==='paused')return false;
+
+        state='japanese';updateUI();
+        await speakJapanese(japanese);
+        if(id!==runId||state==='stopped'||state==='paused')return false;
+        await new Promise(resolve=>setTimeout(resolve,AFTER_SPEECH_MS));
+        if(id!==runId||state==='stopped'||state==='paused')return false;
+        return true;
+    }
+
+    async function speakReverseForCard(){
+        if(state==='stopped'||state==='paused')return;
+        const id=runId,card=cards[index];
+        if(!card)return finish();
+        setActiveCard(card);
+        const ok=await speakReverseCard(card,id);
+        if(id!==runId||state==='stopped'||state==='paused')return;
+        if(!ok){setTimeout(()=>{if(id===runId&&state!=='stopped'&&state!=='paused')speakReverseForCard();},RETRY_MS);return;}
+        index++;
+        if(index>=cards.length)finish();
+        else speakCurrentCard();
+    }
+
+    function speakCurrentCard(){
+        if(state==='stopped'||state==='paused')return;
+        const card=cards[index];
+        if(!card)return finish();
+        if(isBackCard(card))speakReverseForCard();
+        else speakJapaneseForCard();
+    }
+
+    // Called by direction.js when Front/Back changes while Teacher Mode is running.
+    // The actual .flipped class is used as the source of truth.
     async function reverseCurrent(){
         if(state==='stopped'||state==='paused'||!cards.length)return;
         const card=cards[index];
@@ -66,33 +178,29 @@
         clearTimeout(waitTimer);waitTimer=null;
         try{synth()?.cancel();synth()?.resume();}catch(e){}
         setActiveCard(card);
-        state='bangla';updateUI();
 
-        const bangla=banglaText(card);
-        const japanese=japaneseText(card);
-        if(bangla){
-            const ok=await speakBangla(bangla,id);
+        if(!isBackCard(card)){
+            state='japanese';updateUI();
+            await speakJapanese(japaneseText(card));
             if(id!==runId||state==='stopped'||state==='paused')return;
-            if(!ok){retryBangla(id);return;}
+            scheduleBangla(WAIT_MS,id);
+            return;
         }
-        if(id!==runId||state==='stopped'||state==='paused')return;
-        await new Promise(resolve=>setTimeout(resolve,WAIT_MS));
-        if(id!==runId||state==='stopped'||state==='paused')return;
 
-        state='japanese';updateUI();
-        await speakJapanese(japanese);
-        if(id!==runId||state==='stopped'||state==='paused')return;
-        await new Promise(resolve=>setTimeout(resolve,AFTER_SPEECH_MS));
-        if(id!==runId||state==='stopped'||state==='paused')return;
-
-        index++;
-        if(index>=cards.length)finish();
-        else speakJapaneseForCard();
+        await speakReverseForCard();
     }
 
-    function start(){runId++;banglaGeneration++;try{synth()?.cancel();synth()?.resume();}catch(e){}clearTimeout(waitTimer);cards=getCurrentCards();if(!cards.length)return;index=0;pausedPhase=null;pausedSpeech=false;waitRemaining=WAIT_MS;state='japanese';speakJapaneseForCard();}
+    function start(){
+        runId++;banglaGeneration++;
+        try{synth()?.cancel();synth()?.resume();}catch(e){}
+        clearTimeout(waitTimer);
+        cards=getCurrentCards();
+        if(!cards.length)return;
+        index=0;pausedPhase=null;pausedSpeech=false;waitRemaining=WAIT_MS;state='japanese';
+        speakCurrentCard();
+    }
     function pause(){if(state==='stopped'||state==='paused')return;pausedPhase=state;if(state==='waiting'){waitRemaining=Math.max(0,waitRemaining-(Date.now()-waitStartedAt));clearTimeout(waitTimer);waitTimer=null;}else if(synth()?.speaking){try{synth().pause();}catch(e){}pausedSpeech=true;}state='paused';updateUI();}
-    function resume(){if(state!=='paused')return;state=pausedPhase||'japanese';if(pausedSpeech&&synth()?.paused){pausedSpeech=false;try{synth().resume();}catch(e){}}else if(state==='waiting')scheduleBangla(waitRemaining||WAIT_MS,runId);else if(state==='japanese')speakJapaneseForCard();else if(state==='bangla')speakBanglaForCard(runId);else updateUI();}
+    function resume(){if(state!=='paused')return;state=pausedPhase||'japanese';if(pausedSpeech&&synth()?.paused){pausedSpeech=false;try{synth().resume();}catch(e){}}else if(state==='waiting')scheduleBangla(waitRemaining||WAIT_MS,runId);else if(state==='japanese')speakCurrentCard();else if(state==='bangla')speakBanglaForCard(runId);else if(state==='english'||state==='connector')speakCurrentCard();else updateUI();}
     function stop(){runId++;banglaGeneration++;try{synth()?.cancel();}catch(e){}clearTimeout(waitTimer);waitTimer=null;state='stopped';pausedPhase=null;pausedSpeech=false;index=0;waitRemaining=WAIT_MS;document.querySelectorAll('#grid > .card.teacher-active').forEach(e=>e.classList.remove('teacher-active'));updateUI();}
     function finish(){stop();}
     function updateButton(b){if(state==='stopped'){b.innerHTML=labelIcon('',ICONS.play);b.setAttribute('aria-label','Start Teacher Mode from first card');b.title='Start Teacher Mode';}else if(state==='paused'){b.innerHTML=labelIcon('',ICONS.play);b.setAttribute('aria-label','Resume Teacher Mode');b.title='Resume Teacher Mode';}else{b.innerHTML=labelIcon('',ICONS.pause);b.setAttribute('aria-label','Pause Teacher Mode');b.title='Pause Teacher Mode';}}
