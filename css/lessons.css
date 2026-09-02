@@ -13,7 +13,7 @@
 
 .inner{
     width:100%;
-    height:auto;
+    height:100%;
     min-height:0;
     position:relative;
     display:grid;
@@ -201,6 +201,8 @@ html, body{ overscroll-behavior-y:none; }
         border-radius:6px;
     }
 
+    /* The shared .field rule hides fields on mobile. The screen control is
+       intentionally moved into the sticky bar, so explicitly keep it visible. */
     .mobile-bottom-controls > .screen-wake-field{
         display:flex !important;
         flex-direction:column;
@@ -220,6 +222,8 @@ html, body{ overscroll-behavior-y:none; }
         color:var(--vermilion) !important;
     }
 
+    /* Sticky controls are icon-first and compact; don't duplicate the desktop
+       "Screen" label inside the already-labelled bottom button. */
     .mobile-bottom-controls .screen-wake-field .lesson-control-text{
         display:none !important;
     }
@@ -235,8 +239,8 @@ html, body{ overscroll-behavior-y:none; }
 .count-display{ max-width:var(--layout-width); margin:0 auto 20px; text-align:center !important; }
 
 /* ---------- LESSON CARD NATURAL HEIGHT ---------- */
-.grid{ align-items:stretch; }
-.grid > .card{ align-self:stretch; min-height:0 !important; height:auto !important; display:flex; }
+.grid{ align-items:start; }
+.grid > .card{ align-self:start; min-height:0 !important; height:auto !important; }
 .card.lesson-card-structured{ min-height:0 !important; height:auto !important; }
 .card.lesson-card-structured .lesson-card-inner{
     position:relative !important;
@@ -281,40 +285,7 @@ html, body{ overscroll-behavior-y:none; }
 .grid{ align-items:stretch; }
 .grid > .card{ align-self:stretch; height:auto !important; display:flex; }
 .card.lesson-card-structured{ height:auto !important; }
-.card.lesson-card-structured .lesson-card-inner{
-    flex:1 1 auto !important;
-    height:auto !important;
-    align-self:stretch !important;
-}
-.card.lesson-card-structured .lesson-card-content{
-    height:100% !important;
-}
+.card.lesson-card-structured .lesson-card-inner{ height:100% !important; }
+.card.lesson-card-structured .lesson-card-content{ height:100% !important; }
 .card.lesson-card-structured .lesson-card-content > .front,
-.card.lesson-card-structured .lesson-card-content > .back{
-    height:100% !important;
-}
-
-/* ---------- ROW HEIGHT FILL FIX ---------- */
-/* The grid row supplies the stretched .card height. Using flex on the
-   immediate child makes .inner fill that height without a fixed px value. */
-.grid > .card.lesson-card-structured{
-    display:flex !important;
-    flex-direction:column !important;
-    align-self:stretch !important;
-    height:auto !important;
-}
-.grid > .card.lesson-card-structured > .lesson-card-inner{
-    flex:1 1 auto !important;
-    width:100% !important;
-    height:auto !important;
-    min-height:0 !important;
-}
-.grid > .card.lesson-card-structured > .lesson-card-inner > .lesson-card-content{
-    height:100% !important;
-    min-height:0 !important;
-}
-.grid > .card.lesson-card-structured > .lesson-card-inner > .lesson-card-content > .front,
-.grid > .card.lesson-card-structured > .lesson-card-inner > .lesson-card-content > .back{
-    height:100% !important;
-    min-height:0 !important;
-}
+.card.lesson-card-structured .lesson-card-content > .back{ height:100% !important; }
