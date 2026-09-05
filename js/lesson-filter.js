@@ -57,7 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderLessons(){
         const grid=document.getElementById("grid"),mode=document.getElementById("mode"),typePanel=document.getElementById("typePanel");
         if(!grid||!mode||!typePanel)return;
-        const types=Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked")).map(cb=>cb.value);
+        // Hard vocabulary is an overlay filter, not a lesson-card type.
+        const types=Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked"))
+            .map(cb=>cb.value)
+            .filter(value=>value!=="hard");
         let cards=[];selectedLessons().forEach(key=>{cards=cards.concat(buildLessonCards(key).filter(card=>types.includes(card.type)));});
         if(mode.value==="shuffle")shuffle(cards);
         grid.innerHTML="";const frag=document.createDocumentFragment();
@@ -65,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const card=document.createElement("div");card.className="card"+(item.type==="grammar"?" grammar":"");
             const romaji=toRomaji(item.jp||"");card.__lessonItem=item;card.__lessonItem.romaji=romaji;card.__teacherBangla=banglaMeaning(item);card.dataset.romaji=romaji;
             const tag=`${item.lesson} · ${item.type==="grammar"?"Grammar":"Vocabulary"}`;const isVocab=item.type==="vocabulary"||item.type==="cpart"||item.type==="country";const frontText=showJapaneseFirst?item.jp:(isVocab?romaji:item.en);
-            if(isVocab){const hideRomaji=window.lessonBackRomajiVisible===false;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back vocabulary-back"><span class="romaji" style="display:${hideRomaji?'none':''}">${romaji}</span><span class="english">${item.en}</span><span class="bangla">${banglaMeaning(item)}</span></div></div>`;}else{const backText=showJapaneseFirst?item.en:item.jp;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div></div>`;}
+            if(isVocab){const hideRomaji=window.lessonBackRomajiVisible===false;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back vocabulary-back"><span class="romaji" style="display:${hideRomaji?'none':''}">${romaji}</span><span class="english">${item.en}</span><span class="bangla">${banglaMeaning(item)}</span></div></div>`;}else{const backText=showJapaneseFirst?item.en:item.jp;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div>`;}
             card.addEventListener("click",()=>card.classList.toggle("flipped"));const speakText=isVocab?item.jp:cleanForSpeech(item.jp);if(speakText&&isSpeakableJapanese(speakText))card.appendChild(createSpeakerButton(speakText));frag.appendChild(card);
         });
         grid.appendChild(frag);const counter=document.getElementById("cardCount");if(counter)counter.textContent=`Showing ${cards.length} cards`;document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
