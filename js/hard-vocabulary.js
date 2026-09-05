@@ -2,6 +2,8 @@
 // Hard Vocabulary filter — lessons page
 // =====================================================
 (() => {
+  'use strict';
+
   const STORAGE_KEY = 'japanese-lang-hard-vocabulary';
   let hardWords = new Set();
   let hardMode = false;
@@ -15,9 +17,8 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
   };
 
-  const grid = () => document.getElementById('grid');
-  const panel = () => document.getElementById('typePanel');
-  const hardCheckbox = () => panel()?.querySelector('input[value="hard"]');
+  const getGrid = () => document.getElementById('grid');
+  const getPanel = () => document.getElementById('typePanel');
 
   function cardKey(card) {
     const front = card.querySelector('.front > div')?.textContent?.trim() || '';
@@ -33,81 +34,78 @@
       star = document.createElement('button');
       star.type = 'button';
       star.className = 'hard-star';
-      star.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
+      star.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
         const key = cardKey(card);
-        if (hardWords.has(key)) hardWords.delete(key); else hardWords.add(key);
+        if (hardWords.has(key)) hardWords.delete(key);
+        else hardWords.add(key);
         save();
         updateStar(card);
-        if (hardMode) apply();
-        document.dispatchEvent(new CustomEvent('hardVocabularyUpdated'));
+        if (hardMode) applyFilter();
       });
-      card.appendChild(star);
+      card.querySelector('.lesson-card-topbar')?.appendChild(star) || card.appendChild(star);
     }
     const active = hardWords.has(cardKey(card));
     star.textContent = active ? '★' : '☆';
     star.classList.toggle('active', active);
     star.setAttribute('aria-pressed', String(active));
+    star.setAttribute('aria-label', active ? 'Remove from hard vocabulary' : 'Mark as hard vocabulary');
     star.title = active ? 'Remove from hard vocabulary' : 'Hard vocabulary';
   }
 
   function addStars() {
-    grid()?.querySelectorAll(':scope > .card').forEach(updateStar);
+    getGrid()?.querySelectorAll(':scope > .card').forEach(updateStar);
   }
 
-  function apply() {
+  function applyFilter() {
     addStars();
-    grid()?.querySelectorAll(':scope > .card').forEach(card => {
-      const isHard = card.querySelector('.vocabulary-back') && hardWords.has(cardKey(card));
+    getGrid()?.querySelectorAll(':scope > .card').forEach(card => {
+      const isHard = !!card.querySelector('.vocabulary-back') && hardWords.has(cardKey(card));
       card.style.display = isHard ? '' : 'none';
     });
     const count = document.getElementById('countDisplay');
     if (count) {
-      const visible = [...(grid()?.querySelectorAll(':scope > .card') || [])].filter(c => c.style.display !== 'none').length;
+      const visible = [...(getGrid()?.querySelectorAll(':scope > .card') || [])]
+        .filter(card => card.style.display !== 'none').length;
       count.textContent = `Showing ${visible} hard vocabulary`;
     }
   }
 
   function clearFilter() {
     hardMode = false;
-    grid()?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
+    getGrid()?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
     addStars();
   }
 
   function ensureCheckbox() {
-    const p = panel();
-    if (!p || p.querySelector('input[value="hard"]')) return;
+    const panel = getPanel();
+    if (!panel || panel.querySelector('input[value="hard"]')) return;
     const label = document.createElement('label');
     label.innerHTML = '<input type="checkbox" value="hard"> Hard vocabulary';
-    p.appendChild(label);
+    panel.appendChild(label);
   }
 
-  function handleChange(e) {
-    const cb = e.target;
-    if (!cb || cb.value !== 'hard') return;
-    e.stopImmediatePropagation();
-    hardMode = cb.checked;
-    if (hardMode) {
-      // Let the lesson renderer finish first, then apply only starred cards.
-      setTimeout(apply, 0);
-      setTimeout(apply, 100);
-      setTimeout(apply, 400);
-    } else clearFilter();
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
+  function init() {
     ensureCheckbox();
-    panel()?.addEventListener('change', handleChange, true);
+    getPanel()?.addEventListener('change', event => {
+      if (event.target?.value !== 'hard') return;
+      hardMode = event.target.checked;
+      if (hardMode) applyFilter();
+      else clearFilter();
+    });
     addStars();
     document.addEventListener('lessonCardsRendered', () => {
       addStars();
-      if (hardMode) apply();
+      if (hardMode) applyFilter();
     });
     new MutationObserver(() => {
       ensureCheckbox();
       addStars();
-      if (hardMode) apply();
+      if (hardMode) applyFilter();
     }).observe(document.body, { childList: true, subtree: true });
-  });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
 })();
