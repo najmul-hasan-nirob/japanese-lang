@@ -16,9 +16,8 @@
   const save = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
   };
-
-  const getGrid = () => document.getElementById('grid');
-  const getPanel = () => document.getElementById('typePanel');
+  const grid = () => document.getElementById('grid');
+  const panel = () => document.getElementById('typePanel');
 
   function cardKey(card) {
     const front = card.querySelector('.front > div')?.textContent?.trim() || '';
@@ -34,76 +33,64 @@
       star = document.createElement('button');
       star.type = 'button';
       star.className = 'hard-star';
+      card.querySelector('.lesson-card-topbar')?.appendChild(star) || card.appendChild(star);
       star.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
         const key = cardKey(card);
-        if (hardWords.has(key)) hardWords.delete(key);
-        else hardWords.add(key);
+        hardWords.has(key) ? hardWords.delete(key) : hardWords.add(key);
         save();
         updateStar(card);
         if (hardMode) applyFilter();
       });
-      card.querySelector('.lesson-card-topbar')?.appendChild(star) || card.appendChild(star);
     }
     const active = hardWords.has(cardKey(card));
     star.textContent = active ? '★' : '☆';
     star.classList.toggle('active', active);
     star.setAttribute('aria-pressed', String(active));
     star.setAttribute('aria-label', active ? 'Remove from hard vocabulary' : 'Mark as hard vocabulary');
-    star.title = active ? 'Remove from hard vocabulary' : 'Hard vocabulary';
   }
 
   function addStars() {
-    getGrid()?.querySelectorAll(':scope > .card').forEach(updateStar);
+    grid()?.querySelectorAll(':scope > .card').forEach(updateStar);
   }
 
   function applyFilter() {
     addStars();
-    getGrid()?.querySelectorAll(':scope > .card').forEach(card => {
+    grid()?.querySelectorAll(':scope > .card').forEach(card => {
       const isHard = !!card.querySelector('.vocabulary-back') && hardWords.has(cardKey(card));
-      card.style.display = isHard ? '' : 'none';
+      card.hidden = !isHard;
     });
     const count = document.getElementById('countDisplay');
-    if (count) {
-      const visible = [...(getGrid()?.querySelectorAll(':scope > .card') || [])]
-        .filter(card => card.style.display !== 'none').length;
-      count.textContent = `Showing ${visible} hard vocabulary`;
-    }
+    if (count) count.textContent = `Showing ${[...(grid()?.querySelectorAll(':scope > .card') || [])].filter(c => !c.hidden).length} hard vocabulary`;
   }
 
   function clearFilter() {
     hardMode = false;
-    getGrid()?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
+    grid()?.querySelectorAll(':scope > .card').forEach(card => { card.hidden = false; });
     addStars();
   }
 
   function ensureCheckbox() {
-    const panel = getPanel();
-    if (!panel || panel.querySelector('input[value="hard"]')) return;
+    const p = panel();
+    if (!p || p.querySelector('input[value="hard"]')) return;
     const label = document.createElement('label');
     label.innerHTML = '<input type="checkbox" value="hard"> Hard vocabulary';
-    panel.appendChild(label);
+    p.appendChild(label);
   }
 
   function init() {
     ensureCheckbox();
-    getPanel()?.addEventListener('change', event => {
+    panel()?.addEventListener('change', event => {
       if (event.target?.value !== 'hard') return;
       hardMode = event.target.checked;
-      if (hardMode) applyFilter();
-      else clearFilter();
+      hardMode ? applyFilter() : clearFilter();
     });
     addStars();
     document.addEventListener('lessonCardsRendered', () => {
       addStars();
       if (hardMode) applyFilter();
     });
-    new MutationObserver(() => {
-      ensureCheckbox();
-      addStars();
-      if (hardMode) applyFilter();
-    }).observe(document.body, { childList: true, subtree: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
