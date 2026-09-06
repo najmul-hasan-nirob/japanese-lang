@@ -11,84 +11,16 @@ js:
 ---
 
 <div class="toolbar kanji-toolbar">
-    <div class="field filter-field">
-        <label id="kanjiLevelLabel">Level</label>
-        <button type="button" class="multiselect-btn" id="kanjiLevelBtn" aria-haspopup="true" aria-expanded="false">N5 + N4</button>
-        <div class="multiselect-panel" id="kanjiLevelPanel">
-            <label><input type="checkbox" id="kanjiLevelN5" value="N5" checked> N5</label>
-            <label><input type="checkbox" id="kanjiLevelN4" value="N4" checked> N4</label>
-        </div>
-    </div>
-    <div class="field filter-field">
-        <label for="kanjiMode">Order</label>
-        <select id="kanjiMode">
-            <option value="normal">Normal</option>
-            <option value="shuffle">Shuffle</option>
-        </select>
-    </div>
-    <div class="field shuffle-field">
-        <button id="kanjiShuffleBtn" class="shuffle-btn" type="button">↗ Shuffle</button>
-    </div>
-    <div class="field direction-field">
-        <button id="kanjiDirection" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back">Back</button>
-    </div>
+    <div class="field filter-field"><label id="kanjiLevelLabel">Level</label><button type="button" class="multiselect-btn" id="kanjiLevelBtn" aria-haspopup="true" aria-expanded="false">N5 + N4</button><div class="multiselect-panel" id="kanjiLevelPanel"><label><input type="checkbox" id="kanjiLevelN5" value="N5" checked> N5</label><label><input type="checkbox" id="kanjiLevelN4" value="N4" checked> N4</label></div></div>
+    <div class="field filter-field"><label for="kanjiMode">Order</label><select id="kanjiMode"><option value="normal">Normal</option><option value="shuffle">Shuffle</option></select></div>
+    <div class="field shuffle-field"><button id="kanjiShuffleBtn" class="shuffle-btn" type="button">↗ Shuffle</button></div>
+    <div class="field direction-field"><button id="kanjiDirection" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back">Back</button></div>
 </div>
-
-<div class="lesson-search-wrap" id="kanjiSearchWrap">
-    <div class="lesson-search-box">
-        <span class="lesson-search-icon" aria-hidden="true">⌕</span>
-        <input id="kanjiSearch" type="search" name="lesson-search" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false" readonly placeholder="Search Japanese, Romaji or Bangla..." aria-label="Search Kanji cards">
-        <button id="kanjiSearchClear" type="button" aria-label="Clear search" hidden>×</button>
-    </div>
-</div>
-
-<div class="count-display" id="kanjiCount" aria-live="polite"></div>
-<div class="grid" id="kanjiGrid"></div>
-
+<div class="lesson-search-wrap" id="kanjiSearchWrap"><div class="lesson-search-box"><span class="lesson-search-icon" aria-hidden="true">⌕</span><input id="kanjiSearch" type="search" name="lesson-search" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false" readonly placeholder="Search Japanese, Romaji or Bangla..." aria-label="Search Kanji cards"><button id="kanjiSearchClear" type="button" aria-label="Clear search" hidden>×</button></div></div>
+<div class="count-display" id="kanjiCount" aria-live="polite"></div><div class="grid" id="kanjiGrid"></div>
 <style>
-#kanjiSearchWrap{width:100%;max-width:var(--layout-width);margin:0 auto 18px;}
-#kanjiSearchWrap .lesson-search-box{position:relative;width:100%;height:44px;display:flex;align-items:center;box-sizing:border-box;background:var(--paper-cell);border:1px solid var(--paper-line);border-radius:8px;box-shadow:var(--shadow);transition:border-color .2s ease,box-shadow .2s ease;}
-#kanjiSearchWrap .lesson-search-box:focus-within{border-color:var(--vermilion);box-shadow:0 0 0 2px var(--vermilion-soft);}
-#kanjiSearchWrap .lesson-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-family:Arial,sans-serif;font-size:23px;line-height:1;pointer-events:none;}
-#kanjiSearchWrap #kanjiSearch{width:100%;height:100%;min-width:0;margin:0;padding:0 44px 0 40px;border:0;outline:0;background:transparent;color:var(--ink);font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;line-height:44px;box-sizing:border-box;appearance:none;-webkit-appearance:none;}
-#kanjiSearchWrap #kanjiSearch::placeholder{color:var(--ink-soft);opacity:1;}
-#kanjiSearchWrap #kanjiSearch::-webkit-search-cancel-button,#kanjiSearchWrap #kanjiSearch::-webkit-search-decoration{-webkit-appearance:none;}
-#kanjiSearchWrap #kanjiSearchClear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;margin:0;padding:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:5px;background:transparent;color:var(--ink-soft);font-family:Arial,sans-serif;font-size:22px;line-height:1;cursor:pointer;box-shadow:none;}
-#kanjiSearchWrap #kanjiSearchClear:hover{color:var(--vermilion);background:var(--vermilion-soft);}
-.lesson-tag{margin-left:5px;}
-.grid{grid-template-columns:repeat(4,1fr);}
-.kanji-card{display:flex;flex-direction:column;align-items:stretch;}
-.kanji-card .inner{flex:1 1 auto;align-self:stretch;min-height:100%;}
-.kanji-card .front,.kanji-card .back{padding:15px;}
-.kanji-character{font-family:'Noto Sans JP','Noto Sans',sans-serif;font-size:35px;font-weight:500;line-height:1.05;}
-.kanji-character.small{font-size:42px;}
-.kanji-details{width:100%;display:flex;flex-direction:column;align-items:center;gap:0;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;line-height:1.45;}
-.kanji-detail-meaning{text-align:center;font-size:17px;font-weight:700;line-height:1.45;margin:0 0 5px;}
-.kanji-reading-line{text-align:center;line-height:1.5;margin:0;}
-.kanji-reading-label{font-weight:700;}
-.kanji-example{font-weight:400;}
-.kanji-chi-line{margin-top:7px;}
-.kanji-example-line{margin-top:2px;}
-.kanji-example-line ruby{ruby-position:over;}
-.kanji-example-line rt{font-size:.55em;line-height:1;}
-.kanji-mnemonic-image{width:180px;height:140px;max-width:100%;margin:0 auto 8px;background-image:url('/assets/kanji-mnemonics.webp');background-repeat:no-repeat;background-size:900px 1120px;overflow:hidden;}
-.kanji-bangla-examples{width:100%;margin-top:8px;padding-top:7px;border-top:1px solid var(--paper-line);}
-.kanji-examples-title{font-weight:700;text-align:center;margin-bottom:2px;}
-.kanji-example-line{text-align:center;font-size:12px;line-height:1.45;}
-.kanji-example-jp{font-weight:600;}
-.kanji-example-bn{font-weight:400;}
-@media only screen and (max-width:520px){
-    .kanji-toolbar{grid-template-columns:1fr 1fr;}
-    #kanjiGrid{grid-template-columns:repeat(1,minmax(0,1fr));}
-    .kanji-character{font-size:30px;}
-    .kanji-character.small{font-size:34px;}
-    .kanji-details{font-size:12px;}
-    .kanji-card .lesson-card-topbar{height:38px;}
-    #kanjiSearchWrap{margin-bottom:10px;}
-    #kanjiSearchWrap .lesson-search-box{height:40px;border-radius:7px;}
-    #kanjiSearchWrap #kanjiSearch{height:40px;font-size:13px;line-height:40px;padding-left:36px;padding-right:40px;}
-    #kanjiSearchWrap .lesson-search-icon{left:11px;font-size:21px;}
-    #kanjiSearchWrap #kanjiSearchClear{right:5px;width:28px;height:28px;}
-    .kanji-mnemonic-image{width:160px;height:125px;background-size:800px 1000px;}
-}
+#kanjiSearchWrap{width:100%;max-width:var(--layout-width);margin:0 auto 18px}#kanjiSearchWrap .lesson-search-box{position:relative;width:100%;height:44px;display:flex;align-items:center;box-sizing:border-box;background:var(--paper-cell);border:1px solid var(--paper-line);border-radius:8px;box-shadow:var(--shadow)}#kanjiSearchWrap .lesson-search-icon{position:absolute;left:13px;color:var(--ink-soft);font-family:Arial,sans-serif;font-size:23px;pointer-events:none}#kanjiSearchWrap #kanjiSearch{width:100%;height:100%;margin:0;padding:0 44px 0 40px;border:0;outline:0;background:transparent;color:var(--ink);font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;box-sizing:border-box}.lesson-tag{margin-left:5px}.grid{grid-template-columns:repeat(4,1fr)}.kanji-card{display:flex;flex-direction:column;align-items:stretch}.kanji-card .inner{flex:1 1 auto;align-self:stretch;min-height:100%}.kanji-card .front,.kanji-card .back{padding:15px}.kanji-character{font-family:'Noto Sans JP','Noto Sans',sans-serif;font-size:35px;font-weight:500;line-height:1.05}.kanji-character.small{font-size:42px}.kanji-details{width:100%;display:flex;flex-direction:column;align-items:center;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;line-height:1.45}.kanji-detail-meaning{text-align:center;font-size:17px;font-weight:700;line-height:1.45;margin:0 0 5px}.kanji-reading-line{text-align:center;line-height:1.5}.kanji-reading-label{font-weight:700}.kanji-chi-line{margin-top:7px}.kanji-example-line{margin-top:2px;text-align:center;font-size:12px;line-height:1.45}.kanji-example-jp{font-weight:600}.kanji-example-bn{font-weight:400}.kanji-bangla-examples{width:100%;margin-top:8px;padding-top:7px;border-top:1px solid var(--paper-line)}.kanji-examples-title{font-weight:700;text-align:center;margin-bottom:2px}
+/* Individual mnemonic images: no sprite/background cropping. */
+.kanji-mnemonic-image{display:block;width:auto;height:auto;max-width:180px;max-height:140px;object-fit:contain;margin:0 auto 8px;background:none;overflow:visible}
+@media only screen and (max-width:520px){.kanji-toolbar{grid-template-columns:1fr 1fr}#kanjiGrid{grid-template-columns:repeat(1,minmax(0,1fr))}.kanji-character{font-size:30px}.kanji-character.small{font-size:34px}.kanji-details{font-size:12px}.kanji-card .lesson-card-topbar{height:38px}#kanjiSearchWrap{margin-bottom:10px}#kanjiSearchWrap .lesson-search-box{height:40px}#kanjiSearchWrap #kanjiSearch{height:40px;font-size:13px;line-height:40px;padding-left:36px;padding-right:40px}.kanji-mnemonic-image{max-width:160px;max-height:125px}}
 </style>
