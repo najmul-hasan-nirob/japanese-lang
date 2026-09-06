@@ -131,9 +131,8 @@ let showJapaneseFirst = true;
 // This does not remove or modify any saved Chrome autofill data.
 (function preventLessonsSearchAutofill() {
     function protectSearchFields(root = document) {
-        const fields = root.querySelectorAll?.('input[type="search"], input[type="text"], [role="searchbox"]') || [];
+        const fields = root.querySelectorAll?.('input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), [role="searchbox"]') || [];
         fields.forEach(field => {
-            if (field.matches('input[type="checkbox"], input[type="radio"], input[type="hidden"]')) return;
             field.setAttribute('autocomplete', 'off');
             field.setAttribute('autocorrect', 'off');
             field.setAttribute('autocapitalize', 'none');
