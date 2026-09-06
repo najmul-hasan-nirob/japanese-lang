@@ -2,7 +2,7 @@
 // Lesson card structure
 // .card > .lesson-card-inner
 //     > .lesson-card-topbar
-//         star | number | speaker
+//         star | clue | number | speaker
 //     > .lesson-card-content
 //         front / back
 // Lessons page only.
@@ -73,8 +73,6 @@
             return;
         }
 
-        // Android bridge fallback. It does not expose speech completion, so use
-        // a conservative delay between the Bangla and English utterances.
         if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
             if (bangla) {
                 try { window.AndroidTTS.speak(bangla); } catch (e) {}
@@ -97,8 +95,6 @@
         if (!speaker || speaker.dataset.backSpeechReady === 'true') return;
         speaker.dataset.backSpeechReady = 'true';
 
-        // Capture phase runs before the existing normal Japanese speaker handler.
-        // On the back side, replace that handler with Bangla → বা → English.
         speaker.addEventListener('click', event => {
             if (!isBackCard(card) || teacherModeIsActive(card)) return;
             event.preventDefault();
@@ -170,8 +166,6 @@
     align-items:stretch;
 }
 
-/* Keep the inner wrapper in normal flow so its content determines the
-   card's intrinsic height. The grid then stretches both cards in a row. */
 .lesson-card-inner {
     position:relative;
     width:100%;
@@ -194,7 +188,7 @@
     width:100%;
     height:42px;
     display:grid;
-    grid-template-columns:1fr 1fr 1fr;
+    grid-template-columns:1fr 1fr 1fr 1fr;
     align-items:center;
     justify-items:center;
     box-sizing:border-box;
@@ -278,7 +272,7 @@
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
-    grid-column:3;
+    grid-column:4;
     grid-row:1;
     justify-self:end;
     align-self:center;
@@ -310,6 +304,15 @@
         document.head.appendChild(style);
     }
 
+    function loadVocabularyClues() {
+        if (document.querySelector('script[data-vocabulary-clues]')) return;
+        const script = document.createElement('script');
+        script.src = '/js/vocabulary-clues.js';
+        script.defer = true;
+        script.dataset.vocabularyClues = 'true';
+        document.head.appendChild(script);
+    }
+
     function setupAll(grid) {
         grid.querySelectorAll(':scope > .card').forEach(setupCard);
         if (typeof window.updateLessonCardNumbers === 'function') {
@@ -323,6 +326,7 @@
 
         injectStyles();
         setupAll(grid);
+        loadVocabularyClues();
 
         const observer = new MutationObserver(() => setTimeout(() => setupAll(grid), 0));
         observer.observe(grid, { childList: true, subtree: true });
