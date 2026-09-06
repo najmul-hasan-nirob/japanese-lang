@@ -26,7 +26,6 @@ async function load(card){
     return clue;
   }catch(e){console.warn('Vocabulary clue load failed',e);return '';}
 }
-
 async function save(card,clue){
   const i=identity(card);
   const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card_key:cardKey(card),lesson:i.lesson,vocabulary:i.front,clue})});
@@ -35,7 +34,6 @@ async function save(card,clue){
   card.dataset.vocabularyClue=data?.clue||clue;
   card.classList.toggle('has-vocabulary-clue',true);
 }
-
 async function remove(card){
   const r=await fetch(url(card),{method:'DELETE'});
   let data=null;try{data=await r.json()}catch(e){}
@@ -44,38 +42,79 @@ async function remove(card){
   card.classList.remove('has-vocabulary-clue');
 }
 
-function closePanels(card){
-  card.querySelector('.vocabulary-clue-panel')?.remove();
-  card.querySelector('.vocabulary-clue-editor')?.remove();
+/*
+ * IMPORTANT: clue UI is rendered directly under <body>, not inside the lesson
+ * card. This makes it immune to card/grid overflow, fixed-height, transform,
+ * scrolling and 3D-flip clipping rules from the lesson page.
+ */
+let activeOverlay=null;
+let activeCard=null;
+let repositionHandler=null;
+
+function destroyOverlay(){
+  if(repositionHandler){window.removeEventListener('scroll',repositionHandler,true);window.removeEventListener('resize',repositionHandler);repositionHandler=null;}
+  if(activeOverlay){activeOverlay.remove();activeOverlay=null;}
+  activeCard=null;
 }
+function positionOverlay(box,card){
+  if(!box||!card||!document.body.contains(card))return;
+  const r=card.getBoundingClientRect();
+  const margin=6;
+  let left=Math.max(margin,Math.min(r.left,window.innerWidth-r.width-margin));
+  let width=Math.min(r.width,window.innerWidth-margin*2);
+  if(width<220){width=Math.min(320,window.innerWidth-margin*2);left=(window.innerWidth-width)/2;}
+  box.style.left=Math.round(left)+'px';
+  box.style.width=Math.round(width)+'px';
+
+  /* Prefer below the card topbar, but move above if there is not enough room. */
+  const desiredTop=r.top+(window.innerWidth<=520?40:44);
+  box.style.top=Math.round(desiredTop)+'px';
+  const h=box.getBoundingClientRect().height;
+  if(desiredTop+h>window.innerHeight-margin && r.top-h-margin>margin){
+    box.style.top=Math.round(r.top-h-margin)+'px';
+  }
+}
+function mountOverlay(box,card){
+  destroyOverlay();
+  activeOverlay=box;activeCard=card;
+  document.body.appendChild(box);
+  positionOverlay(box,card);
+  repositionHandler=()=>positionOverlay(box,card);
+  window.addEventListener('scroll',repositionHandler,true);
+  window.addEventListener('resize',repositionHandler);
+}
+
 function showClue(card){
-  closePanels(card);
+  if(activeOverlay&&activeCard===card){destroyOverlay();return;}
   const clue=card.dataset.vocabularyClue||'';
   const panel=document.createElement('div');
   panel.className='vocabulary-clue-panel';
   panel.innerHTML=`<div class="vocabulary-clue-label">💡 Clue</div><div class="vocabulary-clue-text">${esc(clue||'No clue yet.')}</div><button type="button" class="clue-edit">Edit</button>`;
-  card.appendChild(panel);
-  panel.querySelector('.clue-edit').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();panel.remove();showEditor(card);});
+  mountOverlay(panel,card);
+  panel.querySelector('.clue-edit').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();showEditor(card);});
 }
 
 function showEditor(card){
-  closePanels(card);
   const old=card.dataset.vocabularyClue||'';
   const box=document.createElement('div');
   box.className='vocabulary-clue-editor';
   box.innerHTML=`<div class="clue-editor-head"><span>💡 Edit clue</span><button type="button" class="clue-close" aria-label="Close">×</button></div><textarea maxlength="500" placeholder="Write a clue..."></textarea><div class="clue-editor-actions"><button type="button" class="clue-save">Save</button><button type="button" class="clue-delete">Delete</button></div>`;
-  card.appendChild(box);
-  const ta=box.querySelector('textarea');ta.value=old;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  mountOverlay(box,card);
 
-  box.querySelector('.clue-close').onclick=e=>{e.preventDefault();e.stopPropagation();box.remove();};
+  const ta=box.querySelector('textarea');
+  ta.value=old;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  positionOverlay(box,card);
+
+  box.addEventListener('click',e=>e.stopPropagation());
+  box.querySelector('.clue-close').onclick=e=>{e.preventDefault();e.stopPropagation();destroyOverlay();};
   box.querySelector('.clue-save').onclick=async()=>{
     const v=ta.value.trim(),btn=box.querySelector('.clue-save');btn.disabled=true;
-    try{if(v)await save(card,v);else await remove(card);box.remove();if(v)showClue(card);}
+    try{if(v)await save(card,v);else await remove(card);destroyOverlay();if(v)showClue(card);}
     catch(err){console.error('Vocabulary clue save failed:',err);alert('Could not save clue. Please try again.\n\n'+err.message);btn.disabled=false;}
   };
   box.querySelector('.clue-delete').onclick=async()=>{
     const btn=box.querySelector('.clue-delete');btn.disabled=true;
-    try{await remove(card);box.remove();}
+    try{await remove(card);destroyOverlay();}
     catch(err){console.error('Vocabulary clue delete failed:',err);alert('Could not delete clue. Please try again.\n\n'+err.message);btn.disabled=false;}
   };
 }
@@ -92,34 +131,48 @@ function all(){document.querySelectorAll('#grid>.card').forEach(setup)}
 function styles(){
   if(document.getElementById('vocabulary-clue-styles'))return;
   const s=document.createElement('style');s.id='vocabulary-clue-styles';s.textContent=`
-.vocabulary-clue-btn{grid-column:2;grid-row:1;margin:0!important;padding:0 5px!important;border:0!important;background:transparent!important;color:#fff!important;font-size:17px!important;line-height:1;cursor:pointer;pointer-events:auto!important;width:auto!important;height:auto!important;box-shadow:none!important;}
+.vocabulary-clue-btn{grid-column:2!important;grid-row:1!important;margin:0!important;padding:0 5px!important;border:0!important;background:transparent!important;color:#fff!important;font-size:17px!important;line-height:1!important;cursor:pointer!important;pointer-events:auto!important;width:auto!important;height:auto!important;box-shadow:none!important;}
 .has-vocabulary-clue .vocabulary-clue-btn{filter:saturate(1.25);}
 
-/* Clue UI: never clip the panel/editor, even when a card/grid has fixed dimensions. */
-.card.lesson-card-structured,
-.lesson-card-inner,
-.lesson-card-content,
-.lesson-card-content>.front,
-.lesson-card-content>.back{overflow:visible!important;}
-.vocabulary-clue-panel,.vocabulary-clue-editor{position:absolute!important;z-index:9999!important;top:44px!important;left:8px!important;right:8px!important;width:auto!important;max-width:none!important;background:#18212c;color:#fff;padding:11px!important;border-radius:9px;box-shadow:0 5px 20px #0009;box-sizing:border-box!important;}
-.vocabulary-clue-panel{text-align:center;}
-.vocabulary-clue-label{font-size:12px;opacity:.75;margin-bottom:5px;}
-.vocabulary-clue-text{font-size:15px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;max-height:none!important;overflow:visible!important;}
-.vocabulary-clue-panel .clue-edit{display:inline-block!important;margin-top:9px!important;padding:5px 14px!important;border:0;border-radius:6px;cursor:pointer;visibility:visible!important;opacity:1!important;}
-.clue-editor-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:7px;}
-.clue-close{border:0;background:transparent;color:#fff;font-size:23px;line-height:1;cursor:pointer;padding:0 3px;}
-.vocabulary-clue-editor textarea{display:block!important;width:100%!important;min-height:76px!important;height:auto!important;box-sizing:border-box!important;resize:vertical;padding:8px;border-radius:6px;border:1px solid #66717d;font:inherit;}
-.clue-editor-actions{display:flex!important;gap:7px!important;margin-top:7px!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:2!important;}
-.clue-editor-actions button{display:inline-block!important;visibility:visible!important;opacity:1!important;padding:6px 12px!important;border:0;border-radius:6px;cursor:pointer;}
-.clue-editor-actions button:disabled{opacity:.6!important;cursor:wait;}
+/* These are BODY-level overlays, deliberately independent of card overflow. */
+.vocabulary-clue-panel,.vocabulary-clue-editor{
+  position:fixed!important;z-index:2147483647!important;
+  top:0;left:0;width:auto;max-width:calc(100vw - 12px)!important;
+  max-height:calc(100vh - 12px)!important;
+  overflow:auto!important;
+  background:#18212c!important;color:#fff!important;
+  padding:11px!important;border-radius:9px!important;
+  box-shadow:0 8px 28px rgba(0,0,0,.55)!important;
+  box-sizing:border-box!important;
+  transform:none!important;
+}
+.vocabulary-clue-panel{text-align:center!important;}
+.vocabulary-clue-label{font-size:12px!important;opacity:.75;margin-bottom:5px;}
+.vocabulary-clue-text{font-size:15px!important;line-height:1.45!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important;word-break:break-word!important;max-height:none!important;overflow:visible!important;}
+.vocabulary-clue-panel .clue-edit{display:inline-block!important;visibility:visible!important;opacity:1!important;margin-top:9px!important;padding:6px 16px!important;border:0!important;border-radius:6px!important;cursor:pointer!important;}
+.clue-editor-head{display:flex!important;align-items:center!important;justify-content:space-between!important;font-size:13px!important;margin-bottom:7px!important;}
+.clue-close{border:0!important;background:transparent!important;color:#fff!important;font-size:23px!important;line-height:1!important;cursor:pointer!important;padding:0 3px!important;}
+.vocabulary-clue-editor textarea{display:block!important;width:100%!important;min-width:0!important;min-height:76px!important;height:90px!important;max-height:40vh!important;box-sizing:border-box!important;resize:vertical!important;padding:8px!important;border-radius:6px!important;border:1px solid #66717d!important;font:inherit!important;line-height:1.4!important;}
+.clue-editor-actions{display:flex!important;flex-direction:row!important;align-items:center!important;gap:7px!important;margin-top:9px!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:3!important;width:100%!important;}
+.clue-editor-actions button{display:inline-flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;position:static!important;flex:0 0 auto!important;width:auto!important;min-width:64px!important;height:auto!important;padding:7px 13px!important;border:0!important;border-radius:6px!important;cursor:pointer!important;}
+.clue-editor-actions button:disabled{opacity:.6!important;cursor:wait!important;}
 @media(max-width:520px){
  .vocabulary-clue-btn{font-size:16px!important;}
- .vocabulary-clue-panel,.vocabulary-clue-editor{top:40px!important;left:6px!important;right:6px!important;}
+ .vocabulary-clue-panel,.vocabulary-clue-editor{max-width:calc(100vw - 12px)!important;max-height:calc(100vh - 12px)!important;}
+ .vocabulary-clue-editor textarea{height:90px!important;max-height:35vh!important;}
 }
 `;
   document.head.appendChild(s);
 }
 
-function init(){styles();all();document.addEventListener('lessonCardsRendered',()=>setTimeout(all,30));const grid=document.getElementById('grid');if(grid)new MutationObserver(()=>setTimeout(all,0)).observe(grid,{childList:true,subtree:true});}
+function init(){
+  styles();all();
+  document.addEventListener('lessonCardsRendered',()=>setTimeout(all,30));
+  const grid=document.getElementById('grid');
+  if(grid)new MutationObserver(()=>setTimeout(all,0)).observe(grid,{childList:true,subtree:true});
+  document.addEventListener('click',e=>{
+    if(activeOverlay&&!activeOverlay.contains(e.target)&&!e.target.closest('.vocabulary-clue-btn'))destroyOverlay();
+  },true);
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
