@@ -126,3 +126,33 @@ function shuffle(array) {
 }
 
 let showJapaneseFirst = true;
+
+// Prevent Chrome from treating the Lessons page search field as an email field.
+// This does not remove or modify any saved Chrome autofill data.
+(function preventLessonsSearchAutofill() {
+    function protectSearchFields(root = document) {
+        const fields = root.querySelectorAll?.('input[type="search"], input[type="text"], [role="searchbox"]') || [];
+        fields.forEach(field => {
+            if (field.matches('input[type="checkbox"], input[type="radio"], input[type="hidden"]')) return;
+            field.setAttribute('autocomplete', 'off');
+            field.setAttribute('autocorrect', 'off');
+            field.setAttribute('autocapitalize', 'none');
+            field.setAttribute('spellcheck', 'false');
+            if (!field.getAttribute('name') || /email|e-mail/i.test(field.getAttribute('name'))) {
+                field.setAttribute('name', 'lesson-search');
+            }
+        });
+    }
+
+    function init() {
+        protectSearchFields();
+        const observer = new MutationObserver(() => protectSearchFields());
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+})();
