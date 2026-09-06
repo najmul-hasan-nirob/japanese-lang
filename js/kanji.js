@@ -10,18 +10,25 @@
         const count = document.getElementById('kanjiCount');
         if (!grid || !levelPanel || !search || !clear || !mode || !shuffleBtn || !count || !Array.isArray(window.kanjiData)) return;
 
+        // Batch 20-30 from the PDF. Mapping is by Kanji character, never by
+        // array position, so the site's existing Kanji order is unchanged.
+        const batchChars = new Set(['十','百','千','万','円','年','上','下','中','半','分']);
+
         const cards = window.kanjiData.map(function (item, index) {
             const no = item.no || index + 1;
             const extra = (window.n5KanjiBangla && window.n5KanjiBangla[item.kanji]) || {};
-            const batch = no >= 21 && no <= 30;
-            const imageIndex = batch && Number.isInteger(extra.mnemonicIndex) ? extra.mnemonicIndex : null;
+            const hasMnemonic = batchChars.has(item.kanji) && Number.isInteger(extra.mnemonicIndex);
             return {
-                no: no, kanji: item.kanji || '', level: item.level || 'N5',
-                kunyomi: item.kunyomi || '', onyomi: item.onyomi || '', reading: item.reading || '',
-                meaning: batch ? (extra.meaning || item.meaning || '') : (item.meaning || ''),
-                mnemonicImage: imageIndex !== null ? '/assets/kanji-mnemonics.webp' : '',
-                mnemonicIndex: imageIndex,
-                banglaExamples: batch && Array.isArray(extra.examples) ? extra.examples : []
+                no: no,
+                kanji: item.kanji || '',
+                level: item.level || 'N5',
+                kunyomi: item.kunyomi || '',
+                onyomi: item.onyomi || '',
+                reading: item.reading || '',
+                meaning: hasMnemonic ? (extra.meaning || item.meaning || '') : (item.meaning || ''),
+                mnemonicImage: hasMnemonic ? 'assets/kanji-mnemonics.webp?v=2' : '',
+                mnemonicIndex: hasMnemonic ? extra.mnemonicIndex : null,
+                banglaExamples: hasMnemonic && Array.isArray(extra.examples) ? extra.examples : []
             };
         }).filter(function (item) { return item.kanji; });
 
@@ -67,7 +74,7 @@
                 if (item.mnemonicImage && Number.isInteger(item.mnemonicIndex)) {
                     const x = (item.mnemonicIndex % 5) * -180;
                     const y = Math.floor(item.mnemonicIndex / 5) * -140;
-                    image = '<div class="kanji-mnemonic-image" style="background-position:' + x + 'px ' + y + 'px;" role="img" aria-label="' + esc(item.kanji) + ' mnemonic image"></div>';
+                    image = '<div class="kanji-mnemonic-image" style="background-image:url(\'' + item.mnemonicImage + '\');background-size:900px 1120px;background-position:' + x + 'px ' + y + 'px;background-repeat:no-repeat;" role="img" aria-label="' + esc(item.kanji) + ' mnemonic image"></div>';
                 }
                 return '<div class="card kanji-card" data-no="' + item.no + '" data-kanji="' + esc(item.kanji) + '"><div class="inner">' +
                     '<div class="front"><div class="lesson-card-topbar"><span class="lesson-card-number">' + item.no + '</span><span class="lesson-tag">' + esc(item.level) + '</span></div><div class="kanji-character">' + esc(item.kanji) + '</div></div>' +
