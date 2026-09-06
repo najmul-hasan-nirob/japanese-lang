@@ -5,6 +5,7 @@ css: /css/lessons.css
 js:
 - /js/main.js
 - /js/kanji-data.js
+- /js/kanji-extras.js
 - /js/kanji.js
 - /js/kanji-controls.js
 ---
@@ -45,7 +46,6 @@ js:
 <div class="grid" id="kanjiGrid"></div>
 
 <style>
-/* ---------- KANJI SEARCH ---------- */
 #kanjiSearchWrap{width:100%;max-width:var(--layout-width);margin:0 auto 18px;}
 #kanjiSearchWrap .lesson-search-box{position:relative;width:100%;height:44px;display:flex;align-items:center;box-sizing:border-box;background:var(--paper-cell);border:1px solid var(--paper-line);border-radius:8px;box-shadow:var(--shadow);transition:border-color .2s ease,box-shadow .2s ease;}
 #kanjiSearchWrap .lesson-search-box:focus-within{border-color:var(--vermilion);box-shadow:0 0 0 2px var(--vermilion-soft);}
@@ -63,7 +63,7 @@ js:
 .kanji-character{font-family:'Noto Sans JP','Noto Sans',sans-serif;font-size:35px;font-weight:500;line-height:1.05;}
 .kanji-character.small{font-size:42px;}
 .kanji-details{width:100%;display:flex;flex-direction:column;align-items:center;gap:0;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;line-height:1.45;}
-.kanji-detail-meaning{text-align:center;font-size:17px;font-weight:700;line-height:1.45;margin:0;}
+.kanji-detail-meaning{text-align:center;font-size:17px;font-weight:700;line-height:1.45;margin:0 0 5px;}
 .kanji-reading-line{text-align:center;line-height:1.5;margin:0;}
 .kanji-reading-label{font-weight:700;}
 .kanji-example{font-weight:400;}
@@ -71,6 +71,12 @@ js:
 .kanji-example-line{margin-top:2px;}
 .kanji-example-line ruby{ruby-position:over;}
 .kanji-example-line rt{font-size:.55em;line-height:1;}
+.kanji-mnemonic-image{width:180px;height:140px;max-width:100%;margin:0 auto 8px;background-image:url('/assets/kanji-mnemonics.webp');background-repeat:no-repeat;background-size:900px 1120px;overflow:hidden;}
+.kanji-bangla-examples{width:100%;margin-top:8px;padding-top:7px;border-top:1px solid var(--paper-line);}
+.kanji-examples-title{font-weight:700;text-align:center;margin-bottom:2px;}
+.kanji-example-line{text-align:center;font-size:12px;line-height:1.45;}
+.kanji-example-jp{font-weight:600;}
+.kanji-example-bn{font-weight:400;}
 @media only screen and (max-width:520px){
     .kanji-toolbar{grid-template-columns:1fr 1fr;}
     #kanjiGrid{grid-template-columns:repeat(1,minmax(0,1fr));}
@@ -83,5 +89,6 @@ js:
     #kanjiSearchWrap #kanjiSearch{height:40px;font-size:13px;line-height:40px;padding-left:36px;padding-right:40px;}
     #kanjiSearchWrap .lesson-search-icon{left:11px;font-size:21px;}
     #kanjiSearchWrap #kanjiSearchClear{right:5px;width:28px;height:28px;}
+    .kanji-mnemonic-image{width:160px;height:125px;background-size:800px 1000px;}
 }
 </style>
