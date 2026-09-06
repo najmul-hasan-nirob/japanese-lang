@@ -11,8 +11,6 @@
 
         if (!grid || !levelPanel || !search || !clear || !mode || !shuffleBtn || !count || !Array.isArray(window.kanjiData)) return;
 
-        // The Kanji page uses the complete kanji-data.js registry.
-        // N5 cards receive their Kunyomi/Onyomi data from the uploaded N5 PDF.
         const cards = window.kanjiData.map(function (item, index) {
             return {
                 no: item.no || index + 1,
@@ -21,7 +19,10 @@
                 kunyomi: item.kunyomi || '',
                 onyomi: item.onyomi || '',
                 reading: item.reading || '',
-                meaning: item.meaning || ''
+                meaning: item.meaning || '',
+                mnemonicImage: item.mnemonicImage || '',
+                mnemonicIndex: Number.isInteger(item.mnemonicIndex) ? item.mnemonicIndex : null,
+                banglaExamples: Array.isArray(item.banglaExamples) ? item.banglaExamples : []
             };
         }).filter(function (item) { return item.kanji; });
 
@@ -53,12 +54,23 @@
         }
 
         function detailHtml(item) {
-            return '<div class="kanji-reading-line"><span class="kanji-reading-label">Kunyomi:</span> ' +
-                (item.kunyomi ? escapeHtml(item.kunyomi) : '—') +
-                '</div>' +
+            var html = '';
+            if (item.meaning) {
+                html += '<div class="kanji-detail-meaning">' + escapeHtml(item.meaning) + '</div>';
+            }
+            html += '<div class="kanji-reading-line"><span class="kanji-reading-label">Kunyomi:</span> ' +
+                (item.kunyomi ? escapeHtml(item.kunyomi) : '—') + '</div>' +
                 '<div class="kanji-reading-line"><span class="kanji-reading-label">Onyomi:</span> ' +
-                (item.onyomi ? escapeHtml(item.onyomi) : '—') +
-                '</div>';
+                (item.onyomi ? escapeHtml(item.onyomi) : '—') + '</div>';
+
+            if (item.banglaExamples.length) {
+                html += '<div class="kanji-bangla-examples"><div class="kanji-examples-title">উদাহরণ:</div>' +
+                    item.banglaExamples.map(function (example) {
+                        return '<div class="kanji-example-line"><span class="kanji-example-jp">' + escapeHtml(example.jp) +
+                            '</span> — <span class="kanji-example-bn">' + escapeHtml(example.bn) + '</span></div>';
+                    }).join('') + '</div>';
+            }
+            return html;
         }
 
         function render() {
@@ -66,6 +78,13 @@
             if (mode.value === 'shuffle') visible = visible.slice().sort(function () { return Math.random() - 0.5; });
 
             grid.innerHTML = visible.map(function (item) {
+                var imageHtml = '';
+                if (item.mnemonicImage && Number.isInteger(item.mnemonicIndex)) {
+                    var spriteX = (item.mnemonicIndex % 5) * -180;
+                    var spriteY = Math.floor(item.mnemonicIndex / 5) * -140;
+                    imageHtml = '<div class="kanji-mnemonic-image" style="background-position:' + spriteX + 'px ' + spriteY + 'px;" role="img" aria-label="' + escapeHtml(item.kanji) + ' mnemonic image"></div>';
+                }
+
                 return '<div class="card kanji-card" data-no="' + item.no + '" data-kanji="' + escapeHtml(item.kanji) + '">' +
                     '<div class="inner">' +
                         '<div class="front">' +
@@ -74,6 +93,7 @@
                         '</div>' +
                         '<div class="back">' +
                             '<div class="lesson-card-topbar"><span class="lesson-card-number">' + item.no + '</span><span class="lesson-tag">' + escapeHtml(item.level) + '</span></div>' +
+                            imageHtml +
                             '<div class="kanji-character small">' + escapeHtml(item.kanji) + '</div>' +
                             '<div class="kanji-details">' + detailHtml(item) + '</div>' +
                         '</div>' +
@@ -82,9 +102,7 @@
             }).join('');
 
             grid.querySelectorAll('.card').forEach(function (card) {
-                card.addEventListener('click', function () {
-                    card.classList.toggle('flipped');
-                });
+                card.addEventListener('click', function () { card.classList.toggle('flipped'); });
             });
 
             count.textContent = 'Showing ' + visible.length + ' kanji';
@@ -103,16 +121,9 @@
             levelBtn.setAttribute('aria-expanded', 'false');
         });
         search.addEventListener('input', render);
-        clear.addEventListener('click', function () {
-            search.value = '';
-            render();
-            search.focus();
-        });
+        clear.addEventListener('click', function () { search.value = ''; render(); search.focus(); });
         mode.addEventListener('change', render);
-        shuffleBtn.addEventListener('click', function () {
-            mode.value = 'shuffle';
-            render();
-        });
+        shuffleBtn.addEventListener('click', function () { mode.value = 'shuffle'; render(); });
 
         updateLevelLabel();
         render();
