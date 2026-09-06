@@ -146,7 +146,7 @@
         style.id = 'lesson-card-structure-styles';
         style.textContent = `
 .card.lesson-card-structured {
-    position:relative; overflow:hidden; border-radius:var(--radius);
+    position:relative; overflow:visible; border-radius:var(--radius);
     display:flex; align-items:stretch;
 }
 .lesson-card-inner {
