@@ -10,22 +10,23 @@
         const count = document.getElementById('kanjiCount');
         if (!grid || !levelPanel || !search || !clear || !mode || !shuffleBtn || !count || !Array.isArray(window.kanjiData)) return;
 
-        // PDF batch 20-30. Always map by Kanji character so the project's existing Kanji order is preserved.
-        const mnemonicFiles = {
-            '十': {index:0}, '百': {index:1}, '千': {index:2}, '万': {index:3}, '円': {index:4},
-            '年': {index:5}, '上': {index:6}, '下': {index:7}, '中': {index:8}, '半': {index:9}, '分': {index:10}
+        // PDF batch 20-30. Map by Kanji character; never change the site's existing order.
+        // The verified sprite is 300x440: 3 columns x 4 rows, 100x110 tiles.
+        const mnemonicIndex = {
+            '十':0, '百':1, '千':2, '万':3, '円':4,
+            '年':5, '上':6, '下':7, '中':8, '半':9, '分':10
         };
-        const mnemonicSprite = 'assets/kanji-mnemonics-20-30.webp?v=3';
+        const mnemonicSprite = 'assets/kanji-mnemonics-20-30.webp?v=4';
 
         const cards = window.kanjiData.map(function (item, index) {
             const no = item.no || index + 1;
             const extra = (window.n5KanjiBangla && window.n5KanjiBangla[item.kanji]) || {};
-            const m = mnemonicFiles[item.kanji];
+            const m = Object.prototype.hasOwnProperty.call(mnemonicIndex, item.kanji) ? mnemonicIndex[item.kanji] : null;
             return {
                 no:no, kanji:item.kanji || '', level:item.level || 'N5', kunyomi:item.kunyomi || '', onyomi:item.onyomi || '', reading:item.reading || '',
-                meaning:m ? (extra.meaning || item.meaning || '') : (item.meaning || ''),
-                mnemonicImage:m ? mnemonicSprite : '', mnemonicIndex:m ? m.index : null,
-                banglaExamples:m && Array.isArray(extra.examples) ? extra.examples : []
+                meaning:m !== null ? (extra.meaning || item.meaning || '') : (item.meaning || ''),
+                mnemonicImage:m !== null ? mnemonicSprite : '', mnemonicIndex:m,
+                banglaExamples:m !== null && Array.isArray(extra.examples) ? extra.examples : []
             };
         }).filter(function (item) { return item.kanji; });
 
@@ -45,8 +46,8 @@
             grid.innerHTML=visible.map(function(item){
                 let image='';
                 if(item.mnemonicImage && Number.isInteger(item.mnemonicIndex)){
-                    const x=(item.mnemonicIndex%5)*-180, y=Math.floor(item.mnemonicIndex/5)*-140;
-                    image='<div class="kanji-mnemonic-image" style="background-image:url(\''+item.mnemonicImage+'\');background-size:900px 420px;background-position:'+x+'px '+y+'px;background-repeat:no-repeat;" role="img" aria-label="'+esc(item.kanji)+' mnemonic image"></div>';
+                    const x=(item.mnemonicIndex%3)*-100, y=Math.floor(item.mnemonicIndex/3)*-110;
+                    image='<div class="kanji-mnemonic-image" style="background-image:url(\''+item.mnemonicImage+'\');background-size:300px 440px;background-position:'+x+'px '+y+'px;background-repeat:no-repeat;width:100px;height:110px;max-width:100%;margin:0 auto 8px;" role="img" aria-label="'+esc(item.kanji)+' mnemonic image"></div>';
                 }
                 return '<div class="card kanji-card" data-no="'+item.no+'" data-kanji="'+esc(item.kanji)+'"><div class="inner">'+
                     '<div class="front"><div class="lesson-card-topbar"><span class="lesson-card-number">'+item.no+'</span><span class="lesson-tag">'+esc(item.level)+'</span></div><div class="kanji-character">'+esc(item.kanji)+'</div></div>'+ 
