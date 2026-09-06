@@ -11,13 +11,15 @@
 
         if (!grid || !levelPanel || !search || !clear || !mode || !shuffleBtn || !count || !Array.isArray(window.kanjiData)) return;
 
-        // The Kanji page now uses the complete kanji-data.js registry.
-        // No manual Kanji dataset is loaded or required.
+        // The Kanji page uses the complete kanji-data.js registry.
+        // N5 cards receive their Kunyomi/Onyomi data from the uploaded N5 PDF.
         const cards = window.kanjiData.map(function (item, index) {
             return {
                 no: item.no || index + 1,
                 kanji: item.kanji || '',
                 level: item.level || 'N5',
+                kunyomi: item.kunyomi || '',
+                onyomi: item.onyomi || '',
                 reading: item.reading || '',
                 meaning: item.meaning || ''
             };
@@ -45,16 +47,18 @@
             return cards.filter(function (item) {
                 if (levels.length && !levels.includes(item.level)) return false;
                 if (!q) return true;
-                const text = [item.kanji, item.reading, item.meaning, item.level, String(item.no)].join(' ').toLowerCase();
+                const text = [item.kanji, item.kunyomi, item.onyomi, item.reading, item.meaning, item.level, String(item.no)].join(' ').toLowerCase();
                 return text.includes(q);
             });
         }
 
         function detailHtml(item) {
-            const details = [];
-            if (item.reading) details.push('<div class="kanji-reading-line"><span class="kanji-reading-label">Reading:</span> ' + escapeHtml(item.reading) + '</div>');
-            if (item.meaning) details.push('<div class="kanji-reading-line"><span class="kanji-reading-label">Meaning:</span> ' + escapeHtml(item.meaning) + '</div>');
-            return details.join('');
+            return '<div class="kanji-reading-line"><span class="kanji-reading-label">Kunyomi:</span> ' +
+                (item.kunyomi ? escapeHtml(item.kunyomi) : '—') +
+                '</div>' +
+                '<div class="kanji-reading-line"><span class="kanji-reading-label">Onyomi:</span> ' +
+                (item.onyomi ? escapeHtml(item.onyomi) : '—') +
+                '</div>';
         }
 
         function render() {
