@@ -46,44 +46,33 @@
             const queue = [];
             if (bangla) {
                 const u = new SpeechSynthesisUtterance(bangla);
-                u.lang = 'bn-BD';
-                u.rate = 1.0;
-                const voice = getSpeechVoice('bn');
-                if (voice) u.voice = voice;
+                u.lang = 'bn-BD'; u.rate = 1.0;
+                const voice = getSpeechVoice('bn'); if (voice) u.voice = voice;
                 queue.push(u);
             }
             if (bangla && english) {
                 const u = new SpeechSynthesisUtterance('বা');
-                u.lang = 'bn-BD';
-                u.rate = 1.0;
-                const voice = getSpeechVoice('bn');
-                if (voice) u.voice = voice;
+                u.lang = 'bn-BD'; u.rate = 1.0;
+                const voice = getSpeechVoice('bn'); if (voice) u.voice = voice;
                 queue.push(u);
             }
             if (english) {
                 const u = new SpeechSynthesisUtterance(english);
-                u.lang = 'en-US';
-                u.rate = 1.0;
-                const voice = getSpeechVoice('en');
-                if (voice) u.voice = voice;
+                u.lang = 'en-US'; u.rate = 1.0;
+                const voice = getSpeechVoice('en'); if (voice) u.voice = voice;
                 queue.push(u);
             }
-
             queue.forEach(u => s.speak(u));
             return;
         }
 
         if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
-            if (bangla) {
-                try { window.AndroidTTS.speak(bangla); } catch (e) {}
-            }
+            if (bangla) { try { window.AndroidTTS.speak(bangla); } catch (e) {} }
             if (bangla && english) {
                 const delay = Math.max(900, Math.min(5000, bangla.replace(/\s/g, '').length * 55 + 500));
                 setTimeout(() => {
                     try { window.AndroidTTS.speak('বা'); } catch (e) {}
-                    setTimeout(() => {
-                        try { window.AndroidTTS.speak(english); } catch (e) {}
-                    }, 500);
+                    setTimeout(() => { try { window.AndroidTTS.speak(english); } catch (e) {} }, 500);
                 }, delay);
             } else if (english) {
                 try { window.AndroidTTS.speak(english); } catch (e) {}
@@ -94,7 +83,6 @@
     function setupSpeakerBehavior(card, speaker) {
         if (!speaker || speaker.dataset.backSpeechReady === 'true') return;
         speaker.dataset.backSpeechReady = 'true';
-
         speaker.addEventListener('click', event => {
             if (!isBackCard(card) || teacherModeIsActive(card)) return;
             event.preventDefault();
@@ -154,147 +142,68 @@
 
     function injectStyles() {
         if (document.getElementById('lesson-card-structure-styles')) return;
-
         const style = document.createElement('style');
         style.id = 'lesson-card-structure-styles';
         style.textContent = `
 .card.lesson-card-structured {
-    position:relative;
-    overflow:hidden;
-    border-radius:var(--radius);
-    display:flex;
-    align-items:stretch;
+    position:relative; overflow:hidden; border-radius:var(--radius);
+    display:flex; align-items:stretch;
 }
-
 .lesson-card-inner {
-    position:relative;
-    width:100%;
-    height:auto;
-    min-height:0;
-    overflow:visible;
-    border-radius:inherit;
-    box-sizing:border-box;
-    display:flex;
-    flex-direction:column;
-    flex:1 1 auto;
-    transform-style:preserve-3d;
+    position:relative; width:100%; height:auto; min-height:0; overflow:visible;
+    border-radius:inherit; box-sizing:border-box; display:flex;
+    flex-direction:column; flex:1 1 auto; transform-style:preserve-3d;
 }
-
 .lesson-card-topbar {
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    width:100%;
-    height:42px;
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr 1fr;
-    align-items:center;
-    justify-items:center;
-    box-sizing:border-box;
-    z-index:50;
-    pointer-events:none;
+    position:absolute; top:0; left:0; right:0; width:100%; height:42px;
+    display:grid; grid-template-columns:1fr 1fr 1fr 1fr; align-items:center;
+    justify-items:center; box-sizing:border-box; z-index:50; pointer-events:none;
 }
-
 .lesson-card-content {
-    position:relative;
-    width:100%;
-    height:auto;
-    min-height:0;
-    box-sizing:border-box;
-    overflow:visible;
-    display:grid;
-    flex:1 1 auto;
-    grid-template-columns:minmax(0, 1fr);
-    grid-template-rows:1fr;
-    align-items:stretch;
-    pointer-events:none;
+    position:relative; width:100%; height:auto; min-height:0; box-sizing:border-box;
+    overflow:visible; display:grid; flex:1 1 auto;
+    grid-template-columns:minmax(0, 1fr); grid-template-rows:1fr;
+    align-items:stretch; pointer-events:none;
 }
-
 .lesson-card-content > .front,
 .lesson-card-content > .back {
-    position:relative;
-    inset:auto;
-    grid-area:1 / 1;
-    width:100%;
-    height:auto;
-    min-height:0;
-    box-sizing:border-box;
-    padding-top:50px !important;
-    padding-bottom:14px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    pointer-events:auto;
+    position:relative; inset:auto; grid-area:1 / 1; width:100%; height:auto;
+    min-height:0; box-sizing:border-box; padding-top:50px !important;
+    padding-bottom:14px; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; text-align:center; pointer-events:auto;
 }
-
 .lesson-card-topbar .hard-star,
 .lesson-card-topbar .lesson-card-number,
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
-    margin:0 !important;
-    pointer-events:auto;
+    margin:0 !important; pointer-events:auto;
 }
-
 .lesson-card-topbar .hard-star {
-    grid-column:1;
-    grid-row:1;
-    justify-self:start;
-    align-self:center;
-    position:relative !important;
-    inset:auto !important;
-    transform:none !important;
+    grid-column:1; grid-row:1; justify-self:start; align-self:center;
+    position:relative !important; inset:auto !important; transform:none !important;
     margin-left:8px !important;
 }
-
 .lesson-card-topbar .lesson-card-number {
-    position:absolute !important;
-    top:50% !important;
-    left:50% !important;
-    right:auto !important;
-    bottom:auto !important;
-    transform:translate(-50%, -50%) !important;
-    grid-column:auto !important;
-    grid-row:auto !important;
-    justify-self:auto !important;
-    align-self:auto !important;
-    margin:0 !important;
-    z-index:60;
-    display:flex !important;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none !important;
+    position:absolute !important; top:50% !important; left:50% !important;
+    right:auto !important; bottom:auto !important;
+    transform:translate(-50%, -50%) !important; grid-column:auto !important;
+    grid-row:auto !important; justify-self:auto !important; align-self:auto !important;
+    margin:0 !important; z-index:60; display:flex !important;
+    align-items:center; justify-content:center; pointer-events:none !important;
 }
-
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
-    grid-column:4;
-    grid-row:1;
-    justify-self:end;
-    align-self:center;
-    position:relative !important;
-    inset:auto !important;
-    transform:none !important;
-    margin-right:8px !important;
-    display:flex !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    pointer-events:auto !important;
+    grid-column:4; grid-row:1; justify-self:end; align-self:center;
+    position:relative !important; inset:auto !important; transform:none !important;
+    margin-right:8px !important; display:flex !important;
+    visibility:visible !important; opacity:1 !important; pointer-events:auto !important;
 }
-
 @media (max-width:520px) {
     .lesson-card-topbar { height:38px; }
-
     .lesson-card-content > .front,
-    .lesson-card-content > .back {
-        padding-top:44px !important;
-        padding-bottom:10px;
-    }
-
+    .lesson-card-content > .back { padding-top:44px !important; padding-bottom:10px; }
     .lesson-card-topbar .hard-star { margin-left:5px !important; }
     .lesson-card-topbar .speaker-btn,
     .lesson-card-topbar .speak-btn,
@@ -304,37 +213,20 @@
         document.head.appendChild(style);
     }
 
-    function loadVocabularyClues() {
-        if (document.querySelector('script[data-vocabulary-clues]')) return;
-        const script = document.createElement('script');
-        script.src = '/js/vocabulary-clues.js';
-        script.defer = true;
-        script.dataset.vocabularyClues = 'true';
-        document.head.appendChild(script);
-    }
-
     function setupAll(grid) {
         grid.querySelectorAll(':scope > .card').forEach(setupCard);
-        if (typeof window.updateLessonCardNumbers === 'function') {
-            window.updateLessonCardNumbers();
-        }
+        if (typeof window.updateLessonCardNumbers === 'function') window.updateLessonCardNumbers();
     }
 
     function init() {
         const grid = document.getElementById('grid');
         if (!grid) return;
-
         injectStyles();
         setupAll(grid);
-        loadVocabularyClues();
-
         const observer = new MutationObserver(() => setTimeout(() => setupAll(grid), 0));
         observer.observe(grid, { childList: true, subtree: true });
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
 })();
