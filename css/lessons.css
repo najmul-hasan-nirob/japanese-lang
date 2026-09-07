@@ -288,4 +288,6 @@ html, body{ overscroll-behavior-y:none; }
     }
 }
 
+.lesson-card-topbar, .front, .back{
+    border-radius:var(--radius) !important;
 }
