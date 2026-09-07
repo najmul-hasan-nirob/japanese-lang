@@ -289,10 +289,6 @@ html, body{ overscroll-behavior-y:none; }
     .vocabulary-clue-panel .vocabulary-clue-text {
         padding-top: 30px !important;
     }
-
-    .vocabulary-clue-editor{
-            padding: 5px 15px !important;
-    }
 }
 
 .lesson-card-topbar, .front, .back{
