@@ -15,7 +15,7 @@
     const synth=()=>window.speechSynthesis||null;
     function getCurrentCards(){return Array.from(document.querySelectorAll('#grid > .card')).filter(c=>{const s=getComputedStyle(c);return s.display!=='none'&&c.offsetParent!==null;});}
     function japaneseText(card){const clone=(card.querySelector('.front')||card).cloneNode(true);clone.querySelectorAll('.lesson-card-topbar,.speaker-btn,.speak-btn,.pronunciation-btn,.romaji,.hard-star,.lesson-card-number,img,svg,button').forEach(e=>e.remove());return clone.textContent.replace(/[^\u3040-\u30ff\u3400-\u9fff\uff66-\uff9fー々〆〇・「」『』【】［］（）！？。、「」\s]/g,'').replace(/\s+/g,' ').trim();}
-    function banglaText(card){const el=card.querySelector('.bangla');if(!el)return '';return el.textContent.replace(/\s*\/\s*/g,' অথবা ').replace(/\s+/g,' ').trim();}
+    function banglaText(card){const el=card.querySelector('.bangla');if(!el)return '';return el.textContent.replace(/\s*\/\s*/g,' বা ').replace(/\s+/g,' ').trim();}
     function isBackCard(card){return !!card&&(card.classList.contains('flipped')||card.getAttribute('data-flipped')==='true');}
     function setActiveCard(card){document.querySelectorAll('#grid > .card.teacher-active').forEach(e=>e.classList.remove('teacher-active'));if(!card)return;card.classList.add('teacher-active');const r=card.getBoundingClientRect();if(r.top<50||r.bottom>innerHeight-50)card.scrollIntoView({behavior:'smooth',block:'center'});}
     function getVoices(){return synth()?synth().getVoices():[];}
