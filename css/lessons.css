@@ -291,10 +291,3 @@ html, body{ overscroll-behavior-y:none; }
 .lesson-card-topbar, .front, .back{
     border-radius:var(--radius) !important;
 }
-
-.vocabulary-clue-panel {
-        width: 94% !important;
-        left: 10px !important;
-        top: 160px !important;
-        height: 172px !important;
-}
