@@ -35,7 +35,7 @@
     }
 
     function speakBackSequence(card) {
-        const bangla = card.querySelector('.bangla')?.textContent.replace(/\s+/g, ' ').trim() || '';
+        const bangla = (card.querySelector('.bangla')?.textContent || '').replace(/\s*\/\s*/g, ' বা ').replace(/\s+/g, ' ').trim();
         const english = card.querySelector('.english')?.textContent.replace(/\s+/g, ' ').trim() || '';
         if (!bangla && !english) return;
 
