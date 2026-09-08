@@ -45,7 +45,7 @@
         }
         .kanji-stroke-panel {
             position:relative !important;
-            width:min(92vw,420px) !important;
+            width:min(92vw,430px) !important;
             max-height:90vh !important;
             overflow:auto !important;
             background:var(--paper-cell,#fff) !important;
@@ -69,21 +69,27 @@
             cursor:pointer !important;
         }
         .kanji-stroke-title {
-            margin:0 34px 8px !important;
-            font-size:17px !important;
+            margin:0 34px 4px !important;
+            font-size:18px !important;
             font-weight:700 !important;
         }
+        .kanji-stroke-subtitle {
+            margin:0 0 10px !important;
+            font-size:12px !important;
+            opacity:.7 !important;
+        }
         .kanji-stroke-stage {
-            width:min(70vw,280px) !important;
-            height:min(70vw,280px) !important;
-            max-width:280px !important;
-            max-height:280px !important;
+            width:min(72vw,300px) !important;
+            height:min(72vw,300px) !important;
+            max-width:300px !important;
+            max-height:300px !important;
             margin:8px auto 12px !important;
             display:flex !important;
             align-items:center !important;
             justify-content:center !important;
             background:rgba(128,128,128,.07) !important;
             border-radius:10px !important;
+            overflow:hidden !important;
         }
         .kanji-stroke-stage svg {
             width:100% !important;
@@ -105,6 +111,7 @@
         @media (max-width:520px){
             .kanji-card > .lesson-card-topbar { gap:5px !important; }
             .kanji-card > .lesson-card-topbar button { width:28px !important; height:28px !important; min-width:28px !important; }
+            .kanji-stroke-panel { padding:14px !important; }
         }
     `;
     document.head.appendChild(style);
@@ -130,29 +137,43 @@
 
     function animateStrokeOrder(svg) {
         const paths = Array.from(svg.querySelectorAll('path')).filter(function (path) {
-            return /-s\\d+/.test(path.id || '');
+            return /-s\d+/.test(path.id || '');
         }).sort(function (a, b) {
-            const getNo = function (el) { const m = (el.id || '').match(/-s(\\d+)/); return m ? Number(m[1]) : 9999; };
+            const getNo = function (el) {
+                const m = (el.id || '').match(/-s(\d+)/);
+                return m ? Number(m[1]) : 9999;
+            };
             return getNo(a) - getNo(b);
+        });
+
+        if (!paths.length) return;
+
+        // Show the finished Kanji faintly as a guide, then draw each stroke in order.
+        paths.forEach(function (path) {
+            path.style.fill = 'none';
+            path.style.stroke = '#b8b8b8';
+            path.style.strokeWidth = '3';
+            path.style.strokeLinecap = 'round';
+            path.style.strokeLinejoin = 'round';
+            path.style.opacity = '0.28';
         });
 
         paths.forEach(function (path, index) {
             try {
                 const length = path.getTotalLength();
-                path.style.fill = 'none';
                 path.style.stroke = 'currentColor';
                 path.style.strokeWidth = '3.5';
-                path.style.strokeLinecap = 'round';
-                path.style.strokeLinejoin = 'round';
                 path.style.strokeDasharray = String(length);
                 path.style.strokeDashoffset = String(length);
                 path.style.opacity = '1';
                 path.getBoundingClientRect();
-                path.style.transition = 'stroke-dashoffset .42s ease';
-                path.style.transitionDelay = (index * .48) + 's';
-                requestAnimationFrame(function () { path.style.strokeDashoffset = '0'; });
+                path.style.transition = 'stroke-dashoffset .55s ease';
+                path.style.transitionDelay = (index * .62) + 's';
+                requestAnimationFrame(function () {
+                    path.style.strokeDashoffset = '0';
+                });
             } catch (error) {
-                path.style.opacity = '1';
+                path.style.strokeDashoffset = '0';
             }
         });
     }
@@ -169,8 +190,9 @@
             <div class="kanji-stroke-panel">
                 <button type="button" class="kanji-stroke-close" aria-label="Close stroke order">×</button>
                 <h3 class="kanji-stroke-title">${kanji} — Stroke Order</h3>
+                <p class="kanji-stroke-subtitle">Watch how to write this Kanji, one stroke at a time.</p>
                 <div class="kanji-stroke-stage"><div class="kanji-stroke-error">Loading…</div></div>
-                <p class="kanji-stroke-note">Stroke order plays automatically.</p>
+                <p class="kanji-stroke-note">The strokes are drawn in writing order automatically.</p>
             </div>`;
         document.body.appendChild(modal);
         activeModal = modal;
@@ -200,7 +222,9 @@
             svg.setAttribute('aria-label', kanji + ' stroke order');
             stage.innerHTML = '';
             stage.appendChild(document.importNode(svg, true));
-            requestAnimationFrame(function () { animateStrokeOrder(stage.querySelector('svg')); });
+            requestAnimationFrame(function () {
+                animateStrokeOrder(stage.querySelector('svg'));
+            });
         } catch (error) {
             stage.innerHTML = '<div class="kanji-stroke-error">Stroke order could not be loaded.</div>';
         }
