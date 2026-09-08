@@ -63,11 +63,6 @@
             font-size:15px !important;
             font-weight:700 !important;
         }
-        .kanji-stroke-section-help {
-            margin:0 0 8px !important;
-            font-size:11px !important;
-            opacity:.7 !important;
-        }
         .kanji-stroke-stage {
             width:min(55vw,220px) !important;
             height:min(55vw,220px) !important;
@@ -205,11 +200,9 @@
             stage.appendChild(document.importNode(svg, true));
             const currentSvg = stage.querySelector('svg');
             playStrokes(currentSvg, status);
-            section.querySelector('.kanji-stroke-replay').hidden = false;
         } catch (error) {
             stage.innerHTML = '<div class="kanji-stroke-error">Stroke order could not be loaded.</div>';
             status.textContent = 'Please try again.';
-            section.querySelector('.kanji-stroke-replay').hidden = true;
         }
     }
 
@@ -258,13 +251,6 @@
             }
         });
 
-        section.querySelector('.kanji-stroke-replay').addEventListener('click', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const svg = section.querySelector('svg');
-            if (svg) playStrokes(svg, section.querySelector('.kanji-stroke-status'));
-        });
-
         section.addEventListener('click', function (event) {
             event.stopPropagation();
         });
@@ -302,7 +288,6 @@
             }
         });
 
-        // Exact requested order: star → number → stroke order → level tag → speaker.
         topbar.append(star, number, stroke, tag, speaker);
         card.insertBefore(topbar, inner);
         card.insertBefore(section, inner);
