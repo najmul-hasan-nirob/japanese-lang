@@ -1,22 +1,14 @@
-// Kanji cards: use the same topbar structure and controls as Lesson cards.
+// Kanji cards use the exact Lesson-card topbar behavior.
+// The topbar is outside the flipping element and remains static.
 (function () {
-    function speak(text) {
-        if (!text) return;
-        if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ja-JP';
-            utterance.rate = 0.9;
-            window.speechSynthesis.speak(utterance);
-        } else if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
-            try { window.AndroidTTS.speak(text); } catch (e) {}
-        }
-    }
-
     function setupCard(card) {
         if (!card || card.dataset.kanjiTopbarReady === 'true') return;
         const inner = card.querySelector(':scope > .inner');
         if (!inner) return;
+
+        inner.querySelectorAll(':scope > .lesson-card-topbar').forEach(function (bar) {
+            bar.remove();
+        });
 
         const topbar = document.createElement('div');
         topbar.className = 'lesson-card-topbar';
@@ -47,13 +39,23 @@
             event.preventDefault();
             event.stopPropagation();
             const kanji = card.getAttribute('data-kanji') || '';
-            speak(kanji);
+            if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(kanji);
+                utterance.lang = 'ja-JP';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            } else if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
+                try { window.AndroidTTS.speak(kanji); } catch (e) {}
+            }
         });
 
         topbar.appendChild(star);
         if (number) topbar.appendChild(number);
         topbar.appendChild(speaker);
-        inner.insertBefore(topbar, inner.firstChild);
+
+        // .inner flips. The topbar is inserted before it, so it never flips.
+        card.insertBefore(topbar, inner);
         card.dataset.kanjiTopbarReady = 'true';
     }
 
@@ -66,6 +68,6 @@
         }).observe(grid, { childList: true });
     }
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
     else init();
 })();
