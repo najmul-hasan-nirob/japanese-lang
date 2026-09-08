@@ -8,7 +8,7 @@
             flex-wrap:nowrap !important;
             align-items:center !important;
             justify-content:space-between !important;
-            gap:6px !important;
+            gap:14px !important;
             width:100% !important;
             min-height:34px !important;
             white-space:nowrap !important;
@@ -102,7 +102,7 @@
             font-size:12px !important;
         }
         @media (max-width:520px){
-            .kanji-card > .lesson-card-topbar { gap:4px !important; }
+            .kanji-card > .lesson-card-topbar { gap:9px !important; }
             .kanji-card > .lesson-card-topbar button { width:28px !important; height:28px !important; min-width:28px !important; }
             .kanji-card > .kanji-stroke-section { padding:10px !important; }
             .kanji-stroke-stage { width:58vw !important; height:58vw !important; max-width:200px !important; max-height:200px !important; }
