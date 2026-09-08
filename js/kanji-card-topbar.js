@@ -242,10 +242,8 @@
         section.setAttribute('aria-hidden', 'true');
         section.innerHTML = `
             <div class="kanji-stroke-section-title">How to write ${card.dataset.kanji || ''}</div>
-            <div class="kanji-stroke-section-help">The character is drawn one stroke at a time in the correct order.</div>
             <div class="kanji-stroke-stage"><div class="kanji-stroke-error">Stroke order will appear here.</div></div>
             <div class="kanji-stroke-status"></div>
-            <button type="button" class="kanji-stroke-replay" hidden>↻ Replay</button>
         `;
 
         stroke.addEventListener('click', function (event) {
