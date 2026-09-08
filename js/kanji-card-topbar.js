@@ -3,22 +3,29 @@
     const style = document.createElement('style');
     style.textContent = `
         .kanji-card > .lesson-card-topbar {
-            display:flex !important;
-            flex-direction:row !important;
-            flex-wrap:nowrap !important;
+            display:grid !important;
+            grid-template-columns:repeat(5, minmax(0, 1fr)) !important;
             align-items:center !important;
-            justify-content:space-between !important;
-            gap:14px !important;
+            justify-items:center !important;
+            gap:0 !important;
             width:100% !important;
             min-height:34px !important;
             white-space:nowrap !important;
         }
         .kanji-card > .lesson-card-topbar > * {
-            flex:0 0 auto !important;
+            min-width:0 !important;
             white-space:nowrap !important;
+            margin:0 !important;
+            position:static !important;
+            transform:none !important;
         }
-        .kanji-card > .lesson-card-topbar .lesson-card-number {
-            margin-right:auto !important;
+        .kanji-card > .lesson-card-topbar .hard-star,
+        .kanji-card > .lesson-card-topbar .lesson-card-number,
+        .kanji-card > .lesson-card-topbar .kanji-stroke-btn,
+        .kanji-card > .lesson-card-topbar .lesson-tag,
+        .kanji-card > .lesson-card-topbar .speaker-btn {
+            grid-column:auto !important;
+            justify-self:center !important;
         }
         .kanji-card > .lesson-card-topbar button {
             width:30px !important;
@@ -102,7 +109,7 @@
             font-size:12px !important;
         }
         @media (max-width:520px){
-            .kanji-card > .lesson-card-topbar { gap:9px !important; }
+            .kanji-card > .lesson-card-topbar { grid-template-columns:repeat(5, minmax(0, 1fr)) !important; }
             .kanji-card > .lesson-card-topbar button { width:28px !important; height:28px !important; min-width:28px !important; }
             .kanji-card > .kanji-stroke-section { padding:10px !important; }
             .kanji-stroke-stage { width:58vw !important; height:58vw !important; max-width:200px !important; max-height:200px !important; }
