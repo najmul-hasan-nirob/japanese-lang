@@ -1,18 +1,21 @@
-// Kanji cards use the exact Lesson-card topbar behavior.
-// The topbar is outside the flipping element and remains static.
+// Static Lesson-style topbar for Kanji cards. It is outside .inner, so it never flips.
 (function () {
     function setupCard(card) {
         if (!card || card.dataset.kanjiTopbarReady === 'true') return;
         const inner = card.querySelector(':scope > .inner');
         if (!inner) return;
 
-        inner.querySelectorAll(':scope > .lesson-card-topbar').forEach(function (bar) {
-            bar.remove();
-        });
-
         const topbar = document.createElement('div');
         topbar.className = 'lesson-card-topbar';
         topbar.setAttribute('aria-label', 'Card controls');
+
+        const number = document.createElement('span');
+        number.className = 'lesson-card-number';
+        number.textContent = card.dataset.no || '';
+
+        const tag = document.createElement('span');
+        tag.className = 'lesson-tag';
+        tag.textContent = card.dataset.level || '';
 
         const star = document.createElement('button');
         star.type = 'button';
@@ -28,7 +31,6 @@
             star.setAttribute('aria-pressed', String(active));
         });
 
-        const number = inner.querySelector('.lesson-card-number');
         const speaker = document.createElement('button');
         speaker.type = 'button';
         speaker.className = 'speaker-btn';
@@ -38,23 +40,20 @@
         speaker.addEventListener('click', function (event) {
             event.preventDefault();
             event.stopPropagation();
-            const kanji = card.getAttribute('data-kanji') || '';
+            const text = card.dataset.kanji || '';
             if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(kanji);
+                const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'ja-JP';
                 utterance.rate = 0.9;
                 window.speechSynthesis.speak(utterance);
-            } else if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
-                try { window.AndroidTTS.speak(kanji); } catch (e) {}
             }
         });
 
         topbar.appendChild(star);
-        if (number) topbar.appendChild(number);
+        topbar.appendChild(number);
+        topbar.appendChild(tag);
         topbar.appendChild(speaker);
-
-        // .inner flips. The topbar is inserted before it, so it never flips.
         card.insertBefore(topbar, inner);
         card.dataset.kanjiTopbarReady = 'true';
     }
