@@ -57,17 +57,19 @@
 
             card.innerHTML = `
                 <div class="inner">
-                    <div class="front">
+                    <div class="lesson-card-topbar">
                         <button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button>
                         <span class="lesson-card-number" aria-hidden="true">${index + 1}</span>
                         <span class="lesson-tag">Why</span>
+                        <button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>
+                    </div>
+                    <div class="front">
                         <div class="lesson-japanese">${escapeHtml(word.jp)}</div>
                     </div>
                     <div class="back vocabulary-back">
                         <span class="romaji">${escapeHtml(word.romaji)}</span>
                         <span class="bangla">${escapeHtml(word.bn)}</span>
                     </div>
-                    <button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>
                 </div>`;
 
             card.addEventListener('click', function (event) {
