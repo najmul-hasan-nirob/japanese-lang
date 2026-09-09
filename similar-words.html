@@ -1,0 +1,48 @@
+---
+layout: default
+title: Similar Words
+css: /css/lessons.css
+js:
+- /js/main.js
+- /js/similar-words.js
+---
+
+<div class="toolbar">
+    <div class="field filter-field">
+        <label id="similarWordsLabel">Why</label>
+        <button type="button" class="multiselect-btn" id="similarWordsBtn" aria-haspopup="true" aria-expanded="false">Why</button>
+        <div class="multiselect-panel" id="similarWordsPanel">
+            <label><input type="checkbox" value="why" checked> Why</label>
+        </div>
+    </div>
+    <div class="field filter-field">
+        <label for="similarWordsMode">Order</label>
+        <select id="similarWordsMode">
+            <option value="normal">Normal</option>
+            <option value="shuffle">Shuffle</option>
+        </select>
+    </div>
+    <div class="field shuffle-field"><button id="similarWordsShuffleBtn" class="shuffle-btn" type="button"></button></div>
+    <div class="field romaji-field"><button id="similarWordsRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true"></button></div>
+    <div class="field direction-field"><button id="similarWordsDirection" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back"></button></div>
+</div>
+<div class="count-display" id="similarWordsCount" aria-live="polite">Showing 0 cards</div>
+<div class="grid" id="similarWordsGrid"></div>
+
+<script>
+(function () {
+    const panel = document.getElementById('similarWordsPanel');
+    const button = document.getElementById('similarWordsBtn');
+    if (!panel || !button) return;
+    button.addEventListener('click', function () {
+        const open = panel.classList.toggle('open');
+        button.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.filter-field')) {
+            panel.classList.remove('open');
+            button.setAttribute('aria-expanded', 'false');
+        }
+    });
+})();
+</script>
