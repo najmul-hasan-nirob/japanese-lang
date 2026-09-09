@@ -170,7 +170,14 @@
         window.addEventListener('japaneseLangCloudLoaded', function () {
             restoreState();
             render();
+            window.dispatchEvent(new CustomEvent('similarWordsFilterStateRestored'));
         });
+
+        // The page's filter-button UI script runs immediately after this file.
+        // Fire after the current script stack so it can display the restored selection.
+        setTimeout(function () {
+            window.dispatchEvent(new CustomEvent('similarWordsFilterStateRestored'));
+        }, 0);
     }
 
     initFilterPersistence();
