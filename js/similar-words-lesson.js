@@ -9,7 +9,9 @@
     if (!grid || !count || !mode) return;
 
     const words = [
-        { jp: 'なんで', romaji: 'nande', bn: 'কেন', group: 'why' }
+        { jp: 'なんで', romaji: 'nande', bn: 'কেন', group: 'why' },
+        { jp: 'が', romaji: 'ga', bn: 'কিন্তু', group: 'but' },
+        { jp: 'でも', romaji: 'demo', bn: 'কিন্তু', group: 'but' }
     ];
 
     function escapeHtml(value) {
@@ -62,7 +64,7 @@
                 <div class="lesson-card-topbar" aria-label="Card controls">
                     <button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button>
                     <span class="lesson-card-number" aria-hidden="true">${index + 1}</span>
-                    <span class="lesson-tag">Why</span>
+                    <span class="lesson-tag">${escapeHtml(word.group === 'why' ? 'Why' : 'But')}</span>
                     <button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>
                 </div>
                 <div class="inner">
