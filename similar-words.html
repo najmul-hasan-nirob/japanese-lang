@@ -13,7 +13,9 @@ js:
         <label id="similarWordsLabel">Why</label>
         <button type="button" class="multiselect-btn" id="similarWordsBtn" aria-haspopup="true" aria-expanded="false">Why</button>
         <div class="multiselect-panel" id="similarWordsPanel">
+            <label><input type="checkbox" value="all" checked> All</label>
             <label><input type="checkbox" value="why" checked> Why</label>
+            <label><input type="checkbox" value="but"> But</label>
         </div>
     </div>
     <div class="field filter-field">
@@ -88,7 +90,32 @@ js:
 (function () {
     const panel = document.getElementById('similarWordsPanel');
     const button = document.getElementById('similarWordsBtn');
+    const label = document.getElementById('similarWordsLabel');
     if (!panel || !button) return;
+
+    const allCheckbox = panel.querySelector('input[value="all"]');
+    const groupCheckboxes = Array.from(panel.querySelectorAll('input[type="checkbox"]'))
+        .filter(input => input !== allCheckbox);
+
+    function updateFilterUI() {
+        const checked = groupCheckboxes.filter(input => input.checked);
+        const allSelected = checked.length === groupCheckboxes.length;
+        if (allCheckbox) allCheckbox.checked = allSelected;
+        const text = allSelected ? 'All' : checked.length ? checked.map(input => input.parentElement.textContent.trim()).join(', ') : 'None';
+        button.textContent = text;
+        if (label) label.textContent = text;
+    }
+
+    panel.addEventListener('change', function (event) {
+        if (event.target === allCheckbox) {
+            groupCheckboxes.forEach(input => { input.checked = allCheckbox.checked; });
+        } else if (event.target.matches('input[type="checkbox"]')) {
+            updateFilterUI();
+        }
+        updateFilterUI();
+    });
+
+    updateFilterUI();
 
     button.addEventListener('click', function (event) {
         event.stopPropagation();
