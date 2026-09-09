@@ -10,12 +10,12 @@ js:
 
 <div class="toolbar">
     <div class="field filter-field">
-        <label id="similarWordsLabel">Why</label>
-        <button type="button" class="multiselect-btn" id="similarWordsBtn" aria-haspopup="true" aria-expanded="false">Why</button>
+        <label id="similarWordsLabel">All</label>
+        <button type="button" class="multiselect-btn" id="similarWordsBtn" aria-haspopup="true" aria-expanded="false">All</button>
         <div class="multiselect-panel" id="similarWordsPanel">
             <label><input type="checkbox" value="all" checked> All</label>
             <label><input type="checkbox" value="why" checked> Why</label>
-            <label><input type="checkbox" value="but"> But</label>
+            <label><input type="checkbox" value="but" checked> But</label>
         </div>
     </div>
     <div class="field filter-field">
@@ -109,12 +109,11 @@ js:
     panel.addEventListener('change', function (event) {
         if (event.target === allCheckbox) {
             groupCheckboxes.forEach(input => { input.checked = allCheckbox.checked; });
-        } else if (event.target.matches('input[type="checkbox"]')) {
-            updateFilterUI();
         }
         updateFilterUI();
     });
 
+    window.addEventListener('japaneseLangCloudLoaded', updateFilterUI);
     updateFilterUI();
 
     button.addEventListener('click', function (event) {
