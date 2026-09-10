@@ -1,6 +1,6 @@
 // Japanese Lang — Important Rules data
 const importantRules = [
-    { kind: "Test front", rule: "Test backk" }
+    { kind: "Test frontt", rule: "Test backk" }
 ];
 window.importantRules = importantRules;
 
