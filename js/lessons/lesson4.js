@@ -2,10 +2,10 @@
 const lesson4 = {
   "vocabulary": [
     {
-      "jp": "おきます1",
-      "romaji": "okimasu2",
-      "en": "get up, wake up3",
-      "bn": "ঘুম থেকে ওঠা / জেগে ওঠা4",
+      "jp": "おきます",
+      "romaji": "okimasu",
+      "en": "get up, wake up",
+      "bn": "ঘুম থেকে ওঠা / জেগে ওঠা",
       "type": "vocabulary",
       "lesson": "Lesson 4"
     },
