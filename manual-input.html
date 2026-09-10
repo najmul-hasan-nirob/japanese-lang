@@ -4,7 +4,7 @@ title: Manual Input
 css: /css/lessons.css
 js:
 - /js/main.js
-- /js/manual-input.js?v=20260910
+- /js/manual-input.js
 ---
 
 <div class="manual-input-page">
@@ -26,7 +26,10 @@ js:
             <div class="manual-input-field"><label for="manualBangla">Bangla</label><input id="manualBangla" type="text" required placeholder="কেন" autocomplete="off"></div>
             <div class="manual-input-field"><label for="manualGroup">Group / Filter</label><select id="manualGroup" required><option value="" disabled selected>Loading groups...</option></select><input id="manualNewGroup" type="text" placeholder="Enter new group name" spellcheck="false" autocomplete="off" hidden><small>Select an existing group, or choose Create a new group.</small></div>
         </div>
-        <div id="ruleFields" class="manual-input-field" hidden><label for="manualRule">Important Rule</label><textarea id="manualRule" rows="8" placeholder="Write the rule here..." spellcheck="false"></textarea></div>
+        <div id="ruleFields" hidden>
+            <div class="manual-input-field"><label for="manualRuleKind">What kind of rule?</label><input id="manualRuleKind" type="text" placeholder="Example: て-form rule" spellcheck="false" autocomplete="off"></div>
+            <div class="manual-input-field"><label for="manualRule">Write the rule</label><textarea id="manualRule" rows="8" placeholder="Write the rule here..." spellcheck="false"></textarea></div>
+        </div>
         <button id="manualSubmit" class="manual-submit-btn" type="submit">Add</button><div id="manualStatus" class="manual-status" role="status"></div>
     </form>
 </div>
