@@ -1,86 +1,33 @@
-// Japanese Lang — Manual Input
-// Adds Similar Words entries directly to the repository through the GitHub Contents API.
+// Japanese Lang — Secure Manual Input
 (function () {
     'use strict';
 
-    const OWNER = 'najmul-hasan-nirob';
-    const REPO = 'japanese-lang';
-    const BRANCH = 'main';
-    const WORDS_PATH = 'js/similar words/similar-words-lesson.js';
-    const SIMILAR_WORDS_PAGE = 'similar-words.html';
-    const TOKEN_KEY = 'japanese-lang-github-token-session';
+    const SUPABASE_URL = 'https://levpdywhnikadumfocao.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxldnBkeXdobmlrYWR1bWZvY2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTUzNX0.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
+    const WORDS_RAW_URL = 'https://raw.githubusercontent.com/najmul-hasan-nirob/japanese-lang/main/js/similar%20words/similar-words-lesson.js';
+    const SESSION_KEY = 'japanese-lang-manual-input-unlocked';
 
+    const lock = document.getElementById('manualLock');
+    const unlockForm = document.getElementById('manualUnlockForm');
+    const passwordInput = document.getElementById('manualPassword');
+    const unlockStatus = document.getElementById('manualUnlockStatus');
     const form = document.getElementById('manualInputForm');
     const japaneseInput = document.getElementById('manualJapanese');
     const romajiInput = document.getElementById('manualRomaji');
     const banglaInput = document.getElementById('manualBangla');
     const groupInput = document.getElementById('manualGroup');
     const newGroupInput = document.getElementById('manualNewGroup');
-    const tokenInput = document.getElementById('githubToken');
     const targetSelect = document.getElementById('manualTarget');
     const submitButton = document.getElementById('manualSubmit');
     const status = document.getElementById('manualStatus');
+    const lockButton = document.getElementById('manualLockButton');
 
-    if (!form) return;
+    if (!form || !unlockForm) return;
 
-    function setStatus(message, type) {
-        status.textContent = message || '';
-        status.className = 'manual-status' + (type ? ' ' + type : '');
+    function setStatus(el, message, type) {
+        el.textContent = message || '';
+        el.className = 'manual-status' + (type ? ' ' + type : '');
     }
-
-    function encodeBase64(text) {
-        const bytes = new TextEncoder().encode(text);
-        let binary = '';
-        for (let i = 0; i < bytes.length; i += 0x8000) {
-            binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-        }
-        return btoa(binary);
-    }
-
-    function decodeBase64(base64) {
-        const binary = atob(base64.replace(/\s/g, ''));
-        const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
-        return new TextDecoder().decode(bytes);
-    }
-
-    async function githubRequest(path, options, token) {
-        const response = await fetch('https://api.github.com' + path, {
-            ...options,
-            headers: {
-                'Accept': 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28',
-                'Authorization': 'Bearer ' + token,
-                ...(options && options.body ? { 'Content-Type': 'application/json' } : {}),
-                ...(options && options.headers ? options.headers : {})
-            }
-        });
-        const text = await response.text();
-        let data = null;
-        try { data = JSON.parse(text); } catch (_) {}
-        if (!response.ok) throw new Error(data?.message || ('GitHub API error ' + response.status));
-        return data;
-    }
-
-    async function getFile(path, token) {
-        const data = await githubRequest(
-            '/repos/' + OWNER + '/' + REPO + '/contents/' + encodeURIComponent(path).replace(/%2F/g, '/'),
-            { method: 'GET' }, token
-        );
-        if (!data || Array.isArray(data) || !data.content || !data.sha) throw new Error('Could not read ' + path + '.');
-        return { content: decodeBase64(data.content), sha: data.sha };
-    }
-
-    async function updateFile(path, content, sha, message, token) {
-        return githubRequest(
-            '/repos/' + OWNER + '/' + REPO + '/contents/' + encodeURIComponent(path).replace(/%2F/g, '/'),
-            {
-                method: 'PUT',
-                body: JSON.stringify({ message, content: encodeBase64(content), sha, branch: BRANCH })
-            }, token
-        );
-    }
-
-    function jsString(value) { return JSON.stringify(String(value)); }
 
     function normalizeGroup(value) {
         return String(value || '').trim().toLowerCase().replace(/\s+/g, '-');
@@ -90,62 +37,32 @@
         return String(value || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
     }
 
-    function extractWords(jsContent) {
+    function extractGroups(jsContent) {
         const match = jsContent.match(/const\s+words\s*=\s*\[([\s\S]*?)\n\s*\];/);
-        if (!match) throw new Error('Could not find the words array in the Similar Words file.');
+        if (!match) throw new Error('Could not find the words array.');
         const groups = [];
-        const groupRegex = /group\s*:\s*(['"])(.*?)\1/g;
-        let groupMatch;
-        while ((groupMatch = groupRegex.exec(match[1]))) {
-            if (groupMatch[2] && !groups.includes(groupMatch[2])) groups.push(groupMatch[2]);
+        const re = /group\s*:\s*(['"])(.*?)\1/g;
+        let m;
+        while ((m = re.exec(match[1]))) {
+            if (m[2] && !groups.includes(m[2])) groups.push(m[2]);
         }
-        return { groups };
+        return groups;
     }
 
-    function appendWord(jsContent, word) {
-        const match = jsContent.match(/const\s+words\s*=\s*\[([\s\S]*?)\n\s*\];/);
-        if (!match) throw new Error('Could not find the words array in the Similar Words file.');
-        const entry = `        { jp: ${jsString(word.jp)}, romaji: ${jsString(word.romaji)}, bn: ${jsString(word.bn)}, group: ${jsString(word.group)} }`;
-        const separator = match[1].trim() ? ',\n' : '\n';
-        const replacement = 'const words = [' + match[1].replace(/\s*$/, '') + separator + entry + '\n    ];';
-        return jsContent.replace(match[0], replacement);
-    }
-
-    function addFilterCheckbox(htmlContent, group) {
-        const panelRegex = /(<div\s+class=["']multiselect-panel["']\s+id=["']similarWordsPanel["'][^>]*>)([\s\S]*?)(<\/div>)/i;
-        const match = htmlContent.match(panelRegex);
-        if (!match) throw new Error('Could not find the Similar Words filter panel.');
-        const escapedGroup = group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        if (new RegExp('value=["\\\']' + escapedGroup + '["\\\']').test(match[2])) return htmlContent;
-        const checkbox = `            <label><input type="checkbox" value="${group}" checked> ${displayGroup(group)}</label>\n`;
-        return htmlContent.replace(panelRegex, match[1] + match[2] + checkbox + match[3]);
-    }
-
-    function getSessionToken() {
-        try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (_) { return ''; }
-    }
-
-    function setSessionToken(token) {
-        try { sessionStorage.setItem(TOKEN_KEY, token); } catch (_) {}
-    }
-
-    function updateTokenUI() {
-        const saved = getSessionToken();
-        if (saved) {
-            tokenInput.value = saved;
-            tokenInput.placeholder = 'Token saved for this browser tab';
+    async function loadGroups() {
+        try {
+            groupInput.innerHTML = '<option value="" disabled selected>Loading groups...</option>';
+            const response = await fetch(WORDS_RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
+            if (!response.ok) throw new Error('Could not load groups.');
+            const groups = extractGroups(await response.text());
+            populateGroups(groups);
+        } catch (error) {
+            groupInput.innerHTML = '<option value="" disabled selected>Could not load groups</option><option value="__create_new__">＋ Create a new group</option>';
+            setStatus(status, error.message, 'error');
         }
-    }
-
-    function showNewGroupField() {
-        const createNew = groupInput.value === '__create_new__';
-        newGroupInput.hidden = !createNew;
-        newGroupInput.required = createNew;
-        if (createNew) newGroupInput.focus();
     }
 
     function populateGroups(groups) {
-        const current = groupInput.value;
         groupInput.innerHTML = '<option value="" disabled>Select a group</option>';
         groups.forEach(group => {
             const option = document.createElement('option');
@@ -157,44 +74,50 @@
         createOption.value = '__create_new__';
         createOption.textContent = '＋ Create a new group';
         groupInput.appendChild(createOption);
-        if (groups.includes(current)) groupInput.value = current;
-        else if (groups.length) groupInput.value = groups[0];
+        if (groups.length) groupInput.value = groups[0];
         showNewGroupField();
     }
 
-    async function loadGroups() {
-        const token = tokenInput.value.trim() || getSessionToken();
-        if (!token) {
-            groupInput.innerHTML = '<option value="" disabled selected>Enter GitHub token first</option><option value="__create_new__">＋ Create a new group</option>';
-            return;
-        }
-        try {
-            const file = await getFile(WORDS_PATH, token);
-            populateGroups(extractWords(file.content).groups);
-        } catch (_) {
-            groupInput.innerHTML = '<option value="" disabled selected>Could not load groups</option><option value="__create_new__">＋ Create a new group</option>';
-        }
+    function showNewGroupField() {
+        const createNew = groupInput.value === '__create_new__';
+        newGroupInput.hidden = !createNew;
+        newGroupInput.required = createNew;
+        if (createNew) newGroupInput.focus();
     }
 
-    groupInput.addEventListener('change', showNewGroupField);
+    function unlock() {
+        lock.hidden = true;
+        form.hidden = false;
+        loadGroups();
+        japaneseInput.focus();
+    }
 
-    tokenInput.addEventListener('input', () => {
-        const token = tokenInput.value.trim();
-        if (token) setSessionToken(token);
+    function lockPage() {
+        try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
+        form.hidden = true;
+        lock.hidden = false;
+        passwordInput.value = '';
+        passwordInput.focus();
+    }
+
+    unlockForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        setStatus(unlockStatus, '', '');
+        const password = passwordInput.value;
+        if (!password) return;
+        // The server validates the password. We only keep the unlocked state for this tab.
+        unlock();
+        try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (_) {}
     });
-    tokenInput.addEventListener('blur', loadGroups);
 
-    updateTokenUI();
-    if (getSessionToken()) loadGroups();
-    else groupInput.innerHTML = '<option value="" disabled selected>Enter GitHub token first</option><option value="__create_new__">＋ Create a new group</option>';
+    lockButton.addEventListener('click', lockPage);
+    groupInput.addEventListener('change', showNewGroupField);
 
     form.addEventListener('submit', async function (event) {
         event.preventDefault();
-        setStatus('', '');
+        setStatus(status, '', '');
 
-        let group = groupInput.value === '__create_new__' ? newGroupInput.value : groupInput.value;
-        group = normalizeGroup(group);
-        const token = tokenInput.value.trim() || getSessionToken();
+        const group = normalizeGroup(groupInput.value === '__create_new__' ? newGroupInput.value : groupInput.value);
         const word = {
             jp: japaneseInput.value.trim(),
             romaji: romajiInput.value.trim(),
@@ -202,52 +125,74 @@
             group
         };
         const target = targetSelect.selectedOptions[0];
-        const wordsPath = target?.dataset.jsPath || WORDS_PATH;
+        const targetName = target?.value || 'similar-words';
 
-        if (!word.jp || !word.romaji || !word.bn || !word.group || !token) {
-            setStatus('Please complete all fields.', 'error');
-            return;
-        }
-        if (wordsPath !== WORDS_PATH) {
-            setStatus('This Similar Words target is not configured yet.', 'error');
+        if (!word.jp || !word.romaji || !word.bn || !word.group) {
+            setStatus(status, 'Please complete all fields.', 'error');
             return;
         }
 
-        setSessionToken(token);
-        tokenInput.value = token;
+        const password = await getUnlockPassword();
+        if (!password) {
+            lockPage();
+            return;
+        }
+
         submitButton.disabled = true;
         submitButton.textContent = 'Adding...';
-
         try {
-            setStatus('Reading the current Similar Words files...', '');
-            const wordsFile = await getFile(WORDS_PATH, token);
-            const pageFile = await getFile(SIMILAR_WORDS_PAGE, token);
-            const { groups } = extractWords(wordsFile.content);
-            const escapedJapanese = word.jp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            if (new RegExp('jp\\s*:\\s*(["\\\'])' + escapedJapanese + '\\1').test(wordsFile.content)) {
-                throw new Error('This Japanese word already exists in the Similar Words file.');
-            }
-
-            let updatedWords = appendWord(wordsFile.content, word);
-            let updatedPage = pageFile.content;
-            if (!groups.includes(word.group)) updatedPage = addFilterCheckbox(updatedPage, word.group);
-
-            if (updatedPage !== pageFile.content) {
-                setStatus('Adding the new filter group...', '');
-                await updateFile(SIMILAR_WORDS_PAGE, updatedPage, pageFile.sha, 'Add Similar Words filter group: ' + word.group, token);
-            }
-            setStatus('Adding the new word...', '');
-            await updateFile(WORDS_PATH, updatedWords, wordsFile.sha, 'Add Similar Word: ' + word.jp, token);
-
-            setStatus('Added successfully: ' + word.jp + ' (' + word.group + ').', 'success');
+            setStatus(status, 'Adding the word securely...', '');
+            const response = await fetch(SUPABASE_URL + '/functions/v1/manual-input', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password, target: targetName, ...word })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.error || 'Could not add the word.');
+            setStatus(status, data.message || ('Added successfully: ' + word.jp), 'success');
             form.reset();
-            tokenInput.value = token;
             await loadGroups();
         } catch (error) {
-            setStatus(error?.message || 'Could not add the word.', 'error');
+            setStatus(status, error.message || 'Could not add the word.', 'error');
+            if (/password/i.test(error.message || '')) lockPage();
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = 'Add Word';
         }
     });
+
+    let unlockPassword = '';
+    async function getUnlockPassword() {
+        // The password is intentionally kept only in memory, never localStorage/sessionStorage.
+        if (unlockPassword) return unlockPassword;
+        // Re-prompt only if the current page was restored without the in-memory password.
+        const entered = window.prompt('Enter the Manual Input password to continue:');
+        if (!entered) return '';
+        unlockPassword = entered;
+        return unlockPassword;
+    }
+
+    // Store the password in memory after the unlock form so Add Word does not ask again.
+    unlockForm.addEventListener('submit', function () {
+        unlockPassword = passwordInput.value;
+    }, true);
+
+    try {
+        if (sessionStorage.getItem(SESSION_KEY) === '1') {
+            // Session unlock does not retain the password; the first write will ask once.
+            unlock();
+        } else {
+            form.hidden = true;
+            lock.hidden = false;
+            passwordInput.focus();
+        }
+    } catch (_) {
+        form.hidden = true;
+        lock.hidden = false;
+        passwordInput.focus();
+    }
 })();
