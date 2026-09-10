@@ -98,12 +98,10 @@ const lesson7 = {
       "bn": "ব্যক্তিগত কম্পিউটার / পিসি"
     },
     {
-      "jp": "けいたい[でんわ] / ケータイ",
-      "romaji": "keitai[denwa] / ke-tai",
+      "jp": "けいたい[でんわ] or ケータイ",
+      "romaji": "keitai[denwa]",
       "en": "mobile phone, cell phone",
-      "bn": "মোবাইল ফোন",
-      "type": "vocabulary",
-      "lesson": "Lesson 7"
+      "bn": "মোবাইল ফোন"
     },
     {
       "jp": "メール",
@@ -121,7 +119,9 @@ const lesson7 = {
       "jp": "パンチ",
       "romaji": "panchi",
       "en": "punch",
-      "bn": "কাগজে ছিদ্র করার যন্ত্র / পাঞ্চ"
+      "bn": "কাগজে ছিদ্র করার যন্ত্র",
+      "type": "vocabulary",
+      "lesson": "Lesson 7"
     },
     {
       "jp": "ホッチキス",
