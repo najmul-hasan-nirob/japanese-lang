@@ -6,7 +6,6 @@
     const mode = document.getElementById('mode');
     const filterPanel = document.getElementById('similarWordsPanel');
     const FILTER_KEY = 'japanese-lang-similar-words-filter-v1';
-    const DEFAULT_STATE = { selectedGroups: ['why', 'but', 'where'], orderMode: 'normal' };
 
     if (!grid || !count || !mode) return;
 
@@ -16,20 +15,21 @@
         { jp: 'でも', romaji: 'demo', bn: 'কিন্তু', group: 'but' },
         { jp: 'どこ', romaji: 'doko', bn: 'কোথায়', group: 'where' }
     ];
-    const validGroups = new Set(['why', 'but', 'where']);
+    const validGroups = new Set(words.map(word => word.group));
+    const DEFAULT_STATE = { selectedGroups: [...validGroups], orderMode: 'normal' };
     let lastRenderKey = '';
 
     function getSavedState() {
         try {
             const value = JSON.parse(localStorage.getItem(FILTER_KEY) || 'null');
-            if (!value || !Array.isArray(value.selectedGroups)) return { ...DEFAULT_STATE };
+            if (!value || !Array.isArray(value.selectedGroups)) return { ...DEFAULT_STATE, selectedGroups: [...DEFAULT_STATE.selectedGroups] };
             const selectedGroups = value.selectedGroups.filter(group => validGroups.has(group));
             return {
                 selectedGroups: selectedGroups.length ? selectedGroups : [...DEFAULT_STATE.selectedGroups],
                 orderMode: value.orderMode === 'shuffle' ? 'shuffle' : 'normal'
             };
         } catch (_) {
-            return { ...DEFAULT_STATE };
+            return { ...DEFAULT_STATE, selectedGroups: [...DEFAULT_STATE.selectedGroups] };
         }
     }
 
@@ -106,7 +106,7 @@
                 <div class="lesson-card-topbar" aria-label="Card controls">
                     <button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button>
                     <span class="lesson-card-number" aria-hidden="true">${index + 1}</span>
-                    <span class="lesson-tag">${escapeHtml(word.group === 'why' ? 'Why' : word.group === 'but' ? 'But' : 'Where')}</span>
+                    <span class="lesson-tag">${escapeHtml(word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span>
                     <button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>
                 </div>
                 <div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
