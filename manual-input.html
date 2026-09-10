@@ -19,7 +19,10 @@ js:
         <p>Enter the password to unlock this page.</p>
         <form id="manualUnlockForm" class="manual-unlock-form" autocomplete="off">
             <label for="manualPassword">Password</label>
-            <input id="manualPassword" type="password" required autocomplete="current-password" spellcheck="false">
+            <div class="manual-password-wrap">
+                <input id="manualPassword" type="password" required autocomplete="current-password" spellcheck="false">
+                <button id="manualPasswordToggle" class="manual-password-toggle" type="button" aria-label="Show password" title="Show password">Show</button>
+            </div>
             <label class="manual-remember-row">
                 <input id="manualRemember" type="checkbox">
                 <span>Remember me</span>
@@ -77,7 +80,7 @@ js:
 .manual-input-page{max-width:720px;margin:0 auto;padding:28px 16px 70px;color:var(--ink,#241f18)}
 .manual-input-header{margin-bottom:24px}.manual-input-header h1{margin:0 0 8px;font-family:"Shippori Mincho",serif;font-size:30px}.manual-input-header p{margin:0;color:var(--ink-soft,#7a705e);line-height:1.6}
 .manual-lock{max-width:430px;margin:35px auto;padding:28px 22px;text-align:center;border:1px solid var(--paper-line,#d9d2c3);border-radius:16px;background:var(--paper-cell,#fffdf8);box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.08))}.manual-lock-icon{font-size:34px;margin-bottom:8px}.manual-lock h2{margin:0 0 8px}.manual-lock p{margin:0 0 20px;color:var(--ink-soft,#7a705e)}
-.manual-unlock-form{display:flex;flex-direction:column;gap:8px;text-align:left}.manual-unlock-form label:not(.manual-remember-row){font-weight:700;font-size:14px}.manual-unlock-form input[type="password"]{box-sizing:border-box;width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--paper-line,#d9d2c3);border-radius:9px;background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit;font-size:16px}
+.manual-unlock-form{display:flex;flex-direction:column;gap:8px;text-align:left}.manual-unlock-form label:not(.manual-remember-row){font-weight:700;font-size:14px}.manual-password-wrap{position:relative;width:100%}.manual-unlock-form input[type="password"],.manual-unlock-form input[type="text"]{box-sizing:border-box;width:100%;min-height:44px;padding:9px 76px 9px 12px;border:1px solid var(--paper-line,#d9d2c3);border-radius:9px;background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit;font-size:16px}.manual-password-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);min-width:58px;height:34px;padding:4px 8px;border:1px solid var(--paper-line,#d9d2c3);border-radius:7px;background:transparent;color:inherit;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.manual-password-toggle:hover{background:rgba(127,127,127,.08)}
 .manual-remember-row{display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:14px;cursor:pointer;user-select:none}.manual-remember-row input{width:16px;height:16px;margin:0;accent-color:currentColor;cursor:pointer}
 .manual-input-form{display:flex;flex-direction:column;gap:18px;padding:22px;border:1px solid var(--paper-line,#d9d2c3);border-radius:16px;background:var(--paper-cell,#fffdf8);box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.08))}
 .manual-input-form[hidden],.manual-lock[hidden],.manual-new-group[hidden]{display:none!important}
