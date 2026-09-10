@@ -3,6 +3,7 @@ layout: default
 title: Manual Input
 css: /css/lessons.css
 js:
+- /js/main.js
 - /js/manual-input.js
 ---
 
@@ -30,9 +31,12 @@ js:
 
         <div class="manual-input-field">
             <label for="manualGroup">Group / Filter</label>
-            <input id="manualGroup" name="group" type="text" list="manualGroupOptions" required placeholder="why" spellcheck="false" autocomplete="off">
-            <datalist id="manualGroupOptions"></datalist>
-            <small>Choose an existing group or type a new one. A new group will also be added to the Similar Words filter.</small>
+            <select id="manualGroup" name="group" required>
+                <option value="" selected disabled>Loading groups...</option>
+                <option value="__create_new__">＋ Create a new group</option>
+            </select>
+            <input id="manualNewGroup" name="newGroup" type="text" placeholder="Enter new group name" spellcheck="false" autocomplete="off" hidden>
+            <small>Select an existing group, or choose <strong>Create a new group</strong> to add one.</small>
         </div>
 
         <div class="manual-input-field">
@@ -46,7 +50,7 @@ js:
         <div class="manual-input-auth">
             <label for="githubToken">GitHub Token</label>
             <input id="githubToken" name="githubToken" type="password" required placeholder="github_pat_..." autocomplete="new-password" spellcheck="false">
-            <small>Use a fine-grained GitHub token with <strong>Contents: Read and write</strong> access to this repository. The token is used only in your browser and is not saved by this page.</small>
+            <small>The token is kept only in this browser tab for the current session. It is not saved in the repository or localStorage.</small>
         </div>
 
         <button id="manualSubmit" class="manual-submit-btn" type="submit">Add Word</button>
@@ -56,20 +60,11 @@ js:
 
 <style>
 .manual-input-page{max-width:720px;margin:0 auto;padding:28px 16px 70px;color:var(--ink,#241f18)}
-.manual-input-header{margin-bottom:24px}
-.manual-input-header h1{margin:0 0 8px;font-family:"Shippori Mincho",serif;font-size:30px}
-.manual-input-header p{margin:0;color:var(--ink-soft,#7a705e);line-height:1.6}
+.manual-input-header{margin-bottom:24px}.manual-input-header h1{margin:0 0 8px;font-family:"Shippori Mincho",serif;font-size:30px}.manual-input-header p{margin:0;color:var(--ink-soft,#7a705e);line-height:1.6}
 .manual-input-form{display:flex;flex-direction:column;gap:18px;padding:22px;border:1px solid var(--paper-line,#d9d2c3);border-radius:16px;background:var(--paper-cell,#fffdf8);box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.08))}
-.manual-input-field,.manual-input-auth{display:flex;flex-direction:column;gap:7px}
-.manual-input-field label,.manual-input-auth label{font-weight:700;font-size:14px}
+.manual-input-field,.manual-input-auth{display:flex;flex-direction:column;gap:7px}.manual-input-field label,.manual-input-auth label{font-weight:700;font-size:14px}
 .manual-input-field input,.manual-input-field select,.manual-input-auth input{box-sizing:border-box;width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--paper-line,#d9d2c3);border-radius:9px;background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit;font-size:16px}
-.manual-input-field input:focus,.manual-input-field select:focus,.manual-input-auth input:focus{outline:2px solid currentColor;outline-offset:1px}
-.manual-input-field small,.manual-input-auth small{font-size:12px;line-height:1.5;color:var(--ink-soft,#7a705e)}
-.manual-input-auth{margin-top:6px;padding-top:18px;border-top:1px solid var(--paper-line,#d9d2c3)}
-.manual-submit-btn{min-height:46px;border:0;border-radius:9px;padding:10px 18px;background:var(--ink,#241f18);color:var(--paper-cell,#fffdf8);font:inherit;font-weight:700;cursor:pointer}
-.manual-submit-btn:disabled{opacity:.55;cursor:wait}
-.manual-status{min-height:20px;font-size:14px;line-height:1.5}
-.manual-status.success{font-weight:700}
-.manual-status.error{font-weight:700}
+.manual-input-field input:focus,.manual-input-field select:focus,.manual-input-auth input:focus{outline:2px solid currentColor;outline-offset:1px}.manual-input-field small,.manual-input-auth small{font-size:12px;line-height:1.5;color:var(--ink-soft,#7a705e)}
+.manual-input-auth{margin-top:6px;padding-top:18px;border-top:1px solid var(--paper-line,#d9d2c3)}.manual-submit-btn{min-height:46px;border:0;border-radius:9px;padding:10px 18px;background:var(--ink,#241f18);color:var(--paper-cell,#fffdf8);font:inherit;font-weight:700;cursor:pointer}.manual-submit-btn:disabled{opacity:.55;cursor:wait}.manual-status{min-height:20px;font-size:14px;line-height:1.5}.manual-status.success,.manual-status.error{font-weight:700}
 @media(max-width:520px){.manual-input-page{padding:20px 12px 60px}.manual-input-form{padding:16px;border-radius:12px}}
 </style>
