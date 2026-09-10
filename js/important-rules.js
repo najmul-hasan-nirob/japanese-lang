@@ -1,7 +1,7 @@
 // Japanese Lang — Important Rules data
 const importantRules = [
-    // Rules are appended automatically by the Manual Input page.,
-    "To er niyom"
+    // Rules are appended automatically by the Manual Input page.
+    { kind: "General", rule: "To er niyom" }
 ];
 window.importantRules = importantRules;
 
@@ -12,6 +12,17 @@ window.importantRules = importantRules;
         return String(value ?? '').replace(/[&<>'"]/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
         }[c]));
+    }
+
+    function ruleObject(value) {
+        if (value && typeof value === 'object') {
+            return {
+                kind: String(value.kind ?? '').trim() || 'General',
+                rule: String(value.rule ?? '').trim()
+            };
+        }
+        // Keep older rules added before the two-field system working.
+        return { kind: 'General', rule: String(value ?? '').trim() };
     }
 
     function renderRules() {
@@ -28,34 +39,35 @@ window.importantRules = importantRules;
 
         const fragment = document.createDocumentFragment();
 
-        rules.forEach(function (rule, index) {
+        rules.forEach(function (rawRule, index) {
+            const rule = ruleObject(rawRule);
             const card = document.createElement('div');
             card.className = 'card important-rule-card';
+            card.setAttribute('data-favorite-key', `important-rule|${rule.kind}|${rule.rule}`);
             card.innerHTML = `
-                <div class="lesson-card-topbar" aria-label="Card information">
-                    <button type="button" class="hard-star" aria-label="Mark as important" title="Mark as important">☆</button>
+                <div class="lesson-card-topbar" aria-label="Card controls">
+                    <button type="button" class="hard-star" aria-label="Mark as favourite" title="Mark as favourite">☆</button>
                     <span class="lesson-card-number" aria-hidden="true">${index + 1}</span>
                     <span class="lesson-tag">Rule</span>
                 </div>
                 <div class="inner">
                     <div class="front">
-                        <div class="important-rule-text">${escapeHtml(rule)}</div>
+                        <div class="important-rule-text">${escapeHtml(rule.kind)}</div>
+                    </div>
+                    <div class="back">
+                        <div class="important-rule-text">${escapeHtml(rule.rule)}</div>
                     </div>
                 </div>`;
 
-            const star = card.querySelector('.hard-star');
-            star.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                const active = star.classList.toggle('active');
-                star.textContent = active ? '★' : '☆';
-                star.setAttribute('aria-pressed', String(active));
+            card.addEventListener('click', function (event) {
+                if (!event.target.closest('button')) card.classList.toggle('flipped');
             });
 
             fragment.appendChild(card);
         });
 
         list.appendChild(fragment);
+        document.dispatchEvent(new CustomEvent('lessonCardsRendered'));
     }
 
     if (document.readyState === 'loading') {
