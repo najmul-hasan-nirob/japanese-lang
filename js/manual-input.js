@@ -5,7 +5,6 @@
     const SUPABASE_URL = 'https://levpdywhnikadumfocao.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxldnBkeXdobmlrYWR1bWZvY2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTUzNX0.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
     const WORDS_RAW_URL = 'https://raw.githubusercontent.com/najmul-hasan-nirob/japanese-lang/main/js/similar%20words/similar-words-lesson.js';
-    const SESSION_KEY = 'japanese-lang-manual-input-unlocked';
 
     const lock = document.getElementById('manualLock');
     const unlockForm = document.getElementById('manualUnlockForm');
@@ -21,6 +20,8 @@
     const submitButton = document.getElementById('manualSubmit');
     const status = document.getElementById('manualStatus');
     const lockButton = document.getElementById('manualLockButton');
+
+    let unlockPassword = '';
 
     if (!form || !unlockForm) return;
 
@@ -54,8 +55,7 @@
             groupInput.innerHTML = '<option value="" disabled selected>Loading groups...</option>';
             const response = await fetch(WORDS_RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
             if (!response.ok) throw new Error('Could not load groups.');
-            const groups = extractGroups(await response.text());
-            populateGroups(groups);
+            populateGroups(extractGroups(await response.text()));
         } catch (error) {
             groupInput.innerHTML = '<option value="" disabled selected>Could not load groups</option><option value="__create_new__">＋ Create a new group</option>';
             setStatus(status, error.message, 'error');
@@ -85,6 +85,21 @@
         if (createNew) newGroupInput.focus();
     }
 
+    async function verifyPassword(password) {
+        const response = await fetch(SUPABASE_URL + '/functions/v1/manual-input', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                'apikey': SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: 'verify', password })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Incorrect password.');
+        return true;
+    }
+
     function unlock() {
         lock.hidden = true;
         form.hidden = false;
@@ -93,21 +108,30 @@
     }
 
     function lockPage() {
-        try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
+        unlockPassword = '';
         form.hidden = true;
         lock.hidden = false;
         passwordInput.value = '';
+        setStatus(unlockStatus, '', '');
         passwordInput.focus();
     }
 
     unlockForm.addEventListener('submit', async function (event) {
         event.preventDefault();
-        setStatus(unlockStatus, '', '');
         const password = passwordInput.value;
         if (!password) return;
-        // The server validates the password. We only keep the unlocked state for this tab.
-        unlock();
-        try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (_) {}
+        const button = unlockForm.querySelector('button[type="submit"]');
+        if (button) button.disabled = true;
+        setStatus(unlockStatus, 'Checking password...', '');
+        try {
+            await verifyPassword(password);
+            unlockPassword = password;
+            unlock();
+        } catch (error) {
+            setStatus(unlockStatus, error.message || 'Incorrect password.', 'error');
+        } finally {
+            if (button) button.disabled = false;
+        }
     });
 
     lockButton.addEventListener('click', lockPage);
@@ -125,15 +149,16 @@
             group
         };
         const target = targetSelect.selectedOptions[0];
-        const targetName = target?.value || 'similar-words';
 
         if (!word.jp || !word.romaji || !word.bn || !word.group) {
             setStatus(status, 'Please complete all fields.', 'error');
             return;
         }
-
-        const password = await getUnlockPassword();
-        if (!password) {
+        if (!target || target.value !== 'similar-words') {
+            setStatus(status, 'This Similar Words target is not configured yet.', 'error');
+            return;
+        }
+        if (!unlockPassword) {
             lockPage();
             return;
         }
@@ -149,7 +174,7 @@
                     'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ password, target: targetName, ...word })
+                body: JSON.stringify({ password: unlockPassword, target: target.value, ...word })
             });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.error || 'Could not add the word.');
@@ -165,34 +190,7 @@
         }
     });
 
-    let unlockPassword = '';
-    async function getUnlockPassword() {
-        // The password is intentionally kept only in memory, never localStorage/sessionStorage.
-        if (unlockPassword) return unlockPassword;
-        // Re-prompt only if the current page was restored without the in-memory password.
-        const entered = window.prompt('Enter the Manual Input password to continue:');
-        if (!entered) return '';
-        unlockPassword = entered;
-        return unlockPassword;
-    }
-
-    // Store the password in memory after the unlock form so Add Word does not ask again.
-    unlockForm.addEventListener('submit', function () {
-        unlockPassword = passwordInput.value;
-    }, true);
-
-    try {
-        if (sessionStorage.getItem(SESSION_KEY) === '1') {
-            // Session unlock does not retain the password; the first write will ask once.
-            unlock();
-        } else {
-            form.hidden = true;
-            lock.hidden = false;
-            passwordInput.focus();
-        }
-    } catch (_) {
-        form.hidden = true;
-        lock.hidden = false;
-        passwordInput.focus();
-    }
+    lock.hidden = false;
+    form.hidden = true;
+    passwordInput.focus();
 })();
