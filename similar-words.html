@@ -16,14 +16,12 @@ js:
             <label><input type="checkbox" value="all" checked> All</label>
             <label><input type="checkbox" value="why" checked> Why</label>
             <label><input type="checkbox" value="but" checked> But</label>
+            <label><input type="checkbox" value="where" checked> Where</label>
         </div>
     </div>
     <div class="field filter-field">
         <label for="mode">Order</label>
-        <select id="mode">
-            <option value="normal">Normal</option>
-            <option value="shuffle">Shuffle</option>
-        </select>
+        <select id="mode"><option value="normal">Normal</option><option value="shuffle">Shuffle</option></select>
     </div>
     <div class="field shuffle-field"><button id="shuffleBtn" class="shuffle-btn" type="button"></button></div>
     <div class="field romaji-field"><button id="backRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true"></button></div>
@@ -33,100 +31,9 @@ js:
 <div class="grid" id="grid"></div>
 
 <style>
-.lesson-card-topbar{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height:42px;
-    z-index:20;
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr 1fr;
-    align-items:center;
-    justify-items:center;
-    pointer-events:none;
-    background-color:#18212c;
-    padding:5px;
-    box-sizing:border-box;
-}
-.lesson-card-topbar .hard-star,
-.lesson-card-topbar .lesson-card-number,
-.lesson-card-topbar .speaker-btn,
-.lesson-card-topbar .speak-btn,
-.lesson-card-topbar .pronunciation-btn{
-    position:static!important;
-    transform:none!important;
-    margin:0!important;
-}
-.lesson-card-topbar .hard-star,
-.lesson-card-topbar .speaker-btn,
-.lesson-card-topbar .speak-btn,
-.lesson-card-topbar .pronunciation-btn{pointer-events:auto}
-.lesson-card-topbar .hard-star{grid-column:1}
-.lesson-card-topbar .lesson-card-number{grid-column:3}
-.lesson-card-topbar .lesson-tag{grid-column:2;grid-row:1;margin-left:5px}
-.lesson-card-topbar .speaker-btn,
-.lesson-card-topbar .speak-btn,
-.lesson-card-topbar .pronunciation-btn{
-    grid-column:4;
-    display:flex!important;
-    visibility:visible!important;
-    opacity:1!important;
-}
-.card .front,.card .back{text-align:center}
-.card .front> :not(.lesson-card-topbar),.card .back> :not(.lesson-card-topbar){margin-left:auto;margin-right:auto}
-@media(max-width:520px){
-    .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-    .lesson-card-topbar{height:38px}
-    .lesson-card-inner{padding-top:38px!important}
-    .lesson-card-topbar .hard-star{font-size:23px}
-}
+.lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:42px;z-index:20;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;align-items:center;justify-items:center;pointer-events:none;background-color:#18212c;padding:5px;box-sizing:border-box}.lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-card-number,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{position:static!important;transform:none!important;margin:0!important}.lesson-card-topbar .hard-star,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{pointer-events:auto}.lesson-card-topbar .hard-star{grid-column:1}.lesson-card-topbar .lesson-card-number{grid-column:3}.lesson-card-topbar .lesson-tag{grid-column:2;grid-row:1;margin-left:5px}.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{grid-column:4;display:flex!important;visibility:visible!important;opacity:1!important}.card .front,.card .back{text-align:center}.card .front> :not(.lesson-card-topbar),.card .back> :not(.lesson-card-topbar){margin-left:auto;margin-right:auto}@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.lesson-card-topbar{height:38px}.lesson-card-inner{padding-top:38px!important}.lesson-card-topbar .hard-star{font-size:23px}}
 </style>
 
 <script>
-(function () {
-    const panel = document.getElementById('similarWordsPanel');
-    const button = document.getElementById('similarWordsBtn');
-    const label = document.getElementById('similarWordsLabel');
-    if (!panel || !button) return;
-
-    const allCheckbox = panel.querySelector('input[value="all"]');
-    const groupCheckboxes = Array.from(panel.querySelectorAll('input[type="checkbox"]'))
-        .filter(input => input !== allCheckbox);
-
-    function updateFilterUI() {
-        const checked = groupCheckboxes.filter(input => input.checked);
-        const allSelected = checked.length === groupCheckboxes.length;
-        if (allCheckbox) allCheckbox.checked = allSelected;
-        const text = allSelected ? 'All' : checked.length ? checked.map(input => input.parentElement.textContent.trim()).join(', ') : 'None';
-        button.textContent = text;
-        if (label) label.textContent = text;
-    }
-
-    panel.addEventListener('change', function (event) {
-        if (event.target === allCheckbox) {
-            groupCheckboxes.forEach(input => { input.checked = allCheckbox.checked; });
-        }
-        updateFilterUI();
-    });
-
-    window.addEventListener('japaneseLangCloudLoaded', updateFilterUI);
-    // similar-words-lesson.js restores localStorage/cloud state asynchronously.
-    // Refresh the visible placeholder/label after that restoration completes.
-    window.addEventListener('similarWordsFilterStateRestored', updateFilterUI);
-    updateFilterUI();
-
-    button.addEventListener('click', function (event) {
-        event.stopPropagation();
-        const open = panel.classList.toggle('open');
-        button.setAttribute('aria-expanded', String(open));
-    });
-
-    document.addEventListener('click', function (event) {
-        if (!event.target.closest('.filter-field')) {
-            panel.classList.remove('open');
-            button.setAttribute('aria-expanded', 'false');
-        }
-    });
-})();
+(function(){const panel=document.getElementById('similarWordsPanel'),button=document.getElementById('similarWordsBtn'),label=document.getElementById('similarWordsLabel');if(!panel||!button)return;const allCheckbox=panel.querySelector('input[value="all"]'),groupCheckboxes=Array.from(panel.querySelectorAll('input[type="checkbox"]')).filter(input=>input!==allCheckbox);function updateFilterUI(){const checked=groupCheckboxes.filter(input=>input.checked),allSelected=checked.length===groupCheckboxes.length;if(allCheckbox)allCheckbox.checked=allSelected;const text=allSelected?'All':checked.length?checked.map(input=>input.parentElement.textContent.trim()).join(', '):'None';button.textContent=text;if(label)label.textContent=text}panel.addEventListener('change',function(event){if(event.target===allCheckbox)groupCheckboxes.forEach(input=>{input.checked=allCheckbox.checked});updateFilterUI()});window.addEventListener('japaneseLangCloudLoaded',updateFilterUI);window.addEventListener('similarWordsFilterStateRestored',updateFilterUI);updateFilterUI();button.addEventListener('click',function(event){event.stopPropagation();const open=panel.classList.toggle('open');button.setAttribute('aria-expanded',String(open))});document.addEventListener('click',function(event){if(!event.target.closest('.filter-field')){panel.classList.remove('open');button.setAttribute('aria-expanded','false')}})})();
 </script>
