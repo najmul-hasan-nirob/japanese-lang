@@ -23,15 +23,15 @@ js:
 .important-rule-card .front,.important-rule-card .back{padding:18px 16px 16px!important;text-align:center;display:flex;align-items:center;justify-content:center;min-height:128px;box-sizing:border-box}
 .important-rule-text{width:100%;line-height:1.75;white-space:pre-wrap;word-break:break-word}
 
-/* Four topbar items: favourite, Rule + number, edit, delete. Equal auto-spaced columns and vertical centering. */
-.important-rule-card .lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:42px;z-index:100;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) minmax(0,1fr);grid-template-rows:1fr;align-items:center;justify-items:center;gap:0;pointer-events:auto;background-color:#18212c;padding:5px 8px;box-sizing:border-box;isolation:isolate;overflow:visible}
+/* Topbar: favourite flush left, Rule centered, edit evenly spaced after it, delete flush right. */
+.important-rule-card .lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:42px;z-index:100;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1fr;align-items:center;justify-items:center;gap:0;pointer-events:auto;background-color:#18212c;padding:5px 8px;box-sizing:border-box;isolation:isolate;overflow:visible}
 .important-rule-card .lesson-card-topbar .hard-star,.important-rule-card .lesson-card-topbar .rule-label,.important-rule-card .lesson-card-topbar .important-rule-edit,.important-rule-card .lesson-card-topbar .important-rule-delete{grid-row:1!important;margin:0!important;transform:none!important;align-self:center}
-.important-rule-card .lesson-card-topbar .hard-star{grid-column:1;pointer-events:auto;position:relative!important;z-index:110!important;width:32px;height:32px;padding:0;border:0;background:transparent;color:#9a9a9a;font-size:25px;line-height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85;transition:transform .15s ease,opacity .15s ease,color .15s ease;appearance:none;-webkit-appearance:none;touch-action:manipulation}
+.important-rule-card .lesson-card-topbar .hard-star{grid-column:1;justify-self:start;pointer-events:auto;position:relative!important;z-index:110!important;width:32px;height:32px;padding:0;border:0;background:transparent;color:#9a9a9a;font-size:25px;line-height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85;transition:transform .15s ease,opacity .15s ease,color .15s ease;appearance:none;-webkit-appearance:none;touch-action:manipulation}
 .important-rule-card .lesson-card-topbar .hard-star:hover,.important-rule-card .lesson-card-topbar .hard-star:focus-visible{opacity:1;transform:scale(1.08);outline:none}
 .important-rule-card .lesson-card-topbar .hard-star.active{color:#f5b301;opacity:1}
-.important-rule-card .lesson-card-topbar .rule-label{grid-column:2;display:flex;align-items:center;justify-content:center;white-space:nowrap;line-height:1;font-size:14px;font-weight:600}
-.important-rule-card .lesson-card-topbar .important-rule-edit{grid-column:3}
-.important-rule-card .lesson-card-topbar .important-rule-delete{grid-column:4}
+.important-rule-card .lesson-card-topbar .rule-label{grid-column:2;justify-self:center;display:flex;align-items:center;justify-content:center;white-space:nowrap;line-height:1;font-size:14px;font-weight:600}
+.important-rule-card .lesson-card-topbar .important-rule-edit{grid-column:3;justify-self:center}
+.important-rule-card .lesson-card-topbar .important-rule-delete{grid-column:4;justify-self:end}
 .important-rule-card .lesson-card-topbar .important-rule-edit,.important-rule-card .lesson-card-topbar .important-rule-delete{pointer-events:auto;position:relative!important;z-index:110!important;width:32px;height:32px;padding:0;border:0;border-radius:4px;background:transparent;color:#fff;font-size:18px;line-height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.9;transition:transform .15s ease,opacity .15s ease,background-color .15s ease;appearance:none;-webkit-appearance:none;touch-action:manipulation}
 .important-rule-card .lesson-card-topbar .important-rule-edit:hover,.important-rule-card .lesson-card-topbar .important-rule-delete:hover,.important-rule-card .lesson-card-topbar .important-rule-edit:focus-visible,.important-rule-card .lesson-card-topbar .important-rule-delete:focus-visible{opacity:1;transform:scale(1.08);background-color:rgba(255,255,255,.08);outline:none}
 
@@ -42,7 +42,7 @@ js:
     .important-rule-card,.important-rule-card>.inner{min-height:150px}
     .important-rule-card>.inner{padding-top:38px!important}
     .important-rule-card .front,.important-rule-card .back{padding:14px 10px 12px!important;min-height:112px}
-    .important-rule-card .lesson-card-topbar{height:38px;padding:4px 7px;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) minmax(0,1fr)}
+    .important-rule-card .lesson-card-topbar{height:38px;padding:4px 7px;grid-template-columns:1fr 1fr 1fr 1fr}
     .important-rule-card .lesson-card-topbar .hard-star{width:28px;height:28px;font-size:19px;line-height:28px}
     .important-rule-card .lesson-card-topbar .rule-label{font-size:13px}
     .important-rule-card .lesson-card-topbar .important-rule-edit,.important-rule-card .lesson-card-topbar .important-rule-delete{width:28px;height:28px;font-size:15px;line-height:28px}
