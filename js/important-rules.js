@@ -8,6 +8,11 @@ window.importantRules = importantRules;
 (function () {
     'use strict';
 
+    const SUPABASE_URL = 'https://levpdywhnikadumfocao.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxldnBkeXdobmlrYWR1bWZvY2FvIiwiaWF0IjoxNzg2ODc5NTM1LCJleHAiOjIxMDI0NTUzNTN9.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
+    const REMEMBER_KEY = 'japaneseLangManualInputRememberedPassword';
+    let adminPassword = '';
+
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>'"]/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -15,13 +20,62 @@ window.importantRules = importantRules;
     }
 
     function ruleObject(value) {
-        if (value && typeof value === 'object') {
-            return {
-                kind: String(value.kind ?? '').trim() || 'General',
-                rule: String(value.rule ?? '').trim()
-            };
-        }
+        if (value && typeof value === 'object') return { kind: String(value.kind ?? '').trim() || 'General', rule: String(value.rule ?? '').trim() };
         return { kind: 'General', rule: String(value ?? '').trim() };
+    }
+
+    function getRememberedPassword() {
+        try { return localStorage.getItem(REMEMBER_KEY) || ''; } catch (_) { return ''; }
+    }
+
+    async function request(body) {
+        const r = await fetch(SUPABASE_URL + '/functions/v1/manual-input', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + SUPABASE_ANON_KEY, apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw Error(d.error || ('Request failed (' + r.status + ').'));
+        return d;
+    }
+
+    async function ensureAdminPassword() {
+        if (adminPassword) return adminPassword;
+        const remembered = getRememberedPassword();
+        if (remembered) {
+            try { await request({ action: 'verify', password: remembered }); adminPassword = remembered; return adminPassword; } catch (_) {}
+        }
+        const p = window.prompt('Enter the Manual Input password to continue:');
+        if (!p) return '';
+        await request({ action: 'verify', password: p });
+        adminPassword = p;
+        return adminPassword;
+    }
+
+    async function saveRulesToGitHub() {
+        const password = await ensureAdminPassword();
+        if (!password) throw Error('Password required.');
+        return request({ action: 'replace-rules', target: 'important-rules', password, rules: window.importantRules });
+    }
+
+    function favoriteStore() {
+        try { return JSON.parse(localStorage.getItem('japanese-lang-hard-vocabulary') || '[]'); } catch (_) { return []; }
+    }
+    function saveFavoriteStore(values) {
+        try { localStorage.setItem('japanese-lang-hard-vocabulary', JSON.stringify(values)); } catch (_) {}
+    }
+    function transferFavorite(oldItem, newItem) {
+        const oldKey = `important-rule|${oldItem.kind}|${oldItem.rule}`;
+        const newKey = `important-rule|${newItem.kind}|${newItem.rule}`;
+        const values = favoriteStore();
+        const had = values.includes(oldKey);
+        const next = values.filter(v => v !== oldKey);
+        if (had && !next.includes(newKey)) next.push(newKey);
+        saveFavoriteStore(next);
+    }
+    function removeFavorite(item) {
+        const key = `important-rule|${item.kind}|${item.rule}`;
+        saveFavoriteStore(favoriteStore().filter(v => v !== key));
     }
 
     function addModalStyles() {
@@ -36,14 +90,23 @@ window.importantRules = importantRules;
             #importantRuleEditModal .irm-head h2{margin:0;font-family:"Shippori Mincho",serif;font-size:30px}
             #importantRuleEditModal .irm-close{width:42px;height:42px;border:0;border-radius:50%;background:transparent;color:inherit;font-size:30px;line-height:1;cursor:pointer}
             #importantRuleEditModal .irm-form{width:100%;max-width:900px;margin:auto;display:flex;flex-direction:column;gap:18px}
-            #importantRuleEditModal label{font-weight:700;font-size:15px}
+            #importantRuleEditModal label{display:block;font-weight:700;font-size:15px;margin-bottom:7px}
             #importantRuleEditModal input,#importantRuleEditModal textarea{width:100%;box-sizing:border-box;border:1px solid var(--paper-line,#d9d2c3);border-radius:10px;background:var(--paper-cell,#fffdf8);color:var(--ink,#241f18);font:inherit;padding:13px 14px}
             #importantRuleEditModal input{min-height:48px}
             #importantRuleEditModal textarea{min-height:260px;resize:vertical;line-height:1.65}
             #importantRuleEditModal .irm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
             #importantRuleEditModal .irm-actions button{min-width:110px;padding:11px 18px;border-radius:9px;border:1px solid var(--paper-line,#d9d2c3);background:var(--paper-cell,#fffdf8);color:var(--ink,#241f18);font:inherit;font-weight:700;cursor:pointer}
             #importantRuleEditModal .irm-actions .irm-save{background:#18212c;color:#fff;border-color:#18212c}
+            #importantRuleEditModal .irm-error{color:#b42318;font-size:14px;min-height:20px}
             @media(max-width:520px){#importantRuleEditModal .irm-wrap{padding:18px 14px 30px}#importantRuleEditModal .irm-head h2{font-size:24px}#importantRuleEditModal .irm-head{margin-bottom:20px}#importantRuleEditModal textarea{min-height:220px}.irm-actions{padding-bottom:env(safe-area-inset-bottom)}}
+            .important-rule-card .lesson-card-topbar .important-rule-edit,.important-rule-card .lesson-card-topbar .important-rule-delete{pointer-events:auto;position:relative;z-index:30;width:30px;height:30px;padding:0;border:0;background:transparent;color:#fff;font-size:17px;line-height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85}
+            .important-rule-card .lesson-card-topbar .important-rule-edit:hover,.important-rule-card .lesson-card-topbar .important-rule-delete:hover{opacity:1;transform:scale(1.08)}
+            .important-rule-card .lesson-card-topbar .important-rule-edit{grid-column:3}
+            .important-rule-card .lesson-card-topbar .lesson-card-number{grid-column:2}
+            .important-rule-card .lesson-card-topbar .lesson-tag{grid-column:4}
+            .important-rule-card .lesson-card-topbar .important-rule-delete{grid-column:5}
+            .important-rule-card .lesson-card-topbar{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
+            @media(max-width:520px){.important-rule-card .lesson-card-topbar .important-rule-edit,.important-rule-card .lesson-card-topbar .important-rule-delete{width:24px;height:24px;font-size:14px;line-height:24px}}
         `;
         document.head.appendChild(style);
     }
@@ -53,15 +116,7 @@ window.importantRules = importantRules;
         addModalStyles();
         const modal = document.createElement('div');
         modal.id = 'importantRuleEditModal';
-        modal.innerHTML = `
-            <div class="irm-wrap">
-                <div class="irm-head"><h2>Edit Important Rule</h2><button type="button" class="irm-close" id="irmClose" aria-label="Close">×</button></div>
-                <form class="irm-form" id="irmForm">
-                    <div><label for="irmKind">What kind of rule?</label><input id="irmKind" type="text" autocomplete="off"></div>
-                    <div><label for="irmRule">Write the rule</label><textarea id="irmRule"></textarea></div>
-                    <div class="irm-actions"><button type="button" id="irmCancel">Cancel</button><button type="submit" class="irm-save">Save changes</button></div>
-                </form>
-            </div>`;
+        modal.innerHTML = `<div class="irm-wrap"><div class="irm-head"><h2>Edit Important Rule</h2><button type="button" class="irm-close" id="irmClose" aria-label="Close">×</button></div><form class="irm-form" id="irmForm"><div><label for="irmKind">What kind of rule?</label><input id="irmKind" type="text" autocomplete="off"></div><div><label for="irmRule">Write the rule</label><textarea id="irmRule"></textarea></div><div class="irm-error" id="irmError"></div><div class="irm-actions"><button type="button" id="irmCancel">Cancel</button><button type="submit" class="irm-save">Save changes</button></div></form></div>`;
         document.body.appendChild(modal);
         modal.querySelector('#irmClose').addEventListener('click', closeModal);
         modal.querySelector('#irmCancel').addEventListener('click', closeModal);
@@ -77,6 +132,7 @@ window.importantRules = importantRules;
         editingIndex = index;
         modal.querySelector('#irmKind').value = item.kind;
         modal.querySelector('#irmRule').value = item.rule;
+        modal.querySelector('#irmError').textContent = '';
         modal.classList.add('open');
         document.body.style.overflow = 'hidden';
         setTimeout(() => modal.querySelector('#irmKind').focus(), 0);
@@ -90,34 +146,45 @@ window.importantRules = importantRules;
         editingIndex = -1;
     }
 
-    function saveEdit(event) {
+    async function saveEdit(event) {
         event.preventDefault();
         if (editingIndex < 0) return;
         const modal = document.getElementById('importantRuleEditModal');
         const kind = modal.querySelector('#irmKind').value.trim();
         const rule = modal.querySelector('#irmRule').value.trim();
-        if (!kind || !rule) { alert('Both fields are required.'); return; }
-        window.importantRules[editingIndex] = { kind, rule };
-        closeModal();
-        renderRules();
-        saveRulesToDataFile();
+        if (!kind || !rule) { modal.querySelector('#irmError').textContent = 'Both fields are required.'; return; }
+        const button = modal.querySelector('.irm-save');
+        button.disabled = true;
+        modal.querySelector('#irmError').textContent = 'Saving changes...';
+        const oldItem = ruleObject(window.importantRules[editingIndex]);
+        const newItem = { kind, rule };
+        window.importantRules[editingIndex] = newItem;
+        try {
+            await saveRulesToGitHub();
+            transferFavorite(oldItem, newItem);
+            closeModal();
+            renderRules();
+        } catch (error) {
+            window.importantRules[editingIndex] = oldItem;
+            modal.querySelector('#irmError').textContent = error.message || 'Could not save changes.';
+        } finally { button.disabled = false; }
     }
 
-    async function saveRulesToDataFile() {
-        // Editing/deleting the generated JS data requires the same protected
-        // manual-input backend used to append new rules.
-        if (typeof window.manualInputRuleAdminSave === 'function') {
-            await window.manualInputRuleAdminSave(window.importantRules);
-        }
-    }
-
-    function deleteRule(index) {
+    async function deleteRule(index) {
         const item = ruleObject(window.importantRules?.[index]);
         const confirmed = window.confirm(`Delete this important rule?\n\n${item.kind}\n${item.rule}\n\nThis cannot be undone.`);
         if (!confirmed) return;
-        window.importantRules.splice(index, 1);
-        renderRules();
-        saveRulesToDataFile();
+        try {
+            await ensureAdminPassword();
+            const oldRules = window.importantRules.slice();
+            window.importantRules.splice(index, 1);
+            await saveRulesToGitHub();
+            removeFavorite(item);
+            renderRules();
+        } catch (error) {
+            window.importantRules = oldRules || window.importantRules;
+            alert(error.message || 'Could not delete this rule.');
+        }
     }
 
     function renderRules() {
@@ -125,33 +192,17 @@ window.importantRules = importantRules;
         if (!list) return;
         const rules = window.importantRules || [];
         list.innerHTML = '';
-        if (!rules.length) {
-            list.innerHTML = '<div class="important-rules-empty">No important rules added yet.</div>';
-            return;
-        }
+        if (!rules.length) { list.innerHTML = '<div class="important-rules-empty">No important rules added yet.</div>'; return; }
         const fragment = document.createDocumentFragment();
         rules.forEach(function (rawRule, index) {
             const rule = ruleObject(rawRule);
             const card = document.createElement('div');
             card.className = 'card important-rule-card';
             card.setAttribute('data-favorite-key', `important-rule|${rule.kind}|${rule.rule}`);
-            card.innerHTML = `
-                <div class="lesson-card-topbar" aria-label="Card controls">
-                    <button type="button" class="hard-star" aria-label="Mark as favourite" title="Mark as favourite">☆</button>
-                    <button type="button" class="important-rule-edit" aria-label="Edit rule" title="Edit rule">✎</button>
-                    <span class="lesson-card-number" aria-hidden="true">${index + 1}</span>
-                    <span class="lesson-tag">Rule</span>
-                    <button type="button" class="important-rule-delete" aria-label="Delete rule" title="Delete rule">🗑</button>
-                </div>
-                <div class="inner">
-                    <div class="front"><div class="important-rule-text">${escapeHtml(rule.kind)}</div></div>
-                    <div class="back"><div class="important-rule-text">${escapeHtml(rule.rule)}</div></div>
-                </div>`;
+            card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as favourite" title="Mark as favourite">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">Rule</span><button type="button" class="important-rule-edit" aria-label="Edit rule" title="Edit rule">✎</button><button type="button" class="important-rule-delete" aria-label="Delete rule" title="Delete rule">🗑</button></div><div class="inner"><div class="front"><div class="important-rule-text">${escapeHtml(rule.kind)}</div></div><div class="back"><div class="important-rule-text">${escapeHtml(rule.rule)}</div></div></div>`;
             card.querySelector('.important-rule-edit').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); openEdit(index); });
             card.querySelector('.important-rule-delete').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); deleteRule(index); });
-            card.addEventListener('click', function (event) {
-                if (!event.target.closest('button')) card.classList.toggle('flipped');
-            });
+            card.addEventListener('click', function (event) { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
             fragment.appendChild(card);
         });
         list.appendChild(fragment);
