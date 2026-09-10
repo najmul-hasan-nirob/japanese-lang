@@ -8,84 +8,28 @@ js:
 ---
 
 <div class="manual-input-page">
-    <div class="manual-input-header">
-        <h1>Manual Input</h1>
-        <p>Add a new Similar Words entry without editing the JavaScript file manually.</p>
-    </div>
-
+    <div class="manual-input-header"><h1>Manual Input</h1><p>Add content to Similar Words or Important Rules.</p></div>
     <div id="manualLock" class="manual-lock">
-        <div class="manual-lock-icon">🔒</div>
-        <h2>Manual Input Locked</h2>
-        <p>Enter the password to unlock this page.</p>
+        <div class="manual-lock-icon">🔒</div><h2>Manual Input Locked</h2><p>Enter the password to unlock this page.</p>
         <form id="manualUnlockForm" class="manual-unlock-form" autocomplete="off">
-            <label for="manualPassword">Password</label>
-            <div class="manual-password-wrap">
-                <input id="manualPassword" type="password" required autocomplete="current-password" spellcheck="false">
-                <button id="manualPasswordToggle" class="manual-password-toggle" type="button" aria-label="Show password" title="Show password">Show</button>
-            </div>
-            <label class="manual-remember-row">
-                <input id="manualRemember" type="checkbox">
-                <span>Remember me</span>
-            </label>
-            <button class="manual-submit-btn" type="submit">Unlock</button>
-            <div id="manualUnlockStatus" class="manual-status" role="status" aria-live="polite"></div>
+            <label for="manualPassword">Password</label><div class="manual-password-wrap"><input id="manualPassword" type="password" required autocomplete="current-password" spellcheck="false"><button id="manualPasswordToggle" class="manual-password-toggle" type="button">Show</button></div>
+            <label class="manual-remember-row"><input id="manualRemember" type="checkbox"><span>Remember me</span></label>
+            <button class="manual-submit-btn" type="submit">Unlock</button><div id="manualUnlockStatus" class="manual-status" role="status"></div>
         </form>
     </div>
-
     <form id="manualInputForm" class="manual-input-form" autocomplete="off" hidden>
-        <div class="manual-unlocked-row">
-            <span>🔓 Unlocked</span>
-            <button id="manualLockButton" type="button">Lock</button>
+        <div class="manual-unlocked-row"><span>🔓 Unlocked</span><button id="manualLockButton" type="button">Lock</button></div>
+        <div class="manual-input-field"><label for="manualTarget">Content Type</label><select id="manualTarget" name="target"><option value="similar-words">Similar Words</option><option value="important-rules">Important Rules</option></select></div>
+        <div id="similarFields">
+            <div class="manual-input-field"><label for="manualJapanese">Japanese</label><input id="manualJapanese" type="text" required placeholder="なんで" spellcheck="false" autocomplete="off"></div>
+            <div class="manual-input-field"><label for="manualRomaji">Romaji</label><input id="manualRomaji" type="text" required placeholder="nande" spellcheck="false" autocomplete="off"></div>
+            <div class="manual-input-field"><label for="manualBangla">Bangla</label><input id="manualBangla" type="text" required placeholder="কেন" autocomplete="off"></div>
+            <div class="manual-input-field"><label for="manualGroup">Group / Filter</label><select id="manualGroup" required><option value="" disabled selected>Loading groups...</option></select><input id="manualNewGroup" type="text" placeholder="Enter new group name" spellcheck="false" autocomplete="off" hidden><small>Select an existing group, or choose Create a new group.</small></div>
         </div>
-
-        <div class="manual-input-field">
-            <label for="manualJapanese">Japanese</label>
-            <input id="manualJapanese" name="japanese" type="text" required placeholder="なんで" spellcheck="false" autocomplete="off">
-        </div>
-
-        <div class="manual-input-field">
-            <label for="manualRomaji">Romaji</label>
-            <input id="manualRomaji" name="romaji" type="text" required placeholder="nande" spellcheck="false" autocomplete="off">
-        </div>
-
-        <div class="manual-input-field">
-            <label for="manualBangla">Bangla</label>
-            <input id="manualBangla" name="bangla" type="text" required placeholder="কেন" autocomplete="off">
-        </div>
-
-        <div class="manual-input-field">
-            <label for="manualGroup">Group / Filter</label>
-            <select id="manualGroup" name="group" required>
-                <option value="" selected disabled>Loading groups...</option>
-                <option value="__create_new__">＋ Create a new group</option>
-            </select>
-            <input id="manualNewGroup" name="newGroup" type="text" placeholder="Enter new group name" spellcheck="false" autocomplete="off" hidden>
-            <small>Select an existing group, or choose <strong>Create a new group</strong> to add one.</small>
-        </div>
-
-        <div class="manual-input-field">
-            <label for="manualTarget">Similar Words</label>
-            <select id="manualTarget" name="target">
-                <option value="similar-words">Similar Words</option>
-            </select>
-            <small>This currently has one option. More data sets can be added here later.</small>
-        </div>
-
-        <button id="manualSubmit" class="manual-submit-btn" type="submit">Add Word</button>
-        <div id="manualStatus" class="manual-status" role="status" aria-live="polite"></div>
+        <div id="ruleFields" class="manual-input-field" hidden><label for="manualRule">Important Rule</label><textarea id="manualRule" rows="8" placeholder="Write the rule here..." spellcheck="false"></textarea></div>
+        <button id="manualSubmit" class="manual-submit-btn" type="submit">Add</button><div id="manualStatus" class="manual-status" role="status"></div>
     </form>
 </div>
-
 <style>
-.manual-input-page{max-width:720px;margin:0 auto;padding:28px 16px 70px;color:var(--ink,#241f18)}
-.manual-input-header{margin-bottom:24px}.manual-input-header h1{margin:0 0 8px;font-family:"Shippori Mincho",serif;font-size:30px}.manual-input-header p{margin:0;color:var(--ink-soft,#7a705e);line-height:1.6}
-.manual-lock{max-width:430px;margin:35px auto;padding:28px 22px;text-align:center;border:1px solid var(--paper-line,#d9d2c3);border-radius:16px;background:var(--paper-cell,#fffdf8);box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.08))}.manual-lock-icon{font-size:34px;margin-bottom:8px}.manual-lock h2{margin:0 0 8px}.manual-lock p{margin:0 0 20px;color:var(--ink-soft,#7a705e)}
-.manual-unlock-form{display:flex;flex-direction:column;gap:8px;text-align:left}.manual-unlock-form label:not(.manual-remember-row){font-weight:700;font-size:14px}.manual-password-wrap{position:relative;width:100%}.manual-unlock-form input[type="password"],.manual-unlock-form input[type="text"]{box-sizing:border-box;width:100%;min-height:44px;padding:9px 76px 9px 12px;border:1px solid var(--paper-line,#d9d2c3);border-radius:9px;background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit;font-size:16px}.manual-password-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);min-width:58px;height:34px;padding:4px 8px;border:1px solid var(--paper-line,#d9d2c3);border-radius:7px;background:transparent;color:inherit;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.manual-password-toggle:hover{background:rgba(127,127,127,.08)}
-.manual-remember-row{display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:14px;cursor:pointer;user-select:none}.manual-remember-row input{width:16px;height:16px;margin:0;accent-color:currentColor;cursor:pointer}
-.manual-input-form{display:flex;flex-direction:column;gap:18px;padding:22px;border:1px solid var(--paper-line,#d9d2c3);border-radius:16px;background:var(--paper-cell,#fffdf8);box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.08))}
-.manual-input-form[hidden],.manual-lock[hidden],.manual-new-group[hidden]{display:none!important}
-.manual-unlocked-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--paper-line,#d9d2c3);font-size:13px;font-weight:700}.manual-unlocked-row button{border:1px solid var(--paper-line,#d9d2c3);border-radius:7px;background:transparent;color:inherit;padding:5px 10px;cursor:pointer}
-.manual-input-field{display:flex;flex-direction:column;gap:7px}.manual-input-field label{font-weight:700;font-size:14px}.manual-input-field input,.manual-input-field select{box-sizing:border-box;width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--paper-line,#d9d2c3);border-radius:9px;background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit;font-size:16px}.manual-input-field input:focus,.manual-input-field select:focus,.manual-unlock-form input:focus{outline:2px solid currentColor;outline-offset:1px}.manual-input-field small{font-size:12px;line-height:1.5;color:var(--ink-soft,#7a705e)}
-.manual-submit-btn{min-height:46px;border:0;border-radius:9px;padding:10px 18px;background:var(--ink,#241f18);color:var(--paper-cell,#fffdf8);font:inherit;font-weight:700;cursor:pointer}.manual-submit-btn:disabled{opacity:.55;cursor:wait}.manual-status{min-height:20px;font-size:14px;line-height:1.5}.manual-status.success,.manual-status.error{font-weight:700}
-@media(max-width:520px){.manual-input-page{padding:20px 12px 60px}.manual-input-form{padding:16px;border-radius:12px}.manual-lock{margin-top:20px}}
+.manual-input-page{max-width:720px;margin:0 auto;padding:28px 16px 70px;color:var(--ink,#241f18)}.manual-input-header{margin-bottom:24px}.manual-input-header h1{margin:0 0 8px;font-family:"Shippori Mincho",serif;font-size:30px}.manual-input-header p{margin:0;color:var(--ink-soft,#7a705e);line-height:1.6}.manual-lock{max-width:430px;margin:35px auto;padding:28px 22px;text-align:center;border:1px solid var(--paper-line,#d9d2c3);border-radius:16px;background:var(--paper-cell,#fffdf8);box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.08))}.manual-lock-icon{font-size:34px;margin-bottom:8px}.manual-lock h2{margin:0 0 8px}.manual-lock p{margin:0 0 20px;color:var(--ink-soft,#7a705e)}.manual-unlock-form{display:flex;flex-direction:column;gap:8px;text-align:left}.manual-unlock-form label:not(.manual-remember-row){font-weight:700;font-size:14px}.manual-password-wrap{position:relative}.manual-unlock-form input{box-sizing:border-box;width:100%;min-height:44px;padding:9px 76px 9px 12px;border:1px solid var(--paper-line,#d9d2c3);border-radius:9px;background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit;font-size:16px}.manual-password-toggle{position:absolute;right:6px;top:5px;height:34px;min-width:58px;border:1px solid var(--paper-line,#d9d2c3);border-radius:7px;background:transparent;color:inherit;font-weight:700;cursor:pointer}.manual-remember-row{display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:14px;cursor:pointer}.manual-remember-row input{width:16px;height:16px;margin:0;padding:0}.manual-input-form{display:flex;flex-direction:column;gap:18px;padding:22px;border:1px solid var(--paper-line,#d9d2c3);border-radius:16px;background:var(--paper-cell,#fffdf8);box-shadow:var(--shadow,0 2px 10px rgba(0,0,0,.08))}.manual-input-form[hidden],.manual-lock[hidden],#similarFields[hidden],#ruleFields[hidden],.manual-new-group[hidden]{display:none!important}.manual-unlocked-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--paper-line,#d9d2c3);font-size:13px;font-weight:700}.manual-unlocked-row button{border:1px solid var(--paper-line,#d9d2c3);border-radius:7px;background:transparent;color:inherit;padding:5px 10px;cursor:pointer}.manual-input-field{display:flex;flex-direction:column;gap:7px}.manual-input-field label{font-weight:700;font-size:14px}.manual-input-field input,.manual-input-field select,.manual-input-field textarea{box-sizing:border-box;width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--paper-line,#d9d2c3);border-radius:9px;background:var(--paper,#f7f2e7);color:var(--ink,#241f18);font:inherit;font-size:16px}.manual-input-field textarea{resize:vertical;line-height:1.6}.manual-input-field small{font-size:12px;line-height:1.5;color:var(--ink-soft,#7a705e)}.manual-submit-btn{min-height:46px;border:0;border-radius:9px;padding:10px 18px;background:var(--ink,#241f18);color:var(--paper-cell,#fffdf8);font:inherit;font-weight:700;cursor:pointer}.manual-submit-btn:disabled{opacity:.55;cursor:wait}.manual-status{min-height:20px;font-size:14px;line-height:1.5}.manual-status.success,.manual-status.error{font-weight:700}@media(max-width:520px){.manual-input-page{padding:20px 12px 60px}.manual-input-form{padding:16px;border-radius:12px}.manual-lock{margin-top:20px}}
 </style>
