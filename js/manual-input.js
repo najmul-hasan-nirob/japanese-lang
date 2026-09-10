@@ -1,242 +1,27 @@
 // Japanese Lang — Secure Manual Input
-(function () {
-    'use strict';
-
-    const SUPABASE_URL = 'https://levpdywhnikadumfocao.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxldnBkeXdobmlrYWR1bWZvY2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTUzNX0.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
-    const WORDS_RAW_URL = 'https://raw.githubusercontent.com/najmul-hasan-nirob/japanese-lang/main/js/similar%20words/similar-words-lesson.js';
-    const REMEMBER_KEY = 'japaneseLangManualInputRememberedPassword';
-
-    const lock = document.getElementById('manualLock');
-    const unlockForm = document.getElementById('manualUnlockForm');
-    const passwordInput = document.getElementById('manualPassword');
-    const passwordToggle = document.getElementById('manualPasswordToggle');
-    const rememberInput = document.getElementById('manualRemember');
-    const unlockStatus = document.getElementById('manualUnlockStatus');
-    const form = document.getElementById('manualInputForm');
-    const japaneseInput = document.getElementById('manualJapanese');
-    const romajiInput = document.getElementById('manualRomaji');
-    const banglaInput = document.getElementById('manualBangla');
-    const groupInput = document.getElementById('manualGroup');
-    const newGroupInput = document.getElementById('manualNewGroup');
-    const targetSelect = document.getElementById('manualTarget');
-    const submitButton = document.getElementById('manualSubmit');
-    const status = document.getElementById('manualStatus');
-    const lockButton = document.getElementById('manualLockButton');
-
-    let unlockPassword = '';
-
-    if (!form || !unlockForm) return;
-
-    function setStatus(el, message, type) {
-        el.textContent = message || '';
-        el.className = 'manual-status' + (type ? ' ' + type : '');
-    }
-
-    function normalizeGroup(value) {
-        return String(value || '').trim().toLowerCase().replace(/\s+/g, '-');
-    }
-
-    function displayGroup(value) {
-        return String(value || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
-    }
-
-    function extractGroups(jsContent) {
-        const match = jsContent.match(/const\s+words\s*=\s*\[([\s\S]*?)\n\s*\];/);
-        if (!match) throw new Error('Could not find the words array.');
-        const groups = [];
-        const re = /group\s*:\s*(['"])(.*?)\1/g;
-        let m;
-        while ((m = re.exec(match[1]))) {
-            if (m[2] && !groups.includes(m[2])) groups.push(m[2]);
-        }
-        return groups;
-    }
-
-    async function loadGroups() {
-        try {
-            groupInput.innerHTML = '<option value="" disabled selected>Loading groups...</option>';
-            const response = await fetch(WORDS_RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
-            if (!response.ok) throw new Error('Could not load groups.');
-            populateGroups(extractGroups(await response.text()));
-        } catch (error) {
-            groupInput.innerHTML = '<option value="" disabled selected>Could not load groups</option><option value="__create_new__">＋ Create a new group</option>';
-            setStatus(status, error.message, 'error');
-        }
-    }
-
-    function populateGroups(groups) {
-        groupInput.innerHTML = '<option value="" disabled>Select a group</option>';
-        groups.forEach(group => {
-            const option = document.createElement('option');
-            option.value = group;
-            option.textContent = displayGroup(group);
-            groupInput.appendChild(option);
-        });
-        const createOption = document.createElement('option');
-        createOption.value = '__create_new__';
-        createOption.textContent = '＋ Create a new group';
-        groupInput.appendChild(createOption);
-        if (groups.length) groupInput.value = groups[0];
-        showNewGroupField();
-    }
-
-    function showNewGroupField() {
-        const createNew = groupInput.value === '__create_new__';
-        newGroupInput.hidden = !createNew;
-        newGroupInput.required = createNew;
-        if (createNew) newGroupInput.focus();
-    }
-
-    async function verifyPassword(password) {
-        const response = await fetch(SUPABASE_URL + '/functions/v1/manual-input', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                'apikey': SUPABASE_ANON_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ action: 'verify', password })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            if (response.status === 401 && data.error === 'Incorrect password.') {
-                throw new Error('Incorrect password. The server received the password but its SHA-256 did not match.');
-            }
-            throw new Error(data.error || ('Unlock request failed (' + response.status + ').'));
-        }
-        return true;
-    }
-
-    function getRememberedPassword() {
-        try {
-            return localStorage.getItem(REMEMBER_KEY) || '';
-        } catch (_) {
-            return '';
-        }
-    }
-
-    function setRememberedPassword(password) {
-        try {
-            if (password) localStorage.setItem(REMEMBER_KEY, password);
-            else localStorage.removeItem(REMEMBER_KEY);
-        } catch (_) {}
-    }
-
-    function restoreRememberedPassword() {
-        const remembered = getRememberedPassword();
-        if (remembered) {
-            passwordInput.value = remembered;
-            rememberInput.checked = true;
-        }
-    }
-
-    function unlock() {
-        lock.hidden = true;
-        form.hidden = false;
-        loadGroups();
-        japaneseInput.focus();
-    }
-
-    function lockPage() {
-        unlockPassword = '';
-        form.hidden = true;
-        lock.hidden = false;
-        passwordInput.value = getRememberedPassword();
-        rememberInput.checked = !!passwordInput.value;
-        setStatus(unlockStatus, '', '');
-        passwordInput.focus();
-    }
-
-    if (passwordToggle) {
-        passwordToggle.addEventListener('click', function () {
-            const isHidden = passwordInput.type === 'password';
-            passwordInput.type = isHidden ? 'text' : 'password';
-            passwordToggle.textContent = isHidden ? 'Hide' : 'Show';
-            passwordToggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
-            passwordToggle.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
-            passwordInput.focus();
-        });
-    }
-
-    unlockForm.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        const password = passwordInput.value;
-        if (!password) return;
-        const button = unlockForm.querySelector('button[type="submit"]');
-        if (button) button.disabled = true;
-        setStatus(unlockStatus, 'Checking password...', '');
-        try {
-            await verifyPassword(password);
-            unlockPassword = password;
-            if (rememberInput.checked) setRememberedPassword(password);
-            else setRememberedPassword('');
-            unlock();
-        } catch (error) {
-            setStatus(unlockStatus, error.message || 'Could not verify password.', 'error');
-        } finally {
-            if (button) button.disabled = false;
-        }
-    });
-
-    lockButton.addEventListener('click', lockPage);
-    groupInput.addEventListener('change', showNewGroupField);
-
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        setStatus(status, '', '');
-
-        const group = normalizeGroup(groupInput.value === '__create_new__' ? newGroupInput.value : groupInput.value);
-        const word = {
-            jp: japaneseInput.value.trim(),
-            romaji: romajiInput.value.trim(),
-            bn: banglaInput.value.trim(),
-            group
-        };
-        const target = targetSelect.selectedOptions[0];
-
-        if (!word.jp || !word.romaji || !word.bn || !word.group) {
-            setStatus(status, 'Please complete all fields.', 'error');
-            return;
-        }
-        if (!target || target.value !== 'similar-words') {
-            setStatus(status, 'This Similar Words target is not configured yet.', 'error');
-            return;
-        }
-        if (!unlockPassword) {
-            lockPage();
-            return;
-        }
-
-        submitButton.disabled = true;
-        submitButton.textContent = 'Adding...';
-        try {
-            setStatus(status, 'Adding the word securely...', '');
-            const response = await fetch(SUPABASE_URL + '/functions/v1/manual-input', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ password: unlockPassword, target: target.value, ...word })
-            });
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(data.error || ('Could not add the word (' + response.status + ').'));
-            setStatus(status, data.message || ('Added successfully: ' + word.jp), 'success');
-            form.reset();
-            await loadGroups();
-        } catch (error) {
-            setStatus(status, error.message || 'Could not add the word.', 'error');
-            if (/password/i.test(error.message || '')) lockPage();
-        } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = 'Add Word';
-        }
-    });
-
-    lock.hidden = false;
-    form.hidden = true;
-    restoreRememberedPassword();
-    passwordInput.focus();
+(function(){'use strict';
+const SUPABASE_URL='https://levpdywhnikadumfocao.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxldnBkeXdobmlrYWR1bWZvY2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTUzNX0.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
+const WORDS_RAW_URL='https://raw.githubusercontent.com/najmul-hasan-nirob/japanese-lang/main/js/similar%20words/similar-words-lesson.js',REMEMBER_KEY='japaneseLangManualInputRememberedPassword';
+const lock=document.getElementById('manualLock'),unlockForm=document.getElementById('manualUnlockForm'),passwordInput=document.getElementById('manualPassword'),passwordToggle=document.getElementById('manualPasswordToggle'),rememberInput=document.getElementById('manualRemember'),unlockStatus=document.getElementById('manualUnlockStatus'),form=document.getElementById('manualInputForm'),targetSelect=document.getElementById('manualTarget'),similarFields=document.getElementById('similarFields'),ruleFields=document.getElementById('ruleFields'),japaneseInput=document.getElementById('manualJapanese'),romajiInput=document.getElementById('manualRomaji'),banglaInput=document.getElementById('manualBangla'),groupInput=document.getElementById('manualGroup'),newGroupInput=document.getElementById('manualNewGroup'),ruleInput=document.getElementById('manualRule'),submitButton=document.getElementById('manualSubmit'),status=document.getElementById('manualStatus'),lockButton=document.getElementById('manualLockButton');
+let unlockPassword=''; if(!form||!unlockForm)return;
+function setStatus(el,msg,type){el.textContent=msg||'';el.className='manual-status'+(type?' '+type:'')}
+function normalizeGroup(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,'-')}
+function displayGroup(v){return String(v||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}
+function extractGroups(s){const m=s.match(/const\s+words\s*=\s*\[([\s\S]*?)\n\s*\];/);if(!m)throw Error('Could not find the words array.');const a=[],r=/group\s*:\s*(['"])(.*?)\1/g;let x;while((x=r.exec(m[1])))if(x[2]&&!a.includes(x[2]))a.push(x[2]);return a}
+async function loadGroups(){try{groupInput.innerHTML='<option value="" disabled selected>Loading groups...</option>';const r=await fetch(WORDS_RAW_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('Could not load groups.');populateGroups(extractGroups(await r.text()))}catch(e){groupInput.innerHTML='<option value="" disabled selected>Could not load groups</option><option value="__create_new__">＋ Create a new group</option>';setStatus(status,e.message,'error')}}
+function populateGroups(gs){groupInput.innerHTML='<option value="" disabled>Select a group</option>';gs.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=displayGroup(g);groupInput.appendChild(o)});const c=document.createElement('option');c.value='__create_new__';c.textContent='＋ Create a new group';groupInput.appendChild(c);if(gs.length)groupInput.value=gs[0];showNewGroupField()}
+function showNewGroupField(){const c=groupInput.value==='__create_new__';newGroupInput.hidden=!c;newGroupInput.required=c;if(c)newGroupInput.focus()}
+function updateTarget(){const rules=targetSelect.value==='important-rules';similarFields.hidden=rules;ruleFields.hidden=!rules;japaneseInput.required=!rules;romajiInput.required=!rules;banglaInput.required=!rules;groupInput.required=!rules;newGroupInput.required=!rules&&groupInput.value==='__create_new__';ruleInput.required=rules;submitButton.textContent=rules?'Add Rule':'Add Word';if(rules)ruleInput.focus()}
+async function request(body){const r=await fetch(SUPABASE_URL+'/functions/v1/manual-input',{method:'POST',headers:{Authorization:'Bearer '+SUPABASE_ANON_KEY,apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||('Request failed ('+r.status+').'));return d}
+function remembered(){try{return localStorage.getItem(REMEMBER_KEY)||''}catch(_){return ''}}
+function saveRemembered(p){try{if(p)localStorage.setItem(REMEMBER_KEY,p);else localStorage.removeItem(REMEMBER_KEY)}catch(_){} }
+function restore(){const p=remembered();if(p){passwordInput.value=p;rememberInput.checked=true}}
+function unlock(){lock.hidden=true;form.hidden=false;loadGroups();updateTarget()}
+function lockPage(){unlockPassword='';form.hidden=true;lock.hidden=false;passwordInput.value=remembered();rememberInput.checked=!!passwordInput.value;setStatus(unlockStatus,'','');passwordInput.focus()}
+passwordToggle&&passwordToggle.addEventListener('click',()=>{const h=passwordInput.type==='password';passwordInput.type=h?'text':'password';passwordToggle.textContent=h?'Hide':'Show';passwordInput.focus()});
+targetSelect.addEventListener('change',updateTarget);groupInput.addEventListener('change',showNewGroupField);lockButton.addEventListener('click',lockPage);
+unlockForm.addEventListener('submit',async e=>{e.preventDefault();const p=passwordInput.value;if(!p)return;const b=unlockForm.querySelector('button[type="submit"]');b.disabled=true;setStatus(unlockStatus,'Checking password...','');try{await request({action:'verify',password:p});unlockPassword=p;rememberInput.checked?saveRemembered(p):saveRemembered('');unlock()}catch(x){setStatus(unlockStatus,x.message,'error')}finally{b.disabled=false}});
+form.addEventListener('submit',async e=>{e.preventDefault();setStatus(status,'','');if(!unlockPassword){lockPage();return}const target=targetSelect.value;let body={password:unlockPassword,target};if(target==='important-rules'){body.rule=ruleInput.value.trim();if(!body.rule){setStatus(status,'Please enter an important rule.','error');return}}else{body={...body,jp:japaneseInput.value.trim(),romaji:romajiInput.value.trim(),bn:banglaInput.value.trim(),group:normalizeGroup(groupInput.value==='__create_new__'?newGroupInput.value:groupInput.value)};if(!body.jp||!body.romaji||!body.bn||!body.group){setStatus(status,'Please complete all fields.','error');return}}submitButton.disabled=true;submitButton.textContent=target==='important-rules'?'Adding...':'Adding...';try{setStatus(status,'Adding securely...','');const d=await request(body);setStatus(status,d.message||'Added successfully.','success');form.reset();updateTarget();if(target==='similar-words')await loadGroups()}catch(x){setStatus(status,x.message,'error');if(/password/i.test(x.message||''))lockPage()}finally{submitButton.disabled=false;updateTarget()}});
+lock.hidden=false;form.hidden=true;restore();passwordInput.focus();
 })();
