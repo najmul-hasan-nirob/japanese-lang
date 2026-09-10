@@ -58,10 +58,7 @@
         const text = await response.text();
         let data = null;
         try { data = JSON.parse(text); } catch (_) {}
-        if (!response.ok) {
-            const message = data?.message || ('GitHub API error ' + response.status);
-            throw new Error(message);
-        }
+        if (!response.ok) throw new Error(data?.message || ('GitHub API error ' + response.status));
         return data;
     }
 
@@ -71,9 +68,7 @@
             { method: 'GET' },
             token
         );
-        if (!data || Array.isArray(data) || !data.content || !data.sha) {
-            throw new Error('Could not read ' + path + '.');
-        }
+        if (!data || Array.isArray(data) || !data.content || !data.sha) throw new Error('Could not read ' + path + '.');
         return { content: decodeBase64(data.content), sha: data.sha };
     }
 
@@ -82,12 +77,7 @@
             '/repos/' + OWNER + '/' + REPO + '/contents/' + encodeURIComponent(path).replace(/%2F/g, '/'),
             {
                 method: 'PUT',
-                body: JSON.stringify({
-                    message,
-                    content: encodeBase64(content),
-                    sha,
-                    branch: BRANCH
-                })
+                body: JSON.stringify({ message, content: encodeBase64(content), sha, branch: BRANCH })
             },
             token
         );
@@ -102,9 +92,7 @@
     }
 
     function displayGroup(value) {
-        return String(value || '')
-            .replace(/[-_]+/g, ' ')
-            .replace(/\b\w/g, char => char.toUpperCase());
+        return String(value || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
     }
 
     function extractWords(jsContent) {
@@ -116,13 +104,12 @@
         while ((groupMatch = groupRegex.exec(match[1]))) {
             if (groupMatch[2] && !groups.includes(groupMatch[2])) groups.push(groupMatch[2]);
         }
-        return { arrayBody: match[1], groups };
+        return { groups };
     }
 
     function appendWord(jsContent, word) {
         const match = jsContent.match(/const\s+words\s*=\s*\[([\s\S]*?)\n\s*\];/);
         if (!match) throw new Error('Could not find the words array in the Similar Words file.');
-
         const entry = `        { jp: ${jsString(word.jp)}, romaji: ${jsString(word.romaji)}, bn: ${jsString(word.bn)}, group: ${jsString(word.group)} }`;
         const body = match[1].trimEnd();
         const separator = body ? ',\n' : '\n';
@@ -135,7 +122,8 @@
         const match = htmlContent.match(panelRegex);
         if (!match) throw new Error('Could not find the Similar Words filter panel.');
 
-        const valueRegex = new RegExp('value=["\\\']' + group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '["\\\']');
+        const escapedGroup = group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const valueRegex = new RegExp('value=["\\\']' + escapedGroup + '["\\\']');
         if (valueRegex.test(match[2])) return htmlContent;
 
         const checkbox = `            <label><input type="checkbox" value="${group}"> ${displayGroup(group)}</label>\n`;
@@ -146,9 +134,9 @@
         const pattern = /(const\s+DEFAULT_STATE\s*=\s*\{\s*selectedGroups:\s*\[)([^\]]*)(\])/;
         const match = jsContent.match(pattern);
         if (!match) return jsContent;
-        const existing = match[2];
-        if (new RegExp("['\"]" + group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "['\"]").test(existing)) return jsContent;
-        const separator = existing.trim() ? ', ' : '';
+        const escapedGroup = group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (new RegExp("['\"]" + escapedGroup + "['\"]").test(match[2])) return jsContent;
+        const separator = match[2].trim() ? ', ' : '';
         return jsContent.replace(pattern, '$1$2' + separator + jsString(group) + '$3');
     }
 
@@ -170,15 +158,12 @@
         if (!token) return;
         try {
             const file = await getFile(WORDS_PATH, token);
-            const { groups } = extractWords(file.content);
-            groups.forEach(group => {
+            extractWords(file.content).groups.forEach(group => {
                 const option = document.createElement('option');
                 option.value = group;
                 groupOptions.appendChild(option);
             });
-        } catch (_) {
-            // Do not interrupt typing if the token is not available yet.
-        }
+        } catch (_) {}
     }
 
     tokenInput.addEventListener('blur', loadGroups);
@@ -201,7 +186,6 @@
             setStatus('Please complete all fields.', 'error');
             return;
         }
-
         if (wordsPath !== WORDS_PATH) {
             setStatus('This Similar Words target is not configured yet.', 'error');
             return;
@@ -214,40 +198,29 @@
             setStatus('Reading the current Similar Words files...', '');
             const wordsFile = await getFile(WORDS_PATH, token);
             const pageFile = await getFile(SIMILAR_WORDS_PAGE, token);
-
             const { groups } = extractWords(wordsFile.content);
-            const alreadyExists = new RegExp(
-                'jp\\s*:\\s*(["\\\'])' + word.jp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\1'
-            ).test(wordsFile.content);
+
+            const escapedJapanese = word.jp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const alreadyExists = new RegExp('jp\\s*:\\s*(["\\\'])' + escapedJapanese + '\\1').test(wordsFile.content);
             if (alreadyExists) throw new Error('This Japanese word already exists in the Similar Words file.');
 
             let updatedWords = appendWord(wordsFile.content, word);
             let updatedPage = pageFile.content;
-
             const isNewGroup = !groups.includes(word.group);
             if (isNewGroup) {
                 updatedWords = addGroupToDefaultState(updatedWords, word.group);
                 updatedPage = addFilterCheckbox(updatedPage, word.group);
             }
 
-            setStatus('Committing the new entry...', '');
-            await updateFile(
-                WORDS_PATH,
-                updatedWords,
-                wordsFile.sha,
-                'Add Similar Word: ' + word.jp,
-                token
-            );
-
+            // Update the filter page first. If the second commit fails, retrying is safe:
+            // the existing filter group will simply be detected and left unchanged.
             if (updatedPage !== pageFile.content) {
-                await updateFile(
-                    SIMILAR_WORDS_PAGE,
-                    updatedPage,
-                    pageFile.sha,
-                    'Add Similar Words filter group: ' + word.group,
-                    token
-                );
+                setStatus('Adding the new filter group...', '');
+                await updateFile(SIMILAR_WORDS_PAGE, updatedPage, pageFile.sha, 'Add Similar Words filter group: ' + word.group, token);
             }
+
+            setStatus('Adding the new word...', '');
+            await updateFile(WORDS_PATH, updatedWords, wordsFile.sha, 'Add Similar Word: ' + word.jp, token);
 
             updateLocalFilter(word.group);
             setStatus('Added successfully: ' + word.jp + ' (' + word.group + '). Refresh the Similar Words page after GitHub Pages rebuilds.', 'success');
