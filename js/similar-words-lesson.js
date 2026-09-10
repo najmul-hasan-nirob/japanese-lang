@@ -17,6 +17,7 @@
         { jp: 'どこ', romaji: 'doko', bn: 'কোথায়', group: 'where' }
     ];
     const validGroups = new Set(['why', 'but', 'where']);
+    let lastRenderKey = '';
 
     function getSavedState() {
         try {
@@ -36,9 +37,7 @@
         if (!filterPanel) return;
         const selectedGroups = Array.from(
             filterPanel.querySelectorAll('input[type="checkbox"][value]:checked')
-        )
-            .map(input => input.value)
-            .filter(group => validGroups.has(group));
+        ).map(input => input.value).filter(group => validGroups.has(group));
         const value = {
             selectedGroups: selectedGroups.length ? selectedGroups : [...DEFAULT_STATE.selectedGroups],
             orderMode: mode.value === 'shuffle' ? 'shuffle' : 'normal'
@@ -51,14 +50,10 @@
         if (!filterPanel) return;
         const saved = getSavedState();
         const wanted = new Set(saved.selectedGroups);
-        const boxes = Array.from(
-            filterPanel.querySelectorAll('input[type="checkbox"][value]:not([value="all"])')
-        );
+        const boxes = Array.from(filterPanel.querySelectorAll('input[type="checkbox"][value]:not([value="all"])'));
         boxes.forEach(box => { box.checked = wanted.has(box.value); });
-
         const all = filterPanel.querySelector('input[type="checkbox"][value="all"]');
         if (all) all.checked = boxes.length > 0 && boxes.every(box => box.checked);
-
         if (mode.value !== saved.orderMode) mode.value = saved.orderMode;
     }
 
@@ -71,8 +66,7 @@
     function selectedGroups() {
         if (!filterPanel) return [...DEFAULT_STATE.selectedGroups];
         return Array.from(filterPanel.querySelectorAll('input[type="checkbox"]:checked'))
-            .map(input => input.value)
-            .filter(group => validGroups.has(group));
+            .map(input => input.value).filter(group => validGroups.has(group));
     }
 
     function getVisibleWords() {
@@ -93,10 +87,13 @@
         }
     }
 
-    function render() {
+    function render(force = false) {
         let visible = getVisibleWords();
-        if (mode.value === 'shuffle') visible = visible.slice().sort(() => Math.random() - 0.5);
+        const renderKey = `${visible.map(word => word.jp).join('|')}::${mode.value}`;
+        if (!force && renderKey === lastRenderKey) return;
+        lastRenderKey = renderKey;
 
+        if (mode.value === 'shuffle') visible = visible.slice().sort(() => Math.random() - 0.5);
         grid.innerHTML = '';
         const fragment = document.createDocumentFragment();
 
@@ -105,7 +102,6 @@
             card.className = 'card';
             card.dataset.similarWordGroup = word.group;
             card.__similarWord = word;
-
             card.innerHTML = `
                 <div class="lesson-card-topbar" aria-label="Card controls">
                     <button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button>
@@ -113,79 +109,35 @@
                     <span class="lesson-tag">${escapeHtml(word.group === 'why' ? 'Why' : word.group === 'but' ? 'But' : 'Where')}</span>
                     <button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>
                 </div>
-                <div class="inner">
-                    <div class="front">
-                        <div class="lesson-japanese">${escapeHtml(word.jp)}</div>
-                    </div>
-                    <div class="back vocabulary-back">
-                        <span class="romaji">${escapeHtml(word.romaji)}</span>
-                        <span class="bangla">${escapeHtml(word.bn)}</span>
-                    </div>
-                </div>`;
-
-            card.addEventListener('click', function (event) {
-                if (event.target.closest('button')) return;
-                card.classList.toggle('flipped');
-            });
-
+                <div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
+            card.addEventListener('click', event => { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
             const star = card.querySelector('.hard-star');
-            star.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                const active = star.classList.toggle('active');
-                star.textContent = active ? '★' : '☆';
-                star.setAttribute('aria-pressed', String(active));
-            });
-
+            star.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); const active = star.classList.toggle('active'); star.textContent = active ? '★' : '☆'; star.setAttribute('aria-pressed', String(active)); });
             const speaker = card.querySelector('.speaker-btn');
-            speaker.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                if (!card.classList.contains('flipped')) speakJapanese(word.jp);
-            });
-
+            speaker.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); if (!card.classList.contains('flipped')) speakJapanese(word.jp); });
             fragment.appendChild(card);
         });
-
         grid.appendChild(fragment);
         count.textContent = `Showing ${visible.length} ${visible.length === 1 ? 'card' : 'cards'}`;
-        document.dispatchEvent(new CustomEvent('lessonCardsRendered'));
     }
 
     function initFilterPersistence() {
         if (!filterPanel) return;
         restoreState();
-        mode.value = getSavedState().orderMode;
-
-        filterPanel.addEventListener('change', function (event) {
-            if (event.target.matches('input[type="checkbox"]')) {
-                saveState();
-                render();
-            }
+        filterPanel.addEventListener('change', event => {
+            if (event.target.matches('input[type="checkbox"]')) { saveState(); render(true); }
         });
-        mode.addEventListener('change', function () {
-            saveState();
-            render();
-        });
-
-        window.addEventListener('japaneseLangCloudLoaded', function () {
+        mode.addEventListener('change', () => { saveState(); render(true); });
+        window.addEventListener('japaneseLangCloudLoaded', () => {
+            const before = JSON.stringify(getSavedState());
             restoreState();
-            render();
+            if (before !== JSON.stringify(getSavedState())) render(true);
             window.dispatchEvent(new CustomEvent('similarWordsFilterStateRestored'));
         });
-
-        setTimeout(function () {
-            window.dispatchEvent(new CustomEvent('similarWordsFilterStateRestored'));
-        }, 0);
+        window.dispatchEvent(new CustomEvent('similarWordsFilterStateRestored'));
     }
 
     initFilterPersistence();
-
-    document.getElementById('shuffleBtn')?.addEventListener('click', function () {
-        mode.value = 'shuffle';
-        saveState();
-        render();
-    });
-
-    render();
+    document.getElementById('shuffleBtn')?.addEventListener('click', () => { mode.value = 'shuffle'; saveState(); render(true); });
+    render(true);
 })();
