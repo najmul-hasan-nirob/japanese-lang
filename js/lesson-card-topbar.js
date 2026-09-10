@@ -2,7 +2,7 @@
 // Lesson card structure
 // .card > .lesson-card-inner
 //     > .lesson-card-topbar
-//         star | edit | number | delete | speaker
+//         star | clue | edit | number | delete | speaker
 //     > .lesson-card-content
 //         front / back
 // Lessons page only.
@@ -156,7 +156,7 @@
 }
 .lesson-card-topbar {
     position:absolute; top:0; left:0; right:0; width:100%; height:42px;
-    display:grid; grid-template-columns:repeat(5, 1fr); align-items:center;
+    display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); align-items:center;
     justify-items:center; box-sizing:border-box; z-index:50; pointer-events:none;
 }
 .lesson-card-content {
@@ -177,6 +177,7 @@
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn,
+.lesson-card-topbar .vocabulary-clue-btn,
 .lesson-card-topbar .admin-card-edit,
 .lesson-card-topbar .admin-card-delete {
     position:relative !important; inset:auto !important; top:auto !important; right:auto !important;
@@ -184,16 +185,17 @@
     margin:0 !important; pointer-events:auto; align-self:center; justify-self:center;
 }
 .lesson-card-topbar .hard-star { grid-column:1; grid-row:1; }
-.lesson-card-topbar .admin-card-edit { grid-column:2; grid-row:1; }
+.lesson-card-topbar .vocabulary-clue-btn { grid-column:2 !important; grid-row:1 !important; }
+.lesson-card-topbar .admin-card-edit { grid-column:3; grid-row:1; }
 .lesson-card-topbar .lesson-card-number {
-    grid-column:3; grid-row:1; z-index:60; display:flex !important;
+    grid-column:4; grid-row:1; z-index:60; display:flex !important;
     align-items:center; justify-content:center; pointer-events:none !important;
 }
-.lesson-card-topbar .admin-card-delete { grid-column:4; grid-row:1; }
+.lesson-card-topbar .admin-card-delete { grid-column:5; grid-row:1; }
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
-    grid-column:5; grid-row:1; display:flex !important;
+    grid-column:6; grid-row:1; display:flex !important;
     visibility:visible !important; opacity:1 !important; pointer-events:auto !important;
 }
 @media (max-width:520px) {
