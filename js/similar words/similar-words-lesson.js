@@ -13,7 +13,8 @@
         { jp: 'なんで', romaji: 'nande', bn: 'কেন', group: 'why' },
         { jp: 'が', romaji: 'ga', bn: 'কিন্তু', group: 'but' },
         { jp: 'でも', romaji: 'demo', bn: 'কিন্তু', group: 'but' },
-        { jp: 'どこ', romaji: 'doko', bn: 'কোথায়', group: 'where' }
+        { jp: 'どこ', romaji: 'doko', bn: 'কোথায়', group: 'where' },
+        { jp: "Jp", romaji: "Rm", bn: "Kn", group: "why" }
     ];
     const validGroups = new Set(words.map(word => word.group));
     const DEFAULT_STATE = { selectedGroups: [...validGroups], orderMode: 'normal' };
