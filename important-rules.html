@@ -22,14 +22,20 @@ js:
 .important-rule-card>.inner{min-height:170px;padding-top:42px!important}
 .important-rule-card .front,.important-rule-card .back{padding:18px 16px 16px!important;text-align:center;display:flex;align-items:center;justify-content:center;min-height:128px;box-sizing:border-box}
 .important-rule-text{width:100%;line-height:1.75;white-space:pre-wrap;word-break:break-word}
-.lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:42px;z-index:20;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;align-items:center;justify-items:center;pointer-events:none;background-color:#18212c;padding:5px;box-sizing:border-box;isolation:isolate}
-.lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-card-number{position:static!important;transform:none!important;margin:0!important}
-.lesson-card-topbar .hard-star{grid-column:1;pointer-events:auto;position:relative!important;z-index:30!important;width:30px;height:30px;padding:0;border:0;background:transparent;color:#9a9a9a;font-size:25px;line-height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85;transition:transform .15s ease,opacity .15s ease,color .15s ease;appearance:none;-webkit-appearance:none}
+/* Keep the complete card control bar in exactly one horizontal row. */
+.lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:42px;z-index:50;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:1fr;align-items:center;justify-items:center;pointer-events:auto;background-color:#18212c;padding:5px;box-sizing:border-box;isolation:isolate}
+.lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-card-number,.lesson-card-topbar .important-rule-edit,.lesson-card-topbar .lesson-tag,.lesson-card-topbar .important-rule-delete{grid-row:1!important;margin:0!important;transform:none!important}
+.lesson-card-topbar .hard-star{grid-column:1;pointer-events:auto;position:relative!important;z-index:60!important;width:30px;height:30px;padding:0;border:0;background:transparent;color:#9a9a9a;font-size:25px;line-height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85;transition:transform .15s ease,opacity .15s ease,color .15s ease;appearance:none;-webkit-appearance:none}
 .lesson-card-topbar .hard-star:hover,.lesson-card-topbar .hard-star:focus-visible{opacity:1;transform:scale(1.08);outline:none}
 .lesson-card-topbar .hard-star.active{color:#f5b301;opacity:1}
-.lesson-card-topbar .lesson-card-number{grid-column:3}
-.lesson-card-topbar .lesson-tag{grid-column:2;grid-row:1;margin-left:5px}
+.lesson-card-topbar .lesson-card-number{grid-column:2}
+.lesson-card-topbar .important-rule-edit{grid-column:3}
+.lesson-card-topbar .lesson-tag{grid-column:4;margin-left:0}
+.lesson-card-topbar .important-rule-delete{grid-column:5}
+.important-rule-card .lesson-card-topbar .important-rule-edit,.important-rule-card .lesson-card-topbar .important-rule-delete{pointer-events:auto;position:relative!important;z-index:60!important;width:30px;height:30px;padding:0;border:0;background:transparent;color:#fff;font-size:17px;line-height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.85;transition:transform .15s ease,opacity .15s ease;appearance:none;-webkit-appearance:none}
+.important-rule-card .lesson-card-topbar .important-rule-edit:hover,.important-rule-card .lesson-card-topbar .important-rule-delete:hover{opacity:1;transform:scale(1.08)}
 @media(max-width:900px){.important-rules-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.important-rules-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:520px){.important-rules-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.important-rule-card,.important-rule-card>.inner{min-height:150px}.important-rule-card>.inner{padding-top:38px!important}.important-rule-card .front,.important-rule-card .back{padding:14px 10px 12px!important;min-height:112px}.lesson-card-topbar{height:38px}.lesson-card-topbar .hard-star{font-size:16px;width:26px;height:26px;line-height:26px}}
+/* Mobile: show one card per row; keep all five topbar controls on one row. */
+@media(max-width:520px){.important-rules-list{grid-template-columns:1fr;gap:12px}.important-rule-card,.important-rule-card>.inner{min-height:150px}.important-rule-card>.inner{padding-top:38px!important}.important-rule-card .front,.important-rule-card .back{padding:14px 10px 12px!important;min-height:112px}.lesson-card-topbar{height:38px;padding:4px 8px;grid-template-columns:repeat(5,minmax(0,1fr))}.lesson-card-topbar .hard-star{font-size:18px;width:28px;height:28px;line-height:28px}.important-rule-card .lesson-card-topbar .important-rule-edit,.important-rule-card .lesson-card-topbar .important-rule-delete{width:28px;height:28px;font-size:15px;line-height:28px}}
 </style>
