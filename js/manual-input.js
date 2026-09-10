@@ -8,14 +8,14 @@
     const BRANCH = 'main';
     const WORDS_PATH = 'js/similar words/similar-words-lesson.js';
     const SIMILAR_WORDS_PAGE = 'similar-words.html';
-    const FILTER_KEY = 'japanese-lang-similar-words-filter-v1';
+    const TOKEN_KEY = 'japanese-lang-github-token-session';
 
     const form = document.getElementById('manualInputForm');
     const japaneseInput = document.getElementById('manualJapanese');
     const romajiInput = document.getElementById('manualRomaji');
     const banglaInput = document.getElementById('manualBangla');
     const groupInput = document.getElementById('manualGroup');
-    const groupOptions = document.getElementById('manualGroupOptions');
+    const newGroupInput = document.getElementById('manualNewGroup');
     const tokenInput = document.getElementById('githubToken');
     const targetSelect = document.getElementById('manualTarget');
     const submitButton = document.getElementById('manualSubmit');
@@ -31,9 +31,8 @@
     function encodeBase64(text) {
         const bytes = new TextEncoder().encode(text);
         let binary = '';
-        const chunkSize = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-            binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+        for (let i = 0; i < bytes.length; i += 0x8000) {
+            binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
         }
         return btoa(binary);
     }
@@ -65,8 +64,7 @@
     async function getFile(path, token) {
         const data = await githubRequest(
             '/repos/' + OWNER + '/' + REPO + '/contents/' + encodeURIComponent(path).replace(/%2F/g, '/'),
-            { method: 'GET' },
-            token
+            { method: 'GET' }, token
         );
         if (!data || Array.isArray(data) || !data.content || !data.sha) throw new Error('Could not read ' + path + '.');
         return { content: decodeBase64(data.content), sha: data.sha };
@@ -78,14 +76,11 @@
             {
                 method: 'PUT',
                 body: JSON.stringify({ message, content: encodeBase64(content), sha, branch: BRANCH })
-            },
-            token
+            }, token
         );
     }
 
-    function jsString(value) {
-        return JSON.stringify(String(value));
-    }
+    function jsString(value) { return JSON.stringify(String(value)); }
 
     function normalizeGroup(value) {
         return String(value || '').trim().toLowerCase().replace(/\s+/g, '-');
@@ -111,8 +106,7 @@
         const match = jsContent.match(/const\s+words\s*=\s*\[([\s\S]*?)\n\s*\];/);
         if (!match) throw new Error('Could not find the words array in the Similar Words file.');
         const entry = `        { jp: ${jsString(word.jp)}, romaji: ${jsString(word.romaji)}, bn: ${jsString(word.bn)}, group: ${jsString(word.group)} }`;
-        const body = match[1].trimEnd();
-        const separator = body ? ',\n' : '\n';
+        const separator = match[1].trim() ? ',\n' : '\n';
         const replacement = 'const words = [' + match[1].replace(/\s*$/, '') + separator + entry + '\n    ];';
         return jsContent.replace(match[0], replacement);
     }
@@ -121,64 +115,92 @@
         const panelRegex = /(<div\s+class=["']multiselect-panel["']\s+id=["']similarWordsPanel["'][^>]*>)([\s\S]*?)(<\/div>)/i;
         const match = htmlContent.match(panelRegex);
         if (!match) throw new Error('Could not find the Similar Words filter panel.');
-
         const escapedGroup = group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const valueRegex = new RegExp('value=["\\\']' + escapedGroup + '["\\\']');
-        if (valueRegex.test(match[2])) return htmlContent;
-
-        const checkbox = `            <label><input type="checkbox" value="${group}"> ${displayGroup(group)}</label>\n`;
+        if (new RegExp('value=["\\\']' + escapedGroup + '["\\\']').test(match[2])) return htmlContent;
+        const checkbox = `            <label><input type="checkbox" value="${group}" checked> ${displayGroup(group)}</label>\n`;
         return htmlContent.replace(panelRegex, match[1] + match[2] + checkbox + match[3]);
     }
 
-    function addGroupToDefaultState(jsContent, group) {
-        const pattern = /(const\s+DEFAULT_STATE\s*=\s*\{\s*selectedGroups:\s*\[)([^\]]*)(\])/;
-        const match = jsContent.match(pattern);
-        if (!match) return jsContent;
-        const escapedGroup = group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        if (new RegExp("['\"]" + escapedGroup + "['\"]").test(match[2])) return jsContent;
-        const separator = match[2].trim() ? ', ' : '';
-        return jsContent.replace(pattern, '$1$2' + separator + jsString(group) + '$3');
+    function getSessionToken() {
+        try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (_) { return ''; }
     }
 
-    function updateLocalFilter(group) {
-        try {
-            const current = JSON.parse(localStorage.getItem(FILTER_KEY) || 'null');
-            const selected = Array.isArray(current?.selectedGroups) ? current.selectedGroups : ['why', 'but', 'where'];
-            if (!selected.includes(group)) selected.push(group);
-            localStorage.setItem(FILTER_KEY, JSON.stringify({
-                selectedGroups: selected,
-                orderMode: current?.orderMode === 'shuffle' ? 'shuffle' : 'normal'
-            }));
-        } catch (_) {}
+    function setSessionToken(token) {
+        try { sessionStorage.setItem(TOKEN_KEY, token); } catch (_) {}
+    }
+
+    function updateTokenUI() {
+        const saved = getSessionToken();
+        if (saved) {
+            tokenInput.value = saved;
+            tokenInput.placeholder = 'Token saved for this browser tab';
+        }
+    }
+
+    function showNewGroupField() {
+        const createNew = groupInput.value === '__create_new__';
+        newGroupInput.hidden = !createNew;
+        newGroupInput.required = createNew;
+        if (createNew) newGroupInput.focus();
+    }
+
+    function populateGroups(groups) {
+        const current = groupInput.value;
+        groupInput.innerHTML = '<option value="" disabled>Select a group</option>';
+        groups.forEach(group => {
+            const option = document.createElement('option');
+            option.value = group;
+            option.textContent = displayGroup(group);
+            groupInput.appendChild(option);
+        });
+        const createOption = document.createElement('option');
+        createOption.value = '__create_new__';
+        createOption.textContent = '＋ Create a new group';
+        groupInput.appendChild(createOption);
+        if (groups.includes(current)) groupInput.value = current;
+        else if (groups.length) groupInput.value = groups[0];
+        showNewGroupField();
     }
 
     async function loadGroups() {
-        groupOptions.innerHTML = '';
-        const token = tokenInput.value.trim();
-        if (!token) return;
+        const token = tokenInput.value.trim() || getSessionToken();
+        if (!token) {
+            groupInput.innerHTML = '<option value="" disabled selected>Enter GitHub token first</option><option value="__create_new__">＋ Create a new group</option>';
+            return;
+        }
         try {
             const file = await getFile(WORDS_PATH, token);
-            extractWords(file.content).groups.forEach(group => {
-                const option = document.createElement('option');
-                option.value = group;
-                groupOptions.appendChild(option);
-            });
-        } catch (_) {}
+            populateGroups(extractWords(file.content).groups);
+        } catch (_) {
+            groupInput.innerHTML = '<option value="" disabled selected>Could not load groups</option><option value="__create_new__">＋ Create a new group</option>';
+        }
     }
 
+    groupInput.addEventListener('change', showNewGroupField);
+
+    tokenInput.addEventListener('input', () => {
+        const token = tokenInput.value.trim();
+        if (token) setSessionToken(token);
+    });
     tokenInput.addEventListener('blur', loadGroups);
+
+    updateTokenUI();
+    if (getSessionToken()) loadGroups();
+    else groupInput.innerHTML = '<option value="" disabled selected>Enter GitHub token first</option><option value="__create_new__">＋ Create a new group</option>';
 
     form.addEventListener('submit', async function (event) {
         event.preventDefault();
         setStatus('', '');
 
+        let group = groupInput.value === '__create_new__' ? newGroupInput.value : groupInput.value;
+        group = normalizeGroup(group);
+        const token = tokenInput.value.trim() || getSessionToken();
         const word = {
             jp: japaneseInput.value.trim(),
             romaji: romajiInput.value.trim(),
             bn: banglaInput.value.trim(),
-            group: normalizeGroup(groupInput.value)
+            group
         };
-        const token = tokenInput.value.trim();
         const target = targetSelect.selectedOptions[0];
         const wordsPath = target?.dataset.jsPath || WORDS_PATH;
 
@@ -191,6 +213,8 @@
             return;
         }
 
+        setSessionToken(token);
+        tokenInput.value = token;
         submitButton.disabled = true;
         submitButton.textContent = 'Adding...';
 
@@ -199,32 +223,25 @@
             const wordsFile = await getFile(WORDS_PATH, token);
             const pageFile = await getFile(SIMILAR_WORDS_PAGE, token);
             const { groups } = extractWords(wordsFile.content);
-
             const escapedJapanese = word.jp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const alreadyExists = new RegExp('jp\\s*:\\s*(["\\\'])' + escapedJapanese + '\\1').test(wordsFile.content);
-            if (alreadyExists) throw new Error('This Japanese word already exists in the Similar Words file.');
+            if (new RegExp('jp\\s*:\\s*(["\\\'])' + escapedJapanese + '\\1').test(wordsFile.content)) {
+                throw new Error('This Japanese word already exists in the Similar Words file.');
+            }
 
             let updatedWords = appendWord(wordsFile.content, word);
             let updatedPage = pageFile.content;
-            const isNewGroup = !groups.includes(word.group);
-            if (isNewGroup) {
-                updatedWords = addGroupToDefaultState(updatedWords, word.group);
-                updatedPage = addFilterCheckbox(updatedPage, word.group);
-            }
+            if (!groups.includes(word.group)) updatedPage = addFilterCheckbox(updatedPage, word.group);
 
-            // Update the filter page first. If the second commit fails, retrying is safe:
-            // the existing filter group will simply be detected and left unchanged.
             if (updatedPage !== pageFile.content) {
                 setStatus('Adding the new filter group...', '');
                 await updateFile(SIMILAR_WORDS_PAGE, updatedPage, pageFile.sha, 'Add Similar Words filter group: ' + word.group, token);
             }
-
             setStatus('Adding the new word...', '');
             await updateFile(WORDS_PATH, updatedWords, wordsFile.sha, 'Add Similar Word: ' + word.jp, token);
 
-            updateLocalFilter(word.group);
-            setStatus('Added successfully: ' + word.jp + ' (' + word.group + '). Refresh the Similar Words page after GitHub Pages rebuilds.', 'success');
+            setStatus('Added successfully: ' + word.jp + ' (' + word.group + ').', 'success');
             form.reset();
+            tokenInput.value = token;
             await loadGroups();
         } catch (error) {
             setStatus(error?.message || 'Could not add the word.', 'error');
