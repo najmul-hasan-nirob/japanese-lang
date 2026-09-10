@@ -1,6 +1,6 @@
 // Japanese Lang — Important Rules data
 const importantRules = [
-    { kind: "が এর ব্যবহার", rule: "৩টি verb (わかります、あります、います) ও ৪টি なadjective (すき、きらい、じょうず、へた) সহ মোট ৭টির এর আগে が পারটিকেল বসবেই।" }
+    { kind: "が এর ব্যবহার", rule: "৩টি verb (わかります、あります、います) ও ৪টি なadjective (すき、きらい、じょうず、へた) সহ মোট ৭টির পর Noun এর পর が পার্টকেল বসবেই।" }
 ];
 window.importantRules = importantRules;
 
