@@ -1,5 +1,9 @@
 // =====================================================
-// Hard Vocabulary filter — lessons page
+// Favourite / Hard Vocabulary system
+// - Stores favourite keys in localStorage
+// - Existing vocabulary cards use the same store as before
+// - Any card with data-favorite-key can use the same star system
+// - supabase-sync.js mirrors this local store to Supabase
 // =====================================================
 (() => {
   'use strict';
@@ -8,10 +12,16 @@
   let hardWords = new Set();
   let hardMode = false;
 
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    if (Array.isArray(saved)) hardWords = new Set(saved);
-  } catch (_) {}
+  function loadStored() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      hardWords = new Set(Array.isArray(saved) ? saved : []);
+    } catch (_) {
+      hardWords = new Set();
+    }
+  }
+
+  loadStored();
 
   const save = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
@@ -20,20 +30,29 @@
   const panel = () => document.getElementById('typePanel');
 
   function cardKey(card) {
+    const custom = card.getAttribute('data-favorite-key');
+    if (custom) return custom;
+
     const front = card.querySelector('.front > div')?.textContent?.trim() || '';
     const romaji = card.querySelector('.romaji')?.textContent?.trim() || '';
     const english = card.querySelector('.english')?.textContent?.trim() || '';
     return `${front}|${romaji}|${english}`;
   }
 
+  function canFavourite(card) {
+    return !!card.getAttribute('data-favorite-key') || !!card.querySelector('.vocabulary-back');
+  }
+
   function updateStar(card) {
-    if (!card.querySelector('.vocabulary-back')) return;
+    if (!canFavourite(card)) return;
 
     let star = card.querySelector('.hard-star');
     if (!star) {
       star = document.createElement('button');
       star.type = 'button';
       star.className = 'hard-star';
+      star.setAttribute('aria-label', 'Mark as favourite');
+      star.setAttribute('title', 'Mark as favourite');
       card.querySelector('.lesson-card-topbar')?.appendChild(star) || card.appendChild(star);
 
       star.addEventListener('click', event => {
@@ -53,7 +72,8 @@
     star.textContent = active ? '★' : '☆';
     star.classList.toggle('active', active);
     star.setAttribute('aria-pressed', String(active));
-    star.setAttribute('aria-label', active ? 'Remove from hard vocabulary' : 'Mark as hard vocabulary');
+    star.setAttribute('aria-label', active ? 'Remove from favourites' : 'Mark as favourite');
+    star.setAttribute('title', active ? 'Remove from favourites' : 'Mark as favourite');
   }
 
   function addStars() {
@@ -68,10 +88,6 @@
 
     cards.forEach(card => {
       const isHard = !!card.querySelector('.vocabulary-back') && hardWords.has(cardKey(card));
-
-      // Use inline display instead of the hidden attribute. Some of the
-      // lesson-card CSS uses explicit display rules, which can override
-      // the browser's default [hidden] { display:none } rule.
       card.style.display = isHard ? '' : 'none';
       if (isHard) visible++;
     });
@@ -82,9 +98,7 @@
 
   function clearFilter() {
     hardMode = false;
-    grid()?.querySelectorAll(':scope > .card').forEach(card => {
-      card.style.display = '';
-    });
+    grid()?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
     addStars();
   }
 
@@ -102,7 +116,6 @@
 
     panel()?.addEventListener('change', event => {
       if (event.target?.value !== 'hard') return;
-
       hardMode = event.target.checked;
       hardMode ? applyFilter() : clearFilter();
     });
@@ -110,6 +123,14 @@
     addStars();
 
     document.addEventListener('lessonCardsRendered', () => {
+      addStars();
+      if (hardMode) applyFilter();
+    });
+
+    // supabase-sync.js pulls the cloud copy into localStorage and then
+    // dispatches this event. Refresh the visible stars from that store.
+    window.addEventListener('japaneseLangCloudLoaded', () => {
+      loadStored();
       addStars();
       if (hardMode) applyFilter();
     });
