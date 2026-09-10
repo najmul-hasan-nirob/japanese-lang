@@ -14,7 +14,8 @@
         { jp: 'が', romaji: 'ga', bn: 'কিন্তু', group: 'but' },
         { jp: 'でも', romaji: 'demo', bn: 'কিন্তু', group: 'but' },
         { jp: 'どこ', romaji: 'doko', bn: 'কোথায়', group: 'where' },
-        { jp: "どんな～", romaji: "donna", bn: "কী ধরনের ~", group: "what-kind-of" }
+        { jp: "どんな～", romaji: "donna", bn: "কী ধরনের ~", group: "what-kind-of" },
+        { jp: "～と～", romaji: "～to～", bn: "~ এবং ~ / ~ ও ~", group: "and" }
     ];
     const validGroups = new Set(words.map(word => word.group));
     const DEFAULT_STATE = { selectedGroups: [...validGroups], orderMode: 'normal' };
