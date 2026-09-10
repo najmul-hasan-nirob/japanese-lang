@@ -1,6 +1,6 @@
 // Japanese Lang — Important Rules data
 const importantRules = [
-    { kind: "Test frontt", rule: "Test backk" }
+    { kind: "が এর ব্যবহার", rule: "৩টি verb (わかります、あります、います) ও ৪টি なadjective (すき、きらい、じょうず、へた) সহ মোট ৭টির এর আগে が পারটিকেল বসবেই।" }
 ];
 window.importantRules = importantRules;
 
