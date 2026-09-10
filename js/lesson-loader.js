@@ -19,15 +19,12 @@
 
         const lessonUrl = new URL(`js/lessons/${key}.js`, document.baseURI).href;
 
-        const promise = fetch(lessonUrl, { cache: 'force-cache' })
+        const promise = fetch(lessonUrl, { cache: 'no-cache' })
             .then(response => {
                 if (!response.ok) throw new Error(`Failed to load ${key}: HTTP ${response.status}`);
                 return response.text();
             })
             .then(source => {
-                // Lesson files start with a comment, e.g. "// Lesson 1", before
-                // the const declaration. The previous parser incorrectly
-                // required const to be the first non-whitespace token.
                 const match = source.match(/(?:^|\n)\s*const\s+(lesson\d+)\s*=\s*/);
                 if (!match || match[1] !== key) throw new Error(`Invalid lesson data format: ${key}`);
 
