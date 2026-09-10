@@ -1,162 +1,21 @@
+// Time, Date & Numbers
 function numberToRomaji(n){
-
-    if(n===0) return "zero";
-
-    let remainder = n;
-
-    const man = Math.floor(remainder/10000); remainder%=10000;
-    const sen = Math.floor(remainder/1000); remainder%=1000;
-    const hyaku = Math.floor(remainder/100); remainder%=100;
-    const juu = Math.floor(remainder/10); remainder%=10;
-    const ichi = remainder;
-
-    const digitWords = ["","ichi","ni","san","yon","go","roku","nana","hachi","kyuu"];
-
-    const hyakuWords = {
-        1:"hyaku", 2:"nihyaku", 3:"sanbyaku", 4:"yonhyaku", 5:"gohyaku",
-        6:"roppyaku", 7:"nanahyaku", 8:"happyaku", 9:"kyuuhyaku"
-    };
-
-    const senWords = {
-        1:"sen", 2:"nisen", 3:"sanzen", 4:"yonsen", 5:"gosen",
-        6:"rokusen", 7:"nanasen", 8:"hassen", 9:"kyuusen"
-    };
-
-    let result = "";
-
-    if(man>0){ result += (man===1 ? "ichi" : digitWords[man]) + "man"; }
-    if(sen>0){ result += senWords[sen]; }
-    if(hyaku>0){ result += hyakuWords[hyaku]; }
-    if(juu>0){ result += (juu===1 ? "" : digitWords[juu]) + "juu"; }
-    if(ichi>0){ result += digitWords[ichi]; }
-
-    return result;
-
+  if(n===0)return 'zero'; let r=n;
+  const man=Math.floor(r/10000);r%=10000;const sen=Math.floor(r/1000);r%=1000;const hyaku=Math.floor(r/100);r%=100;const juu=Math.floor(r/10);r%=10;const ichi=r;
+  const d=['','ichi','ni','san','yon','go','roku','nana','hachi','kyuu'];
+  const h={1:'hyaku',2:'nihyaku',3:'sanbyaku',4:'yonhyaku',5:'gohyaku',6:'roppyaku',7:'nanahyaku',8:'happyaku',9:'kyuuhyaku'};
+  const s={1:'sen',2:'nisen',3:'sanzen',4:'yonsen',5:'gosen',6:'rokusen',7:'nanasen',8:'hassen',9:'kyuusen'}; let out='';
+  if(man>0)out+=(man===1?'ichi':d[man])+'man';if(sen>0)out+=s[sen];if(hyaku>0)out+=h[hyaku];if(juu>0)out+=(juu===1?'':d[juu])+'juu';if(ichi>0)out+=d[ichi];return out;
 }
-
-// =====================
-// Build the data set
-// =====================
-
-const numbersData = [];
-
-for(let i=1;i<=1000;i++){
-    numbersData.push({
-        num:i,
-        jp:numberToRomaji(i),
-        range: i<=100 ? "1-100" : "101-1000",
-        milestone: i % 100 === 0
-    });
-}
-
-for(let i=2000;i<=10000;i+=1000){
-    numbersData.push({
-        num:i,
-        jp:numberToRomaji(i),
-        range:"thousands",
-        milestone:true
-    });
-}
-
-// =====================
-// Helpers
-// =====================
-
-function shuffle(array){
-    for(let i=array.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [array[i],array[j]]=[array[j],array[i]];
-    }
-}
-
-const grid=document.getElementById("grid");
-const rangeSel=document.getElementById("range");
-const mode=document.getElementById("mode");
-const directionToggle=document.getElementById("direction");
-const labelLeft=directionToggle.querySelector(".left");
-const labelRight=directionToggle.querySelector(".right");
-
-// This page uses the shared header toggle for "reading" vs "number"
-labelLeft.textContent = "reading";
-labelRight.textContent = "123";
-
-let showJapaneseFirst = true;
-
-function render(){
-
-    grid.innerHTML="";
-
-    let cards;
-
-    if(rangeSel.value==="all"){
-        cards=[...numbersData];
-    }else{
-        cards=numbersData.filter(item=>item.range===rangeSel.value);
-    }
-
-    if(mode.value==="shuffle"){
-        shuffle(cards);
-    }
-
-    const frag=document.createDocumentFragment();
-
-    cards.forEach(item=>{
-
-        const card=document.createElement("div");
-
-        card.className="card" + (item.milestone ? " milestone" : "");
-
-        const frontText = showJapaneseFirst ? item.jp : item.num;
-        const backText = showJapaneseFirst ? item.num : item.jp;
-
-        card.innerHTML=`
-            <div class="inner">
-                <div class="front">${frontText}</div>
-                <div class="back">${backText}</div>
-            </div>
-        `;
-
-        card.addEventListener("click",()=>{
-            card.classList.toggle("flipped");
-        });
-
-        card.appendChild(createSpeakerButton(item.num));
-
-        frag.appendChild(card);
-
-    });
-
-    grid.appendChild(frag);
-
-}
-
-render();
-
-// =====================
-// Controls
-// =====================
-
-rangeSel.addEventListener("change",render);
-mode.addEventListener("change",render);
-
-function toggleDirection(){
-
-    showJapaneseFirst = !showJapaneseFirst;
-
-    directionToggle.classList.toggle("right", !showJapaneseFirst);
-    directionToggle.setAttribute("aria-pressed", String(!showJapaneseFirst));
-
-    labelLeft.classList.toggle("active", showJapaneseFirst);
-    labelRight.classList.toggle("active", !showJapaneseFirst);
-
-    render();
-
-}
-
-directionToggle.addEventListener("click",toggleDirection);
-directionToggle.addEventListener("keydown",(e)=>{
-    if(e.key==="Enter" || e.key===" "){
-        e.preventDefault();
-        toggleDirection();
-    }
-});
+const grid=document.getElementById('grid'),count=document.getElementById('countDisplay'),panel=document.getElementById('timeDatePanel'),filterBtn=document.getElementById('timeDateBtn'),filterLabel=document.getElementById('timeDateLabel'),mode=document.getElementById('mode'),direction=document.getElementById('direction');
+const left=direction?.querySelector('.left'),right=direction?.querySelector('.right');const KEY='japanese-lang-time-date-numbers-filter-v1';
+const groups=['numerals','telling-time','days-of-week','month','date','time-duration'];const labels={numerals:'Numerals','telling-time':'Telling Time','days-of-week':'Days of Week',month:'Month',date:'Date','time-duration':'Time Duration'};const manual=Array.isArray(window.timeDateNumbers)?window.timeDateNumbers:[];let jpFirst=true;
+const esc=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function selected(){const a=Array.from(panel?.querySelectorAll('input:not([value="all"]):checked')||[]).map(x=>x.value);return a.length?a:groups.slice()}
+function filterUI(){const boxes=Array.from(panel?.querySelectorAll('input:not([value="all"])')||[]),chosen=boxes.filter(x=>x.checked),all=panel?.querySelector('input[value="all"]');if(all)all.checked=chosen.length===boxes.length;const t=chosen.length===boxes.length?'All':chosen.length?chosen.map(x=>x.parentElement.textContent.trim()).join(', '):'None';if(filterBtn)filterBtn.textContent=t;if(filterLabel)filterLabel.textContent=t}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({selectedGroups:selected(),orderMode:mode.value}))}catch(_){}filterUI()}
+function restore(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null'),wanted=new Set(Array.isArray(x?.selectedGroups)?x.selectedGroups:groups);panel?.querySelectorAll('input:not([value="all"])').forEach(b=>b.checked=wanted.has(b.value));if(mode)mode.value=x?.orderMode==='shuffle'?'shuffle':'normal'}catch(_){}filterUI()}
+function allCards(){const a=[];for(let i=1;i<=1000;i++)a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true,milestone:i%100===0});for(let i=2000;i<=10000;i+=1000)a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true,milestone:true});manual.forEach((x,i)=>a.push({...x,id:x.id||'manual-'+i,builtin:false}));return a.filter(x=>selected().includes(x.group))}
+function speak(t){if(window.speechSynthesis&&typeof SpeechSynthesisUtterance!=='undefined'){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(t));u.lang='ja-JP';u.rate=.9;speechSynthesis.speak(u)}else if(window.AndroidTTS?.speak)try{window.AndroidTTS.speak(String(t))}catch(_){} }
+function render(){let a=allCards();if(mode.value==='shuffle')a=a.slice().sort(()=>Math.random()-.5);grid.innerHTML='';const f=document.createDocumentFragment();a.forEach((x,i)=>{const c=document.createElement('div');c.className='card'+(x.milestone?' milestone':'');c.dataset.timeDateId=x.id;c.__timeDateItem=x;const front=jpFirst?x.jp:(x.builtin?x.num:x.bn);const back=x.builtin?(jpFirst?x.num:x.jp):null;c.innerHTML=`<div class="lesson-card-topbar"><button type="button" class="hard-star">☆</button><span class="lesson-tag">${esc(labels[x.group]||x.group)}</span><span class="lesson-card-number">${i+1}</span><div class="time-admin-slot"></div><button type="button" class="speaker-btn">🔊</button></div><div class="inner"><div class="front">${esc(front)}</div><div class="back">${x.builtin?esc(back):`<span class="romaji">${esc(x.romaji)}</span><span class="bangla">${esc(x.bn)}</span>`}</div></div>`;c.onclick=e=>{if(!e.target.closest('button'))c.classList.toggle('flipped')};const star=c.querySelector('.hard-star'),fav='time-date-number|'+x.id;let favs=[];try{favs=JSON.parse(localStorage.getItem('japanese-lang-hard-vocabulary')||'[]')}catch(_){}star.textContent=favs.includes(fav)?'★':'☆';star.onclick=e=>{e.stopPropagation();let a=[];try{a=JSON.parse(localStorage.getItem('japanese-lang-hard-vocabulary')||'[]')}catch(_){}const on=star.textContent!=='★';a=a.filter(v=>v!==fav);if(on)a.push(fav);star.textContent=on?'★':'☆';try{localStorage.setItem('japanese-lang-hard-vocabulary',JSON.stringify(a))}catch(_){}};c.querySelector('.speaker-btn').onclick=e=>{e.stopPropagation();speak(x.jp)};f.appendChild(c)});grid.appendChild(f);count.textContent=`Showing ${a.length} ${a.length===1?'card':'cards'}`}
+left&&(left.textContent='reading');right&&(right.textContent='123');direction?.addEventListener('click',()=>{jpFirst=!jpFirst;left.classList.toggle('active',jpFirst);right.classList.toggle('active',!jpFirst);render()});panel?.addEventListener('change',e=>{if(e.target.value==='all')panel.querySelectorAll('input:not([value="all"])').forEach(x=>x.checked=e.target.checked);save();render()});filterBtn?.addEventListener('click',e=>{e.stopPropagation();panel.classList.toggle('open');filterBtn.setAttribute('aria-expanded',panel.classList.contains('open'))});document.addEventListener('click',e=>{if(!e.target.closest('.filter-field'))panel?.classList.remove('open')});mode?.addEventListener('change',()=>{save();render()});document.getElementById('shuffleBtn')?.addEventListener('click',()=>{mode.value='shuffle';save();render()});restore();render();
