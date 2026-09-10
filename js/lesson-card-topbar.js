@@ -2,7 +2,7 @@
 // Lesson card structure
 // .card > .lesson-card-inner
 //     > .lesson-card-topbar
-//         star | clue | number | speaker
+//         star | edit | number | delete | speaker
 //     > .lesson-card-content
 //         front / back
 // Lessons page only.
@@ -156,7 +156,7 @@
 }
 .lesson-card-topbar {
     position:absolute; top:0; left:0; right:0; width:100%; height:42px;
-    display:grid; grid-template-columns:1fr 1fr 1fr 1fr; align-items:center;
+    display:grid; grid-template-columns:repeat(5, 1fr); align-items:center;
     justify-items:center; box-sizing:border-box; z-index:50; pointer-events:none;
 }
 .lesson-card-content {
@@ -176,38 +176,30 @@
 .lesson-card-topbar .lesson-card-number,
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
-.lesson-card-topbar .pronunciation-btn {
-    margin:0 !important; pointer-events:auto;
+.lesson-card-topbar .pronunciation-btn,
+.lesson-card-topbar .admin-card-edit,
+.lesson-card-topbar .admin-card-delete {
+    position:relative !important; inset:auto !important; top:auto !important; right:auto !important;
+    left:auto !important; bottom:auto !important; transform:none !important;
+    margin:0 !important; pointer-events:auto; align-self:center; justify-self:center;
 }
-.lesson-card-topbar .hard-star {
-    grid-column:1; grid-row:1; justify-self:start; align-self:center;
-    position:relative !important; inset:auto !important; transform:none !important;
-    margin-left:8px !important;
-}
+.lesson-card-topbar .hard-star { grid-column:1; grid-row:1; }
+.lesson-card-topbar .admin-card-edit { grid-column:2; grid-row:1; }
 .lesson-card-topbar .lesson-card-number {
-    position:absolute !important; top:50% !important; left:50% !important;
-    right:auto !important; bottom:auto !important;
-    transform:translate(-50%, -50%) !important; grid-column:auto !important;
-    grid-row:auto !important; justify-self:auto !important; align-self:auto !important;
-    margin:0 !important; z-index:60; display:flex !important;
+    grid-column:3; grid-row:1; z-index:60; display:flex !important;
     align-items:center; justify-content:center; pointer-events:none !important;
 }
+.lesson-card-topbar .admin-card-delete { grid-column:4; grid-row:1; }
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
-    grid-column:4; grid-row:1; justify-self:end; align-self:center;
-    position:relative !important; inset:auto !important; transform:none !important;
-    margin-right:8px !important; display:flex !important;
+    grid-column:5; grid-row:1; display:flex !important;
     visibility:visible !important; opacity:1 !important; pointer-events:auto !important;
 }
 @media (max-width:520px) {
     .lesson-card-topbar { height:38px; }
     .lesson-card-content > .front,
     .lesson-card-content > .back { padding-top:44px !important; padding-bottom:10px; }
-    .lesson-card-topbar .hard-star { margin-left:5px !important; }
-    .lesson-card-topbar .speaker-btn,
-    .lesson-card-topbar .speak-btn,
-    .lesson-card-topbar .pronunciation-btn { margin-right:5px !important; }
 }
 `;
         document.head.appendChild(style);
