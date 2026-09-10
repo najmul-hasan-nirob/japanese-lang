@@ -3,13 +3,14 @@
     'use strict';
 
     const SUPABASE_URL = 'https://levpdywhnikadumfocao.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIiwicmVmIjoibGV2cGR5d2huaWthZHVtZm9jYWFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTUzNX0.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIiwicmVmIjoibGV2cGR5d2huaWthZHVtZm9jYWFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTM1fQ.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
     const WORDS_RAW_URL = 'https://raw.githubusercontent.com/najmul-hasan-nirob/japanese-lang/main/js/similar%20words/similar-words-lesson.js';
     const REMEMBER_KEY = 'japaneseLangManualInputRememberedPassword';
 
     const lock = document.getElementById('manualLock');
     const unlockForm = document.getElementById('manualUnlockForm');
     const passwordInput = document.getElementById('manualPassword');
+    const passwordToggle = document.getElementById('manualPasswordToggle');
     const rememberInput = document.getElementById('manualRemember');
     const unlockStatus = document.getElementById('manualUnlockStatus');
     const form = document.getElementById('manualInputForm');
@@ -140,6 +141,17 @@
         rememberInput.checked = !!passwordInput.value;
         setStatus(unlockStatus, '', '');
         passwordInput.focus();
+    }
+
+    if (passwordToggle) {
+        passwordToggle.addEventListener('click', function () {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            passwordToggle.textContent = isHidden ? 'Hide' : 'Show';
+            passwordToggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            passwordToggle.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
+            passwordInput.focus();
+        });
     }
 
     unlockForm.addEventListener('submit', async function (event) {
