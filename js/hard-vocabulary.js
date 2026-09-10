@@ -26,7 +26,7 @@
   const save = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
   };
-  const grid = () => document.getElementById('grid');
+  const grid = () => document.getElementById('grid') || document.getElementById('importantRulesList');
   const panel = () => document.getElementById('typePanel');
 
   function cardKey(card) {
@@ -54,7 +54,12 @@
       star.setAttribute('aria-label', 'Mark as favourite');
       star.setAttribute('title', 'Mark as favourite');
       card.querySelector('.lesson-card-topbar')?.appendChild(star) || card.appendChild(star);
+    }
 
+    // Some cards (such as Important Rules) render their own star before this
+    // system runs. Always bind the handler once, regardless of who created it.
+    if (!star.dataset.favouriteBound) {
+      star.dataset.favouriteBound = 'true';
       star.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
@@ -83,7 +88,7 @@
   function applyFilter() {
     addStars();
 
-    const cards = [...(grid()?.querySelectorAll(':scope > .card') || [])];
+    const cards = [...(document.getElementById('grid')?.querySelectorAll(':scope > .card') || [])];
     let visible = 0;
 
     cards.forEach(card => {
@@ -98,7 +103,7 @@
 
   function clearFilter() {
     hardMode = false;
-    grid()?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
+    document.getElementById('grid')?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
     addStars();
   }
 
