@@ -2,18 +2,18 @@
 const lesson4 = {
   "vocabulary": [
     {
-      "jp": "おきます",
-      "romaji": "okimasu",
-      "en": "get up, wake up",
-      "bn": "ঘুম থেকে ওঠা / জেগে ওঠা",
+      "jp": "おきます1",
+      "romaji": "okimasu2",
+      "en": "get up, wake up3",
+      "bn": "ঘুম থেকে ওঠা / জেগে ওঠা4",
       "type": "vocabulary",
       "lesson": "Lesson 4"
     },
     {
-      "jp": "ねます1",
-      "romaji": "nemasu2",
-      "en": "sleep, go to bed3",
-      "bn": "ঘুমানো / ঘুমাতে যাওয়া4",
+      "jp": "ねます",
+      "romaji": "nemasu",
+      "en": "sleep, go to bed",
+      "bn": "ঘুমানো / ঘুমাতে যাওয়া",
       "type": "vocabulary",
       "lesson": "Lesson 4"
     },
