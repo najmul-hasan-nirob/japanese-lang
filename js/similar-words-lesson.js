@@ -6,16 +6,17 @@
     const mode = document.getElementById('mode');
     const filterPanel = document.getElementById('similarWordsPanel');
     const FILTER_KEY = 'japanese-lang-similar-words-filter-v1';
-    const DEFAULT_STATE = { selectedGroups: ['why', 'but'], orderMode: 'normal' };
+    const DEFAULT_STATE = { selectedGroups: ['why', 'but', 'where'], orderMode: 'normal' };
 
     if (!grid || !count || !mode) return;
 
     const words = [
         { jp: 'なんで', romaji: 'nande', bn: 'কেন', group: 'why' },
         { jp: 'が', romaji: 'ga', bn: 'কিন্তু', group: 'but' },
-        { jp: 'でも', romaji: 'demo', bn: 'কিন্তু', group: 'but' }
+        { jp: 'でも', romaji: 'demo', bn: 'কিন্তু', group: 'but' },
+        { jp: 'どこ', romaji: 'doko', bn: 'কোথায়', group: 'where' }
     ];
-    const validGroups = new Set(['why', 'but']);
+    const validGroups = new Set(['why', 'but', 'where']);
 
     function getSavedState() {
         try {
@@ -109,7 +110,7 @@
                 <div class="lesson-card-topbar" aria-label="Card controls">
                     <button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button>
                     <span class="lesson-card-number" aria-hidden="true">${index + 1}</span>
-                    <span class="lesson-tag">${escapeHtml(word.group === 'why' ? 'Why' : 'But')}</span>
+                    <span class="lesson-tag">${escapeHtml(word.group === 'why' ? 'Why' : word.group === 'but' ? 'But' : 'Where')}</span>
                     <button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>
                 </div>
                 <div class="inner">
@@ -173,8 +174,6 @@
             window.dispatchEvent(new CustomEvent('similarWordsFilterStateRestored'));
         });
 
-        // The page's filter-button UI script runs immediately after this file.
-        // Fire after the current script stack so it can display the restored selection.
         setTimeout(function () {
             window.dispatchEvent(new CustomEvent('similarWordsFilterStateRestored'));
         }, 0);
