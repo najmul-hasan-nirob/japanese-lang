@@ -3,12 +3,14 @@
     'use strict';
 
     const SUPABASE_URL = 'https://levpdywhnikadumfocao.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxldnBkeXdobmlrYWR1bWZvY2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTUzNX0.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIiwicmVmIjoibGV2cGR5d2huaWthZHVtZm9jYWFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4Nzk1MzUsImV4cCI6MjEwMjQ1NTM1fQ.NiBsJ_jEeAPNuDLdjqn9bQamTOz-kgLaLLQPcE6N6aM';
     const WORDS_RAW_URL = 'https://raw.githubusercontent.com/najmul-hasan-nirob/japanese-lang/main/js/similar%20words/similar-words-lesson.js';
+    const REMEMBER_KEY = 'japaneseLangManualInputRememberedPassword';
 
     const lock = document.getElementById('manualLock');
     const unlockForm = document.getElementById('manualUnlockForm');
     const passwordInput = document.getElementById('manualPassword');
+    const rememberInput = document.getElementById('manualRemember');
     const unlockStatus = document.getElementById('manualUnlockStatus');
     const form = document.getElementById('manualInputForm');
     const japaneseInput = document.getElementById('manualJapanese');
@@ -100,6 +102,29 @@
         return true;
     }
 
+    function getRememberedPassword() {
+        try {
+            return localStorage.getItem(REMEMBER_KEY) || '';
+        } catch (_) {
+            return '';
+        }
+    }
+
+    function setRememberedPassword(password) {
+        try {
+            if (password) localStorage.setItem(REMEMBER_KEY, password);
+            else localStorage.removeItem(REMEMBER_KEY);
+        } catch (_) {}
+    }
+
+    function restoreRememberedPassword() {
+        const remembered = getRememberedPassword();
+        if (remembered) {
+            passwordInput.value = remembered;
+            rememberInput.checked = true;
+        }
+    }
+
     function unlock() {
         lock.hidden = true;
         form.hidden = false;
@@ -111,7 +136,8 @@
         unlockPassword = '';
         form.hidden = true;
         lock.hidden = false;
-        passwordInput.value = '';
+        passwordInput.value = getRememberedPassword();
+        rememberInput.checked = !!passwordInput.value;
         setStatus(unlockStatus, '', '');
         passwordInput.focus();
     }
@@ -126,6 +152,8 @@
         try {
             await verifyPassword(password);
             unlockPassword = password;
+            if (rememberInput.checked) setRememberedPassword(password);
+            else setRememberedPassword('');
             unlock();
         } catch (error) {
             setStatus(unlockStatus, error.message || 'Incorrect password.', 'error');
@@ -192,5 +220,6 @@
 
     lock.hidden = false;
     form.hidden = true;
+    restoreRememberedPassword();
     passwordInput.focus();
 })();
