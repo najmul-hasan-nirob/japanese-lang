@@ -1,66 +1,61 @@
 ---
 layout: default
-title: Japanese Numbers · 1–10,000
+title: Time, Date & Numbers
 css: /css/numbers.css
-js: 
+js:
   - /js/main.js
   - /js/speech-fix.js
+  - /js/time-date-numbers.js
   - /js/numbers.js
+  - /js/admin-card-edit.js
+  - /js/time-date-admin.js
 ---
 
 <div class="toolbar">
-
     <div class="field filter-field">
-        <label for="range">Range</label>
-        <select id="range">
-            <option value="all">All</option>
-            <option value="1-100" selected>Range</option>
-            <option value="101-1000">101 – 1,000</option>
-            <option value="thousands">Thousands</option>
-        </select>
-    </div>
-
-    <div class="field filter-field">
-        <label for="mode">Order</label>
-        <select id="mode">
-            <option value="normal">Order</option>
-            <option value="shuffle">Shuffle</option>
-        </select>
-    </div>
-
-    <div class="field direction-filter-field">
-        <label>Front / Back</label>
-        <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show reading or number first">
-            <span class="abacus-label left active">reading</span>
-            <div class="rod"><div class="bead"></div></div>
-            <span class="abacus-label right">123</span>
+        <label id="timeDateLabel">All</label>
+        <button type="button" class="multiselect-btn" id="timeDateBtn" aria-haspopup="true" aria-expanded="false">All</button>
+        <div class="multiselect-panel" id="timeDatePanel">
+            <label><input type="checkbox" value="all" checked> All</label>
+            <label><input type="checkbox" value="numerals" checked> Numerals</label>
+            <label><input type="checkbox" value="telling-time" checked> Telling Time</label>
+            <label><input type="checkbox" value="days-of-week" checked> Days of Week</label>
+            <label><input type="checkbox" value="month" checked> Month</label>
+            <label><input type="checkbox" value="date" checked> Date</label>
+            <label><input type="checkbox" value="time-duration" checked> Time Duration</label>
         </div>
     </div>
-
-    <div class="field shuffle-field">
-        <label>Shuffle</label>
-        <button id="shuffleBtn" class="shuffle-btn" type="button">Shuffle</button>
+    <div class="field filter-field">
+        <label for="mode">Order</label>
+        <select id="mode"><option value="normal">Normal</option><option value="shuffle">Shuffle</option></select>
+    </div>
+    <div class="field shuffle-field"><button id="shuffleBtn" class="shuffle-btn" type="button">Shuffle</button></div>
+    <div class="field direction-filter-field">
+        <label>Front / Back</label>
+        <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show reading or meaning first">
+            <span class="abacus-label left active">reading</span><div class="rod"><div class="bead"></div></div><span class="abacus-label right">123</span>
+        </div>
     </div>
 </div>
 
 <div class="count-display" id="countDisplay" aria-live="polite"></div>
 <div class="grid" id="grid"></div>
 
-<div class="footnote"><span class="dot"></span>marked cards are round-number milestones (hundreds &amp; thousands)</div>
-
 <style>
-@media (max-width:520px){.grid{grid-template-columns:repeat(3,1fr);}}
+.time-admin-slot{min-width:56px;display:flex;justify-content:center;gap:2px}
+.lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:38px;z-index:20;display:grid;grid-template-columns:1fr 1.5fr 1fr 1.5fr 1fr;align-items:center;justify-items:center;pointer-events:none;background:#18212c;padding:4px 6px;box-sizing:border-box}
+.lesson-card-topbar>*{pointer-events:auto}
+.lesson-card-topbar .hard-star{grid-column:1;position:static!important;margin:0!important;transform:none!important}
+.lesson-card-topbar .lesson-tag{grid-column:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:11px}
+.lesson-card-topbar .lesson-card-number{grid-column:3;position:static!important;margin:0!important;transform:none!important}
+.lesson-card-topbar .time-admin-slot{grid-column:4}
+.lesson-card-topbar .speaker-btn{grid-column:5;position:static!important;margin:0!important;transform:none!important;display:flex!important}
+.grid > .card > .inner{padding-top:38px}
+.card .front,.card .back{text-align:center}
+.card .front{display:flex;align-items:center;justify-content:center}
+.card .back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.card .back .romaji,.card .back .bangla{display:block}
+.card .back .romaji{font-size:20px}
+.card .back .bangla{font-size:15px}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.lesson-card-topbar{height:36px}.grid > .card > .inner{padding-top:36px}.lesson-card-topbar .lesson-tag{font-size:10px}.lesson-card-topbar .hard-star{font-size:16px}}
 </style>
-
-<script>
-(function(){
-    const grid=document.getElementById('grid');
-    const count=document.getElementById('countDisplay');
-    function updateCount(){
-        const total=grid.querySelectorAll(':scope > .card').length;
-        count.textContent=`Showing ${total} ${total===1 ? 'number' : 'numbers'}`;
-    }
-    updateCount();
-    new MutationObserver(updateCount).observe(grid,{childList:true});
-})();
-</script>
