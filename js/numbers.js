@@ -1,10 +1,7 @@
 // Time, Date & Numbers
 function numberToRomaji(n){
-  if(n===0)return 'zero'; let r=n;
-  const man=Math.floor(r/10000);r%=10000;const sen=Math.floor(r/1000);r%=1000;const hyaku=Math.floor(r/100);r%=100;const juu=Math.floor(r/10);r%=10;const ichi=r;
-  const d=['','ichi','ni','san','yon','go','roku','nana','hachi','kyuu'];
-  const h={1:'hyaku',2:'nihyaku',3:'sanbyaku',4:'yonhyaku',5:'gohyaku',6:'roppyaku',7:'nanahyaku',8:'happyaku',9:'kyuuhyaku'};
-  const s={1:'sen',2:'nisen',3:'sanzen',4:'yonsen',5:'gosen',6:'rokusen',7:'nanasen',8:'hassen',9:'kyuusen'}; let out='';
+  if(n===0)return 'zero'; let r=n; const man=Math.floor(r/10000);r%=10000;const sen=Math.floor(r/1000);r%=1000;const hyaku=Math.floor(r/100);r%=100;const juu=Math.floor(r/10);r%=10;const ichi=r;
+  const d=['','ichi','ni','san','yon','go','roku','nana','hachi','kyuu']; const h={1:'hyaku',2:'nihyaku',3:'sanbyaku',4:'yonhyaku',5:'gohyaku',6:'roppyaku',7:'nanahyaku',8:'happyaku',9:'kyuuhyaku'}; const s={1:'sen',2:'nisen',3:'sanzen',4:'yonsen',5:'gosen',6:'rokusen',7:'nanasen',8:'hassen',9:'kyuusen'}; let out='';
   if(man>0)out+=(man===1?'ichi':d[man])+'man';if(sen>0)out+=s[sen];if(hyaku>0)out+=h[hyaku];if(juu>0)out+=(juu===1?'':d[juu])+'juu';if(ichi>0)out+=d[ichi];return out;
 }
 const grid=document.getElementById('grid'),count=document.getElementById('countDisplay'),panel=document.getElementById('timeDatePanel'),filterBtn=document.getElementById('timeDateBtn'),filterLabel=document.getElementById('timeDateLabel'),mode=document.getElementById('mode'),direction=document.getElementById('direction');
