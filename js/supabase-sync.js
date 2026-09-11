@@ -13,7 +13,7 @@
     const SHUFFLE_KEY = "japanese-lang-lesson-shuffle-v1";
     const DEFAULT_LESSON_FILTER = { selectedLessons: ["lesson1"], orderMode: "normal" };
     const DEFAULT_SIMILAR_WORDS_FILTER = { selectedGroups: ["why", "but"], orderMode: "normal" };
-    let client = null, syncTimer = null, lastSnapshot = "";
+    let client = null, lastSnapshot = "", currentUserId = null, pushTimer = null;
 
     function get(key, fallback) {
         try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
@@ -33,7 +33,7 @@
     }
     function normalizeSimilarWordsFilter(value) {
         if (!value || typeof value !== "object" || !Array.isArray(value.selectedGroups)) return DEFAULT_SIMILAR_WORDS_FILTER;
-        const selectedGroups = value.selectedGroups.filter(item => item === "why" || item === "but");
+        const selectedGroups = value.selectedGroups.filter(item => typeof item === "string");
         return {
             selectedGroups: selectedGroups.length ? selectedGroups : [...DEFAULT_SIMILAR_WORDS_FILTER.selectedGroups],
             orderMode: value.orderMode === "shuffle" ? "shuffle" : "normal"
@@ -120,12 +120,19 @@
         window.dispatchEvent(new CustomEvent("japaneseLangCloudSaved"));
     }
 
-    async function syncUser(userId) {
-        if (!client || !userId) return;
-        if (snapshot() !== lastSnapshot) await pushCloud(userId); else await pullCloud(userId);
+    function queueCloudPush() {
+        if (!currentUserId) return;
+        clearTimeout(pushTimer);
+        pushTimer = setTimeout(() => {
+            pushCloud(currentUserId);
+        }, 500);
     }
-    function startPolling(userId) { clearInterval(syncTimer); syncTimer = setInterval(() => syncUser(userId), 1500); }
-    function stopPolling() { clearInterval(syncTimer); syncTimer = null; }
+
+    function stopCloudSync() {
+        clearTimeout(pushTimer);
+        pushTimer = null;
+        currentUserId = null;
+    }
 
     function createAuthUI() {
         if (document.getElementById("jlCloudAuth")) return;
@@ -157,12 +164,35 @@
 
     async function auth(signUp) { const email = document.getElementById("jlEmail").value.trim(), password = document.getElementById("jlPassword").value, msg = document.getElementById("jlCloudMessage"); if (!email || !password) { msg.textContent = "Enter email and password."; return; } const result = signUp ? await client.auth.signUp({ email, password }) : await client.auth.signInWithPassword({ email, password }); msg.textContent = result.error ? result.error.message : (signUp ? "Account created. Check your email if confirmation is enabled." : "Signed in."); }
     function updateUI(session) { const status = document.getElementById("jlCloudStatus"); if (!status) return; const signed = !!session?.user; status.textContent = signed ? `Synced: ${session.user.email}` : "Not signed in"; document.getElementById("jlSignIn").hidden = signed; document.getElementById("jlSignUp").hidden = signed; document.getElementById("jlSignOut").hidden = !signed; }
+
     async function init() {
         if (!window.supabase) return;
         client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); createAuthUI();
         const { data } = await client.auth.getSession(); updateUI(data.session);
-        if (data.session?.user) { await pullCloud(data.session.user.id); startPolling(data.session.user.id); }
-        client.auth.onAuthStateChange(async (_event, session) => { updateUI(session); if (session?.user) { await pullCloud(session.user.id); startPolling(session.user.id); } else stopPolling(); });
+        if (data.session?.user) {
+            currentUserId = data.session.user.id;
+            await pullCloud(currentUserId);
+        }
+        client.auth.onAuthStateChange(async (_event, session) => {
+            updateUI(session);
+            if (session?.user) {
+                currentUserId = session.user.id;
+                await pullCloud(currentUserId);
+            } else stopCloudSync();
+        });
+
+        // No polling: cloud pulls happen only when the page is opened, the user signs in,
+        // or the page becomes visible/online again. Local changes are pushed once, debounced.
+        window.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible" && currentUserId) pullCloud(currentUserId);
+        });
+        window.addEventListener("online", () => {
+            if (currentUserId) pullCloud(currentUserId);
+        });
+
+        // Existing app events can request a cloud save without refreshing the cards.
+        window.addEventListener("similarWordsFilterStateChanged", queueCloudPush);
+        window.addEventListener("japaneseLangDataChanged", queueCloudPush);
     }
     document.addEventListener("DOMContentLoaded", init);
 })();
