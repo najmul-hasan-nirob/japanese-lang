@@ -133,12 +133,17 @@
       }
       grid.innerHTML = '';
       const fragment = document.createDocumentFragment();
+      const groupSerials = {};
 
-      cards.forEach(function (item, index) {
+      cards.forEach(function (item) {
         const card = document.createElement('div');
         card.className = 'card' + (item.milestone ? ' milestone' : '');
         card.dataset.timeDateId = item.id;
         card.__timeDateItem = item;
+
+        groupSerials[item.group] = (groupSerials[item.group] || 0) + 1;
+        const groupSerial = groupSerials[item.group];
+        const groupLabel = labels[item.group] || item.group;
 
         const front = jpFirst ? item.jp : (item.builtin ? item.num : item.bn);
         let back = '';
@@ -155,9 +160,7 @@
         card.innerHTML =
           '<div class="lesson-card-topbar">' +
             '<button type="button" class="hard-star" aria-label="Favourite">☆</button>' +
-            '<span class="lesson-tag">' + esc(labels[item.group] || item.group) + '</span>' +
-            '<span class="lesson-card-number">' + (index + 1) + '</span>' +
-            '<div class="time-admin-slot"></div>' +
+            '<span class="lesson-tag">' + esc(groupLabel + ' ' + groupSerial) + '</span>' +
             '<button type="button" class="speaker-btn" aria-label="Play pronunciation">🔊</button>' +
           '</div>' +
           '<div class="inner"><div class="front">' + esc(front) + '</div><div class="back">' + back + '</div></div>';
