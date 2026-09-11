@@ -141,11 +141,16 @@
         card.__timeDateItem = item;
 
         const front = jpFirst ? item.jp : (item.builtin ? item.num : item.bn);
-        const back = item.builtin
-          ? (jpFirst ? item.num : item.jp)
-          : (jpFirst
-            ? '<span class="romaji">' + esc(item.romaji) + '</span><span class="bangla">' + esc(item.bn) + '</span>'
-            : esc(item.jp));
+        let back = '';
+        if (item.builtin) {
+          back = jpFirst ? item.num : item.jp;
+        } else if (jpFirst) {
+          back = '<span class="romaji">' + esc(item.romaji) + '</span>' +
+            (item.en ? '<span class="english">' + esc(item.en) + '</span>' : '') +
+            '<span class="bangla">' + esc(item.bn) + '</span>';
+        } else {
+          back = esc(item.jp);
+        }
 
         card.innerHTML =
           '<div class="lesson-card-topbar">' +
