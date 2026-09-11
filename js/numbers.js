@@ -31,10 +31,9 @@
     const filterLabel = document.getElementById('timeDateLabel');
     const mode = document.getElementById('mode');
     const direction = document.getElementById('direction');
+    const romajiToggle = document.getElementById('backRomajiToggle');
     if (!grid || !panel) return;
 
-    const left = direction ? direction.querySelector('.left') : null;
-    const right = direction ? direction.querySelector('.right') : null;
     const KEY = 'japanese-lang-time-date-numbers-filter-v2';
     const groups = ['numerals', 'telling-time', 'days-of-week', 'month', 'date', 'time-duration'];
     const labels = {
@@ -47,6 +46,15 @@
     };
     const manual = Array.isArray(window.timeDateNumbers) ? window.timeDateNumbers : [];
     let jpFirst = true;
+    let showRomaji = true;
+
+    const ICONS = {
+      romaji: '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7M7.5 5v14M4 19h7M14 5l6 14M20 5l-6 14"></path></svg>',
+      flip: '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3M19 7l-3-3M5 17l3 3"></path></svg>'
+    };
+    const labelledIcon = function (label, icon) {
+      return '<span class="lesson-control-text">' + label + '</span>' + icon;
+    };
 
     function esc(value) {
       return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
@@ -126,6 +134,28 @@
       }
     }
 
+    function updateRomajiUI() {
+      if (!romajiToggle) return;
+      romajiToggle.innerHTML = labelledIcon('Romaji', ICONS.romaji);
+      romajiToggle.setAttribute('aria-pressed', String(showRomaji));
+      romajiToggle.setAttribute('aria-label', showRomaji ? 'Romaji: ON' : 'Romaji: OFF');
+      romajiToggle.title = showRomaji ? 'Romaji: ON' : 'Romaji: OFF';
+    }
+
+    function updateDirectionUI() {
+      if (!direction) return;
+      direction.innerHTML = labelledIcon('Front / Back', ICONS.flip);
+      direction.setAttribute('aria-pressed', String(!jpFirst));
+      direction.setAttribute('aria-label', jpFirst ? 'Show all cards Back' : 'Show all cards Front');
+      direction.title = jpFirst ? 'Show Back' : 'Show Front';
+    }
+
+    function applyRomajiVisibility() {
+      grid.querySelectorAll('.romaji').forEach(function (element) {
+        element.style.display = showRomaji ? '' : 'none';
+      });
+    }
+
     function render() {
       let cards = allCards();
       if (mode && mode.value === 'shuffle') {
@@ -193,18 +223,28 @@
       });
 
       grid.appendChild(fragment);
+      applyRomajiVisibility();
       if (count) count.textContent = 'Showing ' + cards.length + ' ' + (cards.length === 1 ? 'card' : 'cards');
     }
 
     window.renderTimeDateNumbers = render;
+    updateRomajiUI();
+    updateDirectionUI();
 
-    if (left) left.textContent = 'reading';
-    if (right) right.textContent = '123';
-    if (direction) direction.addEventListener('click', function () {
+    if (direction) direction.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
       jpFirst = !jpFirst;
-      if (left) left.classList.toggle('active', jpFirst);
-      if (right) right.classList.toggle('active', !jpFirst);
+      updateDirectionUI();
       render();
+    });
+
+    if (romajiToggle) romajiToggle.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      showRomaji = !showRomaji;
+      updateRomajiUI();
+      applyRomajiVisibility();
     });
 
     panel.addEventListener('change', function (event) {
