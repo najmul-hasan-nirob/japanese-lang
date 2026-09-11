@@ -14,12 +14,14 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify({selectedGroups:sele
 function restore(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null'),wanted=new Set(Array.isArray(x?.selectedGroups)?x.selectedGroups:groups);panel?.querySelectorAll('input:not([value="all"])').forEach(b=>b.checked=wanted.has(b.value));if(mode)mode.value=x?.orderMode==='shuffle'?'shuffle':'normal'}catch(_){}filterUI()}
 function allCards(){
   const a=[];
-  // Keep the learning set focused: 1–10, hundreds, thousands and lakhs.
-  for(let i=1;i<=10;i++)a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true});
-  for(let i=100;i<=1000;i+=100)a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true,milestone:true});
-  for(let i=2000;i<=10000;i+=1000)a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true,milestone:true});
-  for(let i=100000;i<=1000000;i+=100000)a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true,milestone:true});
-  manual.forEach((x,i)=>a.push({...x,id:x.id||'manual-'+i,builtin:false}));
+  // Focused numeral curriculum: 1–10, hundreds, thousands and lakhs.
+  const allowed=new Set();
+  for(let i=1;i<=10;i++)allowed.add(i);
+  for(let i=100;i<=1000;i+=100)allowed.add(i);
+  for(let i=2000;i<=10000;i+=1000)allowed.add(i);
+  for(let i=100000;i<=1000000;i+=100000)allowed.add(i);
+  allowed.forEach(i=>a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true,milestone:i>=100}));
+  manual.forEach((x,i)=>{if(x.group!=='numerals'||allowed.has(Number(x.num)))a.push({...x,id:x.id||'manual-'+i,builtin:false});});
   return a.filter(x=>selected().includes(x.group));
 }
 function speak(t){if(window.speechSynthesis&&typeof SpeechSynthesisUtterance!=='undefined'){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(t));u.lang='ja-JP';u.rate=.9;speechSynthesis.speak(u)}else if(window.AndroidTTS?.speak)try{window.AndroidTTS.speak(String(t))}catch(_){} }
