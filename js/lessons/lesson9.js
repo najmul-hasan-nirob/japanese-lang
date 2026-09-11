@@ -196,10 +196,12 @@ const lesson9 = {
       "bn": "অন্যের স্বামী"
     },
     {
-      "jp": "しゅじん",
-      "romaji": "shujin",
+      "jp": "おっと/しゅじん",
+      "romaji": "otto/shujin",
       "en": "(my) husband",
-      "bn": "আমার স্বামী"
+      "bn": "আমার স্বামী",
+      "type": "vocabulary",
+      "lesson": "Lesson 9"
     },
     {
       "jp": "おくさん",
