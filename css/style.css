@@ -110,7 +110,7 @@ h1 {
 
 .logo h1 {
     color: var(--ink);
-    font-size: 25px;
+    font-size: 20px;
 }
 
 .main-nav {
@@ -123,14 +123,14 @@ h1 {
 .main-nav a {
     display: inline-flex;
     align-items: center;
-    padding: 7px 10px;
+    padding: 6px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     text-decoration: none;
     color: var(--ink);
-    background: var(--paper-cell);
+    /* background: var(--paper-cell);
     border: 1px solid var(--paper-line);
-    border-radius: 6px;
+    border-radius: 6px; */
     transition: color .2s ease, border-color .2s ease, background-color .2s ease;
 }
 
@@ -282,6 +282,9 @@ button {
     .field
 {
     display: none !important;
+}
+.logo {
+    width: 180px;
 }
 .filter-field{
     display: block !important;
