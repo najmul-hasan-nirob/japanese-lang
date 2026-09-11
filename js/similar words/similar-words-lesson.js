@@ -39,11 +39,11 @@
         { jp: 'どのくらい', romaji: 'dono kurai', bn: 'কত সময় / কতক্ষণ', group: 'questions-words' },
         { jp: 'なにご', romaji: 'nanigo', bn: 'কোন ভাষা', group: 'questions-words' },
         { jp: 'なんの', romaji: 'nan no', bn: 'কীসের / কোন ধরনের', group: 'questions-words' },
-        { jp: 'おわります', romaji: 'owarimasu', bn: 'শেষ করা / শেষ হওয়া', group: 'similar-kind-of-sound' },
-        { jp: 'おわかります', romaji: 'owakarimasu', bn: 'বোঝা / বুঝতে পারা', group: 'similar-kind-of-sound' },
-        { jp: 'りょう', romaji: 'ryou', bn: 'ডরমিটরি / ছাত্রাবাস', group: 'similar-kind-of-sound' },
-        { jp: 'りょうり', romaji: 'ryouri', bn: 'রান্না / রান্না করা খাবার', group: 'similar-kind-of-sound' },
-        { jp: 'りょこう', romaji: 'ryokou', bn: 'ভ্রমণ / সফর', group: 'similar-kind-of-sound' }
+        { jp: 'おわります', romaji: 'owarimasu', bn: 'শেষ করা / শেষ হওয়া', group: 'similar-kind-of-sound', soundGroup: 'owari-wakari' },
+        { jp: 'おわかります', romaji: 'owakarimasu', bn: 'বোঝা / বুঝতে পারা', group: 'similar-kind-of-sound', soundGroup: 'owari-wakari' },
+        { jp: 'りょう', romaji: 'ryou', bn: 'ডরমিটরি / ছাত্রাবাস', group: 'similar-kind-of-sound', soundGroup: 'ryou-group' },
+        { jp: 'りょうり', romaji: 'ryouri', bn: 'রান্না / রান্না করা খাবার', group: 'similar-kind-of-sound', soundGroup: 'ryou-group' },
+        { jp: 'りょこう', romaji: 'ryokou', bn: 'ভ্রমণ / সফর', group: 'similar-kind-of-sound', soundGroup: 'ryou-group' }
     ];
     const validGroups = new Set(words.map(word => word.group));
     const DEFAULT_STATE = { selectedGroups: [...validGroups], orderMode: 'normal' };
@@ -100,6 +100,23 @@
         return card;
     }
 
+    function appendSoundGroup(container, groupWords) {
+        const group = document.createElement('div');
+        group.className = 'similar-sound-group';
+        group.setAttribute('aria-label', 'Similar kind of Sound group');
+        groupWords.forEach((word, index) => {
+            group.appendChild(createCard(word, index));
+            if (index < groupWords.length - 1) {
+                const connector = document.createElement('div');
+                connector.className = 'similar-sound-connector';
+                connector.setAttribute('aria-hidden', 'true');
+                connector.innerHTML = '<span>≈</span>';
+                group.appendChild(connector);
+            }
+        });
+        container.appendChild(group);
+    }
+
     function render(force = false) {
         let visible = getVisibleWords();
         const soundOnly = selectedGroups().length === 1 && selectedGroups()[0] === 'similar-kind-of-sound';
@@ -111,22 +128,13 @@
         grid.classList.toggle('similar-sound-active', soundOnly);
 
         if (soundOnly) {
-            const group = document.createElement('div');
-            group.className = 'similar-sound-group';
-            group.setAttribute('aria-label', 'Similar kind of Sound group');
-            const fragment = document.createDocumentFragment();
-            visible.forEach((word, index) => {
-                fragment.appendChild(createCard(word, index));
-                if (index < visible.length - 1) {
-                    const connector = document.createElement('div');
-                    connector.className = 'similar-sound-connector';
-                    connector.setAttribute('aria-hidden', 'true');
-                    connector.innerHTML = '<span>≈</span>';
-                    fragment.appendChild(connector);
-                }
+            const groups = new Map();
+            visible.forEach(word => {
+                const key = word.soundGroup || 'similar-sound-other';
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key).push(word);
             });
-            group.appendChild(fragment);
-            grid.appendChild(group);
+            groups.forEach(groupWords => appendSoundGroup(grid, groupWords));
         } else {
             const fragment = document.createDocumentFragment();
             visible.forEach((word, index) => fragment.appendChild(createCard(word, index)));
