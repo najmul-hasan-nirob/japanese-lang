@@ -1,30 +1,239 @@
 // Time, Date & Numbers
-function numberToRomaji(n){
-  if(n===0)return 'zero'; let r=n; const man=Math.floor(r/10000);r%=10000;const sen=Math.floor(r/1000);r%=1000;const hyaku=Math.floor(r/100);r%=100;const juu=Math.floor(r/10);r%=10;const ichi=r;
-  const d=['','ichi','ni','san','yon','go','roku','nana','hachi','kyuu']; const h={1:'hyaku',2:'nihyaku',3:'sanbyaku',4:'yonhyaku',5:'gohyaku',6:'roppyaku',7:'nanahyaku',8:'happyaku',9:'kyuuhyaku'}; const s={1:'sen',2:'nisen',3:'sanzen',4:'yonsen',5:'gosen',6:'rokusen',7:'nanasen',8:'hassen',9:'kyuusen'}; let out='';
-  if(man>0)out+=(man===1?'ichi':d[man])+'man';if(sen>0)out+=s[sen];if(hyaku>0)out+=h[hyaku];if(juu>0)out+=(juu===1?'':d[juu])+'juu';if(ichi>0)out+=d[ichi];return out;
-}
-const grid=document.getElementById('grid'),count=document.getElementById('countDisplay'),panel=document.getElementById('timeDatePanel'),filterBtn=document.getElementById('timeDateBtn'),filterLabel=document.getElementById('timeDateLabel'),mode=document.getElementById('mode'),direction=document.getElementById('direction');
-const left=direction?.querySelector('.left'),right=direction?.querySelector('.right');const KEY='japanese-lang-time-date-numbers-filter-v1';
-const groups=['numerals','telling-time','days-of-week','month','date','time-duration'];const labels={numerals:'Numerals','telling-time':'Telling Time','days-of-week':'Days of Week',month:'Month',date:'Date',time-duration:'Time Duration'};const manual=Array.isArray(window.timeDateNumbers)?window.timeDateNumbers:[];let jpFirst=true;
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function selected(){const a=Array.from(panel?.querySelectorAll('input:not([value="all"]):checked')||[]).map(x=>x.value);return a.length?a:groups.slice()}
-function filterUI(){const boxes=Array.from(panel?.querySelectorAll('input:not([value="all"])')||[]),chosen=boxes.filter(x=>x.checked),all=panel?.querySelector('input[value="all"]');if(all)all.checked=chosen.length===boxes.length;const t=chosen.length===boxes.length?'All':chosen.length?chosen.map(x=>x.parentElement.textContent.trim()).join(', '):'None';if(filterBtn)filterBtn.textContent=t;if(filterLabel)filterLabel.textContent=t}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({selectedGroups:selected(),orderMode:mode?.value||'normal'}))}catch(_){}filterUI()}
-function restore(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null'),wanted=new Set(Array.isArray(x?.selectedGroups)?x.selectedGroups:groups);panel?.querySelectorAll('input:not([value="all"])').forEach(b=>b.checked=wanted.has(b.value));if(mode)mode.value=x?.orderMode==='shuffle'?'shuffle':'normal'}catch(_){}filterUI()}
-function allCards(){
-  const a=[];
-  // Focused numeral curriculum: 1–10, hundreds, thousands and lakhs.
-  const allowed=new Set();
-  for(let i=1;i<=10;i++)allowed.add(i);
-  for(let i=100;i<=1000;i+=100)allowed.add(i);
-  for(let i=2000;i<=10000;i+=1000)allowed.add(i);
-  for(let i=100000;i<=1000000;i+=100000)allowed.add(i);
-  allowed.forEach(i=>a.push({id:'builtin-'+i,jp:numberToRomaji(i),num:i,group:'numerals',builtin:true,milestone:i>=100}));
-  manual.forEach((x,i)=>{if(x.group!=='numerals'||allowed.has(Number(x.num)))a.push({...x,id:x.id||'manual-'+i,builtin:false});});
-  return a.filter(x=>selected().includes(x.group));
-}
-function speak(t){if(window.speechSynthesis&&typeof SpeechSynthesisUtterance!=='undefined'){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(t));u.lang='ja-JP';u.rate=.9;speechSynthesis.speak(u)}else if(window.AndroidTTS?.speak)try{window.AndroidTTS.speak(String(t))}catch(_){} }
-function render(){let a=allCards();if(mode?.value==='shuffle')a=a.slice().sort(()=>Math.random()-.5);grid.innerHTML='';const f=document.createDocumentFragment();a.forEach((x,i)=>{const c=document.createElement('div');c.className='card'+(x.milestone?' milestone':'');c.dataset.timeDateId=x.id;c.__timeDateItem=x;const front=jpFirst?x.jp:(x.builtin?x.num:x.bn);const back=x.builtin?(jpFirst?x.num:x.jp):(jpFirst?`<span class="romaji">${esc(x.romaji)}</span><span class="bangla">${esc(x.bn)}</span>`:esc(x.jp));c.innerHTML=`<div class="lesson-card-topbar"><button type="button" class="hard-star">☆</button><span class="lesson-tag">${esc(labels[x.group]||x.group)}</span><span class="lesson-card-number">${i+1}</span><div class="time-admin-slot"></div><button type="button" class="speaker-btn">🔊</button></div><div class="inner"><div class="front">${esc(front)}</div><div class="back">${back}</div></div>`;c.onclick=e=>{if(!e.target.closest('button'))c.classList.toggle('flipped')};const star=c.querySelector('.hard-star'),fav='time-date-number|'+x.id;let favs=[];try{favs=JSON.parse(localStorage.getItem('japanese-lang-hard-vocabulary')||'[]')}catch(_){}star.textContent=favs.includes(fav)?'★':'☆';star.onclick=e=>{e.stopPropagation();let a=[];try{a=JSON.parse(localStorage.getItem('japanese-lang-hard-vocabulary')||'[]')}catch(_){}const on=star.textContent!=='★';a=a.filter(v=>v!==fav);if(on)a.push(fav);star.textContent=on?'★':'☆';try{localStorage.setItem('japanese-lang-hard-vocabulary',JSON.stringify(a))}catch(_){}};c.querySelector('.speaker-btn').onclick=e=>{e.stopPropagation();speak(x.jp)};f.appendChild(c)});grid.appendChild(f);count.textContent=`Showing ${a.length} ${a.length===1?'card':'cards'}`}
-window.renderTimeDateNumbers=render;
-left&&(left.textContent='reading');right&&(right.textContent='123');direction?.addEventListener('click',()=>{jpFirst=!jpFirst;left.classList.toggle('active',jpFirst);right.classList.toggle('active',!jpFirst);render()});panel?.addEventListener('change',e=>{if(e.target.value==='all')panel.querySelectorAll('input:not([value="all"])').forEach(x=>x.checked=e.target.checked);save();render()});filterBtn?.addEventListener('click',e=>{e.stopPropagation();panel.classList.toggle('open');filterBtn.setAttribute('aria-expanded',panel.classList.contains('open'))});document.addEventListener('click',e=>{if(!e.target.closest('.filter-field'))panel?.classList.remove('open')});mode?.addEventListener('change',()=>{save();render()});document.getElementById('shuffleBtn')?.addEventListener('click',()=>{mode.value='shuffle';save();render()});restore();render();
+(function () {
+  'use strict';
+
+  function numberToRomaji(n) {
+    const ones = ['', 'ichi', 'ni', 'san', 'yon', 'go', 'roku', 'nana', 'hachi', 'kyuu'];
+    const hundreds = ['', 'hyaku', 'nihyaku', 'sanbyaku', 'yonhyaku', 'gohyaku', 'roppyaku', 'nanahyaku', 'happyaku', 'kyuuhyaku'];
+    const thousands = ['', 'sen', 'nisen', 'sanzen', 'yonsen', 'gosen', 'rokusen', 'nanasen', 'hassen', 'kyuusen'];
+    if (n < 100) {
+      if (n < 10) return ones[n];
+      const ten = Math.floor(n / 10), one = n % 10;
+      return (ten === 1 ? 'juu' : ones[ten] + 'juu') + (one ? ones[one] : '');
+    }
+    if (n < 1000) {
+      const h = Math.floor(n / 100), rest = n % 100;
+      return hundreds[h] + (rest ? numberToRomaji(rest) : '');
+    }
+    if (n < 10000) {
+      const s = Math.floor(n / 1000), rest = n % 1000;
+      return thousands[s] + (rest ? numberToRomaji(rest) : '');
+    }
+    const man = Math.floor(n / 10000), rest = n % 10000;
+    return (man === 1 ? 'ichi' : numberToRomaji(man)) + 'man' + (rest ? numberToRomaji(rest) : '');
+  }
+
+  function init() {
+    const grid = document.getElementById('grid');
+    const count = document.getElementById('countDisplay');
+    const panel = document.getElementById('timeDatePanel');
+    const filterBtn = document.getElementById('timeDateBtn');
+    const filterLabel = document.getElementById('timeDateLabel');
+    const mode = document.getElementById('mode');
+    const direction = document.getElementById('direction');
+    if (!grid || !panel) return;
+
+    const left = direction ? direction.querySelector('.left') : null;
+    const right = direction ? direction.querySelector('.right') : null;
+    const KEY = 'japanese-lang-time-date-numbers-filter-v2';
+    const groups = ['numerals', 'telling-time', 'days-of-week', 'month', 'date', 'time-duration'];
+    const labels = {
+      numerals: 'Numerals',
+      'telling-time': 'Telling Time',
+      'days-of-week': 'Days of Week',
+      month: 'Month',
+      date: 'Date',
+      'time-duration': 'Time Duration'
+    };
+    const manual = Array.isArray(window.timeDateNumbers) ? window.timeDateNumbers : [];
+    let jpFirst = true;
+
+    function esc(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+      });
+    }
+
+    function allowedNumerals() {
+      const values = [];
+      for (let i = 1; i <= 10; i++) values.push(i);
+      for (let i = 100; i <= 1000; i += 100) values.push(i);
+      for (let i = 1000; i <= 10000; i += 1000) {
+        if (values.indexOf(i) === -1) values.push(i);
+      }
+      for (let i = 100000; i <= 1000000; i += 100000) values.push(i);
+      return values;
+    }
+
+    const allowed = allowedNumerals();
+
+    function checkedGroups() {
+      const boxes = Array.from(panel.querySelectorAll('input:not([value="all"])'));
+      return boxes.filter(function (box) { return box.checked; }).map(function (box) { return box.value; });
+    }
+
+    function updateFilterUI() {
+      const boxes = Array.from(panel.querySelectorAll('input:not([value="all"])'));
+      const chosen = boxes.filter(function (box) { return box.checked; });
+      const all = panel.querySelector('input[value="all"]');
+      if (all) all.checked = chosen.length === boxes.length;
+      const text = chosen.length === boxes.length ? 'All' : chosen.length ? chosen.map(function (x) { return x.parentElement.textContent.trim(); }).join(', ') : 'None';
+      if (filterBtn) filterBtn.textContent = text;
+      if (filterLabel) filterLabel.textContent = text;
+    }
+
+    function saveFilters() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({ groups: checkedGroups(), order: mode ? mode.value : 'normal' }));
+      } catch (_) {}
+      updateFilterUI();
+    }
+
+    function restoreFilters() {
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (_) {}
+      const wanted = new Set(saved && Array.isArray(saved.groups) ? saved.groups : groups);
+      panel.querySelectorAll('input:not([value="all"])').forEach(function (box) {
+        box.checked = wanted.has(box.value);
+      });
+      if (mode) mode.value = saved && saved.order === 'shuffle' ? 'shuffle' : 'normal';
+      updateFilterUI();
+    }
+
+    function allCards() {
+      const cards = allowed.map(function (num) {
+        return { id: 'builtin-' + num, jp: numberToRomaji(num), num: num, group: 'numerals', builtin: true, milestone: num >= 100 };
+      });
+      manual.forEach(function (item, index) {
+        const num = Number(item.num);
+        if (item.group !== 'numerals' || allowed.indexOf(num) !== -1) {
+          cards.push(Object.assign({}, item, { id: item.id || 'manual-' + index, builtin: false }));
+        }
+      });
+      const selected = new Set(checkedGroups());
+      return cards.filter(function (item) { return selected.has(item.group); });
+    }
+
+    function speak(text) {
+      if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(String(text));
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      } else if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') {
+        try { window.AndroidTTS.speak(String(text)); } catch (_) {}
+      }
+    }
+
+    function render() {
+      let cards = allCards();
+      if (mode && mode.value === 'shuffle') {
+        cards = cards.slice().sort(function () { return Math.random() - 0.5; });
+      }
+      grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+
+      cards.forEach(function (item, index) {
+        const card = document.createElement('div');
+        card.className = 'card' + (item.milestone ? ' milestone' : '');
+        card.dataset.timeDateId = item.id;
+        card.__timeDateItem = item;
+
+        const front = jpFirst ? item.jp : (item.builtin ? item.num : item.bn);
+        const back = item.builtin
+          ? (jpFirst ? item.num : item.jp)
+          : (jpFirst
+            ? '<span class="romaji">' + esc(item.romaji) + '</span><span class="bangla">' + esc(item.bn) + '</span>'
+            : esc(item.jp));
+
+        card.innerHTML =
+          '<div class="lesson-card-topbar">' +
+            '<button type="button" class="hard-star" aria-label="Favourite">☆</button>' +
+            '<span class="lesson-tag">' + esc(labels[item.group] || item.group) + '</span>' +
+            '<span class="lesson-card-number">' + (index + 1) + '</span>' +
+            '<div class="time-admin-slot"></div>' +
+            '<button type="button" class="speaker-btn" aria-label="Play pronunciation">🔊</button>' +
+          '</div>' +
+          '<div class="inner"><div class="front">' + esc(front) + '</div><div class="back">' + back + '</div></div>';
+
+        card.addEventListener('click', function (event) {
+          if (!event.target.closest('button')) card.classList.toggle('flipped');
+        });
+
+        const star = card.querySelector('.hard-star');
+        const favouriteKey = 'time-date-number|' + item.id;
+        let favourites = [];
+        try { favourites = JSON.parse(localStorage.getItem('japanese-lang-hard-vocabulary') || '[]'); } catch (_) {}
+        star.textContent = favourites.indexOf(favouriteKey) !== -1 ? '★' : '☆';
+        star.addEventListener('click', function (event) {
+          event.stopPropagation();
+          let list = [];
+          try { list = JSON.parse(localStorage.getItem('japanese-lang-hard-vocabulary') || '[]'); } catch (_) {}
+          const on = star.textContent !== '★';
+          list = list.filter(function (value) { return value !== favouriteKey; });
+          if (on) list.push(favouriteKey);
+          star.textContent = on ? '★' : '☆';
+          try { localStorage.setItem('japanese-lang-hard-vocabulary', JSON.stringify(list)); } catch (_) {}
+        });
+
+        card.querySelector('.speaker-btn').addEventListener('click', function (event) {
+          event.stopPropagation();
+          speak(item.jp);
+        });
+        fragment.appendChild(card);
+      });
+
+      grid.appendChild(fragment);
+      if (count) count.textContent = 'Showing ' + cards.length + ' ' + (cards.length === 1 ? 'card' : 'cards');
+    }
+
+    window.renderTimeDateNumbers = render;
+
+    if (left) left.textContent = 'reading';
+    if (right) right.textContent = '123';
+    if (direction) direction.addEventListener('click', function () {
+      jpFirst = !jpFirst;
+      if (left) left.classList.toggle('active', jpFirst);
+      if (right) right.classList.toggle('active', !jpFirst);
+      render();
+    });
+
+    panel.addEventListener('change', function (event) {
+      if (event.target.value === 'all') {
+        panel.querySelectorAll('input:not([value="all"])').forEach(function (box) {
+          box.checked = event.target.checked;
+        });
+      }
+      saveFilters();
+      render();
+    });
+
+    if (filterBtn) filterBtn.addEventListener('click', function (event) {
+      event.stopPropagation();
+      panel.classList.toggle('open');
+      filterBtn.setAttribute('aria-expanded', panel.classList.contains('open') ? 'true' : 'false');
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!event.target.closest('.filter-field')) panel.classList.remove('open');
+    });
+
+    if (mode) mode.addEventListener('change', function () { saveFilters(); render(); });
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    if (shuffleBtn) shuffleBtn.addEventListener('click', function () {
+      if (mode) mode.value = 'shuffle';
+      saveFilters();
+      render();
+    });
+
+    restoreFilters();
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
