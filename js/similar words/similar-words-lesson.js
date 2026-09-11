@@ -38,7 +38,9 @@
         { jp: 'なんにん', romaji: 'nannin', bn: 'কতজন', group: 'questions-words' },
         { jp: 'どのくらい', romaji: 'dono kurai', bn: 'কত সময় / কতক্ষণ', group: 'questions-words' },
         { jp: 'なにご', romaji: 'nanigo', bn: 'কোন ভাষা', group: 'questions-words' },
-        { jp: 'なんの', romaji: 'nan no', bn: 'কীসের / কোন ধরনের', group: 'questions-words' }
+        { jp: 'なんの', romaji: 'nan no', bn: 'কীসের / কোন ধরনের', group: 'questions-words' },
+        { jp: 'おわります', romaji: 'owarimasu', bn: 'শেষ করা / শেষ হওয়া', group: 'similar-kind-of-sound' },
+        { jp: 'おわかります', romaji: 'owakarimasu', bn: 'বোঝা / বুঝতে পারা', group: 'similar-kind-of-sound' }
     ];
     const validGroups = new Set(words.map(word => word.group));
     const DEFAULT_STATE = { selectedGroups: [...validGroups], orderMode: 'normal' };
@@ -83,23 +85,32 @@
 
     function render(force = false) {
         let visible = getVisibleWords();
-        const renderKey = `${visible.map(word => word.jp).join('|')}::${mode.value}`;
+        const soundOnly = selectedGroups().length === 1 && selectedGroups()[0] === 'similar-kind-of-sound';
+        const renderKey = `${visible.map(word => word.jp).join('|')}::${mode.value}::${soundOnly}`;
         if (!force && renderKey === lastRenderKey) return;
         lastRenderKey = renderKey;
-        if (mode.value === 'shuffle') visible = visible.slice().sort(() => Math.random() - 0.5);
+        if (mode.value === 'shuffle' && !soundOnly) visible = visible.slice().sort(() => Math.random() - 0.5);
         grid.innerHTML = '';
+        grid.classList.toggle('similar-sound-active', soundOnly);
         const fragment = document.createDocumentFragment();
         visible.forEach((word, index) => {
             const card = document.createElement('div');
             card.className = 'card';
             card.dataset.similarWordGroup = word.group;
             card.__similarWord = word;
-            card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
+            card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group === 'similar-kind-of-sound' ? 'Similar kind of Sound' : word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="english">${escapeHtml(word.group === 'similar-kind-of-sound' ? (word.jp === 'おわります' ? 'finish' : 'understand') : '')}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
             card.addEventListener('click', event => { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
             const star = card.querySelector('.hard-star');
             star.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); const active = star.classList.toggle('active'); star.textContent = active ? '★' : '☆'; star.setAttribute('aria-pressed', String(active)); });
             card.querySelector('.speaker-btn').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); if (!card.classList.contains('flipped')) speakJapanese(word.jp); });
             fragment.appendChild(card);
+            if (soundOnly && index === 0) {
+                const connector = document.createElement('div');
+                connector.className = 'similar-sound-connector';
+                connector.setAttribute('aria-label', 'Similar kind of sound');
+                connector.innerHTML = '<span>≈</span>';
+                fragment.appendChild(connector);
+            }
         });
         grid.appendChild(fragment);
         count.textContent = `Showing ${visible.length} ${visible.length === 1 ? 'card' : 'cards'}`;
