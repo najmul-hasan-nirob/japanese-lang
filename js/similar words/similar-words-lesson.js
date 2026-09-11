@@ -43,7 +43,9 @@
         { jp: 'おわかります', romaji: 'owakarimasu', bn: 'বোঝা / বুঝতে পারা', group: 'similar-kind-of-sound', soundGroup: 'owari-wakari' },
         { jp: 'りょう', romaji: 'ryou', bn: 'ডরমিটরি / ছাত্রাবাস', group: 'similar-kind-of-sound', soundGroup: 'ryou-group' },
         { jp: 'りょうり', romaji: 'ryouri', bn: 'রান্না / রান্না করা খাবার', group: 'similar-kind-of-sound', soundGroup: 'ryou-group' },
-        { jp: 'りょこう', romaji: 'ryokou', bn: 'ভ্রমণ / সফর', group: 'similar-kind-of-sound', soundGroup: 'ryou-group' }
+        { jp: 'りょこう', romaji: 'ryokou', bn: 'ভ্রমণ / সফর', group: 'similar-kind-of-sound', soundGroup: 'ryou-group' },
+        { jp: 'じ', romaji: 'ji', bn: 'টা (সময়) / ঘণ্টা', group: 'similar-kind-of-sound', soundGroup: 'ji-group' },
+        { jp: 'じ', romaji: 'ji', bn: 'অক্ষর / character', group: 'similar-kind-of-sound', soundGroup: 'ji-group' }
     ];
     const validGroups = new Set(words.map(word => word.group));
     const DEFAULT_STATE = { selectedGroups: [...validGroups], orderMode: 'normal' };
@@ -91,7 +93,7 @@
         card.className = 'card';
         card.dataset.similarWordGroup = word.group;
         card.__similarWord = word;
-        const english = word.jp === 'おわります' ? 'finish' : word.jp === 'おわかります' ? 'understand' : word.jp === 'りょう' ? 'dormitory' : word.jp === 'りょうり' ? 'cooking / cooked food' : word.jp === 'りょこう' ? 'travel' : '';
+        const english = word.jp === 'おわります' ? 'finish' : word.jp === 'おわかります' ? 'understand' : word.jp === 'りょう' ? 'dormitory' : word.jp === 'りょうり' ? 'cooking / cooked food' : word.jp === 'りょこう' ? 'travel' : word.soundGroup === 'ji-group' ? (index === 0 ? 'hour / o’clock' : 'character / letter') : '';
         card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group === 'similar-kind-of-sound' ? 'Similar Sound' : word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="english">${escapeHtml(english)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
         card.addEventListener('click', event => { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
         const star = card.querySelector('.hard-star');
@@ -120,7 +122,7 @@
     function render(force = false) {
         let visible = getVisibleWords();
         const soundOnly = selectedGroups().length === 1 && selectedGroups()[0] === 'similar-kind-of-sound';
-        const renderKey = `${visible.map(word => word.jp).join('|')}::${mode.value}::${soundOnly}`;
+        const renderKey = `${visible.map(word => `${word.jp}:${word.bn}`).join('|')}::${mode.value}::${soundOnly}`;
         if (!force && renderKey === lastRenderKey) return;
         lastRenderKey = renderKey;
         if (mode.value === 'shuffle' && !soundOnly) visible = visible.slice().sort(() => Math.random() - 0.5);
