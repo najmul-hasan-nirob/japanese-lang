@@ -283,9 +283,7 @@ button {
 {
     display: none !important;
 }
-.logo {
-    width: 180px;
-}
+
 .filter-field{
     display: block !important;
 }
@@ -329,6 +327,9 @@ button {
 @media (min-width: 521px) {
     .mobile-bottom-controls { display: none !important; }
     #theme { position: fixed; bottom: 10px; right: 10px; }
+}
+.logo {
+    width: 180px;
 }
 
 .under-toolbar {
