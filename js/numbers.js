@@ -23,6 +23,16 @@
     return (man === 1 ? 'ichi' : numberToRomaji(man)) + 'man' + (rest ? numberToRomaji(rest) : '');
   }
 
+  function numberToJapanese(n) {
+    const kana = {
+      1: 'いち', 2: 'に', 3: 'さん', 4: 'よん', 5: 'ご', 6: 'ろく', 7: 'なな', 8: 'はち', 9: 'きゅう', 10: 'じゅう',
+      100: 'ひゃく', 200: 'にひゃく', 300: 'さんびゃく', 400: 'よんひゃく', 500: 'ごひゃく', 600: 'ろっぴゃく', 700: 'ななひゃく', 800: 'はっぴゃく', 900: 'きゅうひゃく', 1000: 'せん',
+      2000: 'にせん', 3000: 'さんぜん', 4000: 'よんせん', 5000: 'ごせん', 6000: 'ろくせん', 7000: 'ななせん', 8000: 'はっせん', 9000: 'きゅうせん', 10000: 'いちまん',
+      100000: 'じゅうまん', 200000: 'にじゅうまん', 300000: 'さんじゅうまん', 400000: 'よんじゅうまん', 500000: 'ごじゅうまん', 600000: 'ろくじゅうまん', 700000: 'ななじゅうまん', 800000: 'はちじゅうまん', 900000: 'きゅうじゅうまん', 1000000: 'ひゃくまん'
+    };
+    return kana[n] || numberToRomaji(n);
+  }
+
   function numberToBangla(n) {
     const ones = ['', 'এক', 'দুই', 'তিন', 'চার', 'পাঁচ', 'ছয়', 'সাত', 'আট', 'নয়'];
     const teens = ['দশ', 'এগারো', 'বারো', 'তেরো', 'চৌদ্দ', 'পনেরো', 'ষোল', 'সতেরো', 'আঠারো', 'উনিশ'];
@@ -124,7 +134,7 @@
 
     function allCards() {
       const cards = allowed.map(function (num) {
-        return { id: 'builtin-' + num, jp: numberToRomaji(num), num: num, group: 'numerals', builtin: true, milestone: num >= 100 };
+        return { id: 'builtin-' + num, jp: numberToJapanese(num), romaji: numberToRomaji(num), num: num, group: 'numerals', builtin: true, milestone: num >= 100 };
       });
       manual.forEach(function (item, index) {
         const num = Number(item.num);
@@ -200,7 +210,8 @@
         const front = item.jp;
         let back = '';
         if (item.builtin) {
-          back = '<span class="english">' + esc(item.num) + '</span>' +
+          back = '<span class="romaji">' + esc(item.romaji) + '</span>' +
+            '<span class="english">' + esc(item.num) + '</span>' +
             '<span class="bangla">' + esc(numberToBangla(item.num)) + '</span>';
         } else {
           back = '<span class="romaji">' + esc(item.romaji) + '</span>' +
