@@ -29,36 +29,33 @@ js:
         <select id="mode"><option value="normal">Normal</option><option value="shuffle">Shuffle</option></select>
     </div>
     <div class="field shuffle-field"><button id="shuffleBtn" class="shuffle-btn" type="button">Shuffle</button></div>
-    <div class="field direction-filter-field">
-        <label>Front / Back</label>
-        <div class="abacus" id="direction" role="button" tabindex="0" aria-pressed="false" aria-label="Show reading or meaning first">
-            <span class="abacus-label left active">reading</span><div class="rod"><div class="bead"></div></div><span class="abacus-label right">123</span>
-        </div>
-    </div>
+    <div class="field romaji-field"><button id="backRomajiToggle" class="romaji-toggle" type="button" aria-pressed="true"></button></div>
+    <div class="field direction-field"><button id="direction" class="direction-toggle" type="button" aria-pressed="false" aria-label="Show all cards Back" title="Show Back"></button></div>
 </div>
 
 <div class="count-display" id="countDisplay" aria-live="polite"></div>
 <div class="grid" id="grid"></div>
 
 <style>
-    .hard-star{
-        padding: inherit !important;
-        font-size: 16px !important; 
-    }
-.time-admin-slot{min-width:56px;display:flex;justify-content:center;gap:2px}
-.lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:38px;z-index:20;display:grid;grid-template-columns:1fr 1.5fr 1fr 1.5fr 1fr;align-items:center;justify-items:center;pointer-events:none;background:#18212c;padding:4px 6px;box-sizing:border-box}
-.lesson-card-topbar>*{pointer-events:auto}
-.lesson-card-topbar .hard-star{grid-column:1;position:static!important;margin:0!important;transform:none!important}
-.lesson-card-topbar .lesson-tag{grid-column:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:11px}
-.lesson-card-topbar .lesson-card-number{grid-column:3;position:static!important;margin:0!important;transform:none!important}
-.lesson-card-topbar .time-admin-slot{grid-column:4}
-.lesson-card-topbar .speaker-btn{grid-column:5;position:static!important;margin:0!important;transform:none!important;display:flex!important}
-.grid > .card > .inner{padding-top:38px}
-.card .front,.card .back{text-align:center}
-.card .front{display:flex;align-items:center;justify-content:center}
-.card .back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-.card .back .romaji,.card .back .bangla{display:block}
-.card .back .romaji{font-size:20px}
-.card .back .bangla{font-size:15px}
-@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.lesson-card-topbar{height:36px}.grid > .card > .inner{padding-top:36px}.lesson-card-topbar .lesson-tag{font-size:10px}.lesson-card-topbar .hard-star{font-size:16px}}
+    .hard-star{padding:inherit!important;font-size:16px!important}
+    .lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:38px;z-index:20;display:grid;grid-template-columns:1fr 3fr 1fr;align-items:center;justify-items:center;pointer-events:none;background:#18212c;padding:4px 6px;box-sizing:border-box}
+    .lesson-card-topbar>*{pointer-events:auto}
+    .lesson-card-topbar .hard-star{grid-column:1;position:static!important;margin:0!important;transform:none!important}
+    .lesson-card-topbar .lesson-tag{grid-column:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:11px;text-align:center}
+    .lesson-card-topbar .lesson-card-number{grid-column:2;position:static!important;margin:0!important;transform:none!important;display:inline;font-size:11px;font-weight:600;color:#fff;min-width:0;height:auto;padding:0;background:none}
+    .lesson-card-topbar .speaker-btn{grid-column:3;position:static!important;margin:0!important;transform:none!important;display:flex!important}
+    .lesson-card-topbar .lesson-tag + .lesson-card-number::before{content:' '}
+    .grid > .card > .inner{padding-top:38px}
+    .card .front,.card .back{text-align:center}
+    .card .front{display:flex;align-items:center;justify-content:center}
+    .card .back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+    .card .back .romaji,.card .back .english,.card .back .bangla{display:block}
+    .card .back .romaji{font-size:20px}
+    .card .back .english{font-size:14px}
+    .card .back .bangla{font-size:15px}
+    .direction-toggle,.romaji-toggle{width:100%;min-height:38px;padding:7px 10px;border:1px solid var(--paper-line);border-radius:6px;background:var(--paper-cell);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:border-color .2s ease,color .2s ease}
+    .direction-toggle:hover,.romaji-toggle:hover{border-color:var(--vermilion);color:var(--vermilion)}
+    .lesson-control-svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+    .lesson-control-text{font-family:'JetBrains Mono',monospace;font-size:11px}
+    @media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.lesson-card-topbar{height:36px}.grid > .card > .inner{padding-top:36px}.lesson-card-topbar .lesson-tag,.lesson-card-topbar .lesson-card-number{font-size:10px}.lesson-card-topbar .hard-star{font-size:16px}.direction-toggle,.romaji-toggle{min-height:36px}.lesson-control-text{display:inline-flex}.card .back .romaji{font-size:18px}.card .back .english{font-size:12px}.card .back .bangla{font-size:14px}}
 </style>
