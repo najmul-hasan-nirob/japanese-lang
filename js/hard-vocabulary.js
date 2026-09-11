@@ -119,10 +119,21 @@
   function init() {
     ensureCheckbox();
 
+    // Hard vocabulary is an overlay filter. Any change in the normal type
+    // filters must be followed by the hard filter, otherwise a lesson render
+    // can temporarily restore all vocabulary cards while Hard vocabulary is on.
     panel()?.addEventListener('change', event => {
-      if (event.target?.value !== 'hard') return;
-      hardMode = event.target.checked;
-      hardMode ? applyFilter() : clearFilter();
+      if (event.target?.value === 'hard') {
+        hardMode = event.target.checked;
+        if (hardMode) {
+          setTimeout(applyFilter, 0);
+        } else {
+          clearFilter();
+        }
+        return;
+      }
+
+      if (hardMode) setTimeout(applyFilter, 0);
     });
 
     addStars();
