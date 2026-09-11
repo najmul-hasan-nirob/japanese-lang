@@ -262,10 +262,12 @@ const lesson9 = {
       "bn": "কারণ / তাই"
     },
     {
-      "jp": "とうして",
-      "romaji": "tooshite",
+      "jp": "どうして",
+      "romaji": "toushite",
       "en": "why",
-      "bn": "কেন"
+      "bn": "কেন",
+      "type": "vocabulary",
+      "lesson": "Lesson 9"
     }
   ],
   "cpart": [
