@@ -86,6 +86,20 @@
         else if (window.AndroidTTS && typeof window.AndroidTTS.speak === 'function') { try { window.AndroidTTS.speak(text); } catch (_) {} }
     }
 
+    function createCard(word, index) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.similarWordGroup = word.group;
+        card.__similarWord = word;
+        const english = word.jp === 'おわります' ? 'finish' : word.jp === 'おわかります' ? 'understand' : word.jp === 'りょう' ? 'dormitory' : word.jp === 'りょうり' ? 'cooking / cooked food' : word.jp === 'りょこう' ? 'travel' : '';
+        card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group === 'similar-kind-of-sound' ? 'Similar kind of Sound' : word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="english">${escapeHtml(english)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
+        card.addEventListener('click', event => { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
+        const star = card.querySelector('.hard-star');
+        star.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); const active = star.classList.toggle('active'); star.textContent = active ? '★' : '☆'; star.setAttribute('aria-pressed', String(active)); });
+        card.querySelector('.speaker-btn').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); if (!card.classList.contains('flipped')) speakJapanese(word.jp); });
+        return card;
+    }
+
     function render(force = false) {
         let visible = getVisibleWords();
         const soundOnly = selectedGroups().length === 1 && selectedGroups()[0] === 'similar-kind-of-sound';
@@ -95,28 +109,30 @@
         if (mode.value === 'shuffle' && !soundOnly) visible = visible.slice().sort(() => Math.random() - 0.5);
         grid.innerHTML = '';
         grid.classList.toggle('similar-sound-active', soundOnly);
-        const fragment = document.createDocumentFragment();
-        visible.forEach((word, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.dataset.similarWordGroup = word.group;
-            card.__similarWord = word;
-            const english = word.jp === 'おわります' ? 'finish' : word.jp === 'おわかります' ? 'understand' : word.jp === 'りょう' ? 'dormitory' : word.jp === 'りょうり' ? 'cooking / cooked food' : word.jp === 'りょこう' ? 'travel' : '';
-            card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group === 'similar-kind-of-sound' ? 'Similar kind of Sound' : word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="english">${escapeHtml(english)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
-            card.addEventListener('click', event => { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
-            const star = card.querySelector('.hard-star');
-            star.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); const active = star.classList.toggle('active'); star.textContent = active ? '★' : '☆'; star.setAttribute('aria-pressed', String(active)); });
-            card.querySelector('.speaker-btn').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); if (!card.classList.contains('flipped')) speakJapanese(word.jp); });
-            fragment.appendChild(card);
-            if (soundOnly && index < visible.length - 1) {
-                const connector = document.createElement('div');
-                connector.className = 'similar-sound-connector';
-                connector.setAttribute('aria-label', 'Similar kind of sound');
-                connector.innerHTML = '<span>≈</span>';
-                fragment.appendChild(connector);
-            }
-        });
-        grid.appendChild(fragment);
+
+        if (soundOnly) {
+            const group = document.createElement('div');
+            group.className = 'similar-sound-group';
+            group.setAttribute('aria-label', 'Similar kind of Sound group');
+            const fragment = document.createDocumentFragment();
+            visible.forEach((word, index) => {
+                fragment.appendChild(createCard(word, index));
+                if (index < visible.length - 1) {
+                    const connector = document.createElement('div');
+                    connector.className = 'similar-sound-connector';
+                    connector.setAttribute('aria-hidden', 'true');
+                    connector.innerHTML = '<span>≈</span>';
+                    fragment.appendChild(connector);
+                }
+            });
+            group.appendChild(fragment);
+            grid.appendChild(group);
+        } else {
+            const fragment = document.createDocumentFragment();
+            visible.forEach((word, index) => fragment.appendChild(createCard(word, index)));
+            grid.appendChild(fragment);
+        }
+
         count.textContent = `Showing ${visible.length} ${visible.length === 1 ? 'card' : 'cards'}`;
     }
 
