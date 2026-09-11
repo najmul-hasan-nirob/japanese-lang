@@ -26,7 +26,14 @@
     height:148px;
     perspective:1000px;
     cursor:pointer;
+    box-sizing:border-box;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    transition:border-color .2s ease, box-shadow .2s ease;
 }
+.card:hover{border-color:var(--vermilion);}
 .inner{
     width:100%;
     height:100%;
@@ -42,7 +49,7 @@
 .front,.back{
     position:absolute;
     inset:0;
-    border-radius:var(--radius);
+    border-radius:0;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -52,8 +59,8 @@
     word-break:break-word;
     overflow:hidden;
     backface-visibility:hidden;
-    border:1px solid var(--paper-line);
-    box-shadow:var(--shadow);
+    border:0;
+    box-shadow:none;
 }
 .front{
     background:var(--paper-cell);
@@ -69,9 +76,7 @@
     font-size:22px;
     font-weight:700;
     transform:rotateY(180deg);
-    border-color:var(--indigo-deep);
 }
-.card:hover .front,.card:hover .back{border-color:var(--vermilion);}
 .card.milestone .front::after,.card.milestone .back::after{
     content:"";
     position:absolute;
@@ -86,10 +91,11 @@
 /* ---------- TIME / DATE CARD CONTENT ---------- */
 .card .front,.card .back{text-align:center;}
 .card .front{display:flex;align-items:center;justify-content:center;}
-.card .back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
-.card .back .romaji,.card .back .bangla{display:block;}
-.card .back .romaji{font-size:21px;}
-.card .back .bangla{font-size:16px;}
+.card .back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+.card .back .romaji,.card .back .english,.card .back .bangla{display:block;}
+.card .back .romaji{font-family:'JetBrains Mono',monospace;font-size:20px;line-height:1.25;}
+.card .back .english{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;line-height:1.25;opacity:.9;}
+.card .back .bangla{font-size:15px;line-height:1.25;}
 
 /* ---------- FOOTNOTE ---------- */
 .footnote{
@@ -112,7 +118,8 @@
     .front,.back{padding:50px 18px 18px;}
     .front{font-size:16px;}
     .back{font-size:19px;}
-    .card .back .romaji{font-size:19px;}
+    .card .back .romaji{font-size:18px;}
+    .card .back .english{font-size:12px;}
     .card .back .bangla{font-size:14px;}
 }
 
