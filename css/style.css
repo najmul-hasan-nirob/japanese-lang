@@ -70,7 +70,7 @@ body::before {
     top: 0;
     z-index: 1000;
     background: var(--paper);
-    padding: 15px 0 25px;
+    padding: 25px 0;
     box-shadow: 0 1px 0 var(--paper-line);
     display: flex;
     align-items: center;
@@ -90,7 +90,6 @@ h1 {
     font-weight: 700;
     font-size: 30px;
     letter-spacing: .02em;
-    margin-bottom: 4px;
 }
 
 .subtitle {
@@ -110,13 +109,14 @@ h1 {
 
 .logo h1 {
     color: var(--ink);
-    font-size: 20px;
+    font-size: 15px;
+    text-transform: uppercase;
+    line-height: 1.2em;
 }
 
 .main-nav {
     display: flex;
     gap: 12px;
-    margin-top: 14px;
     flex-wrap: wrap;
 }
 
