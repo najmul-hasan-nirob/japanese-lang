@@ -7,6 +7,19 @@ const timeDateNumbers = [
   { id: 'day-wednesday', group: 'days-of-week', jp: 'すいようび', romaji: 'suiyoubi', en: 'Wednesday', bn: 'বুধবার' },
   { id: 'day-thursday', group: 'days-of-week', jp: 'もくようび', romaji: 'mokuyoubi', en: 'Thursday', bn: 'বৃহস্পতিবার' },
   { id: 'day-friday', group: 'days-of-week', jp: 'きんようび', romaji: 'kinyoubi', en: 'Friday', bn: 'শুক্রবার' },
-  { id: 'day-saturday', group: 'days-of-week', jp: 'どようび', romaji: 'doyoubi', en: 'Saturday', bn: 'শনিবার' }
+  { id: 'day-saturday', group: 'days-of-week', jp: 'どようび', romaji: 'doyoubi', en: 'Saturday', bn: 'শনিবার' },
+
+  { id: 'month-january', group: 'month', jp: 'いちがつ', romaji: 'ichigatsu', en: 'January', bn: 'জানুয়ারি' },
+  { id: 'month-february', group: 'month', jp: 'にがつ', romaji: 'nigatsu', en: 'February', bn: 'ফেব্রুয়ারি' },
+  { id: 'month-march', group: 'month', jp: 'さんがつ', romaji: 'sangatsu', en: 'March', bn: 'মার্চ' },
+  { id: 'month-april', group: 'month', jp: 'しがつ', romaji: 'shigatsu', en: 'April', bn: 'এপ্রিল' },
+  { id: 'month-may', group: 'month', jp: 'ごがつ', romaji: 'gogatsu', en: 'May', bn: 'মে' },
+  { id: 'month-june', group: 'month', jp: 'ろくがつ', romaji: 'rokugatsu', en: 'June', bn: 'জুন' },
+  { id: 'month-july', group: 'month', jp: 'しちがつ', romaji: 'shichigatsu', en: 'July', bn: 'জুলাই' },
+  { id: 'month-august', group: 'month', jp: 'はちがつ', romaji: 'hachigatsu', en: 'August', bn: 'আগস্ট' },
+  { id: 'month-september', group: 'month', jp: 'くがつ', romaji: 'kugatsu', en: 'September', bn: 'সেপ্টেম্বর' },
+  { id: 'month-october', group: 'month', jp: 'じゅうがつ', romaji: 'juugatsu', en: 'October', bn: 'অক্টোবর' },
+  { id: 'month-november', group: 'month', jp: 'じゅういちがつ', romaji: 'juuichigatsu', en: 'November', bn: 'নভেম্বর' },
+  { id: 'month-december', group: 'month', jp: 'じゅうにがつ', romaji: 'juunigatsu', en: 'December', bn: 'ডিসেম্বর' }
 ];
 window.timeDateNumbers = timeDateNumbers;
