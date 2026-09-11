@@ -45,8 +45,8 @@
       'time-duration': 'Time Duration'
     };
     const manual = Array.isArray(window.timeDateNumbers) ? window.timeDateNumbers : [];
-    let jpFirst = true;
-    let showRomaji = true;
+    let showBack = false;
+    let showBackRomaji = true;
 
     const ICONS = {
       romaji: '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7M7.5 5v14M4 19h7M14 5l6 14M20 5l-6 14"></path></svg>',
@@ -137,23 +137,31 @@
     function updateRomajiUI() {
       if (!romajiToggle) return;
       romajiToggle.innerHTML = labelledIcon('Romaji', ICONS.romaji);
-      romajiToggle.setAttribute('aria-pressed', String(showRomaji));
-      romajiToggle.setAttribute('aria-label', showRomaji ? 'Romaji: ON' : 'Romaji: OFF');
-      romajiToggle.title = showRomaji ? 'Romaji: ON' : 'Romaji: OFF';
+      romajiToggle.setAttribute('aria-pressed', String(showBackRomaji));
+      romajiToggle.setAttribute('aria-label', showBackRomaji ? 'Romaji: ON' : 'Romaji: OFF');
+      romajiToggle.title = showBackRomaji ? 'Romaji: ON' : 'Romaji: OFF';
     }
 
     function updateDirectionUI() {
       if (!direction) return;
+      direction.classList.toggle('right', showBack);
       direction.innerHTML = labelledIcon('Front / Back', ICONS.flip);
-      direction.setAttribute('aria-pressed', String(!jpFirst));
-      direction.setAttribute('aria-label', jpFirst ? 'Show all cards Back' : 'Show all cards Front');
-      direction.title = jpFirst ? 'Show Back' : 'Show Front';
+      direction.setAttribute('aria-pressed', String(showBack));
+      direction.setAttribute('aria-label', showBack ? 'Show all cards Front' : 'Show all cards Back');
+      direction.title = showBack ? 'Show Front' : 'Show Back';
     }
 
     function applyRomajiVisibility() {
       grid.querySelectorAll('.romaji').forEach(function (element) {
-        element.style.display = showRomaji ? '' : 'none';
+        element.style.display = showBackRomaji ? '' : 'none';
       });
+    }
+
+    function applyCardState() {
+      grid.querySelectorAll('.card').forEach(function (card) {
+        card.classList.toggle('flipped', showBack);
+      });
+      applyRomajiVisibility();
     }
 
     function render() {
@@ -175,16 +183,16 @@
         const groupSerial = groupSerials[item.group];
         const groupLabel = labels[item.group] || item.group;
 
-        const front = jpFirst ? item.jp : (item.builtin ? item.num : item.bn);
+        // Keep the card sides stable, exactly like the lesson cards.
+        // The global Front / Back control only applies the .flipped class.
+        const front = item.jp;
         let back = '';
         if (item.builtin) {
-          back = jpFirst ? item.num : item.jp;
-        } else if (jpFirst) {
+          back = esc(item.num);
+        } else {
           back = '<span class="romaji">' + esc(item.romaji) + '</span>' +
             (item.en ? '<span class="english">' + esc(item.en) + '</span>' : '') +
             '<span class="bangla">' + esc(item.bn) + '</span>';
-        } else {
-          back = esc(item.jp);
         }
 
         card.innerHTML =
@@ -223,7 +231,7 @@
       });
 
       grid.appendChild(fragment);
-      applyRomajiVisibility();
+      applyCardState();
       if (count) count.textContent = 'Showing ' + cards.length + ' ' + (cards.length === 1 ? 'card' : 'cards');
     }
 
@@ -234,15 +242,15 @@
     if (direction) direction.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
-      jpFirst = !jpFirst;
+      showBack = !showBack;
       updateDirectionUI();
-      render();
+      applyCardState();
     });
 
     if (romajiToggle) romajiToggle.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
-      showRomaji = !showRomaji;
+      showBackRomaji = !showBackRomaji;
       updateRomajiUI();
       applyRomajiVisibility();
     });
