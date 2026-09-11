@@ -92,7 +92,7 @@
         card.dataset.similarWordGroup = word.group;
         card.__similarWord = word;
         const english = word.jp === 'おわります' ? 'finish' : word.jp === 'おわかります' ? 'understand' : word.jp === 'りょう' ? 'dormitory' : word.jp === 'りょうり' ? 'cooking / cooked food' : word.jp === 'りょこう' ? 'travel' : '';
-        card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group === 'similar-kind-of-sound' ? 'Similar kind of Sound' : word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="english">${escapeHtml(english)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
+        card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group === 'similar-kind-of-sound' ? 'Similar Sound' : word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="english">${escapeHtml(english)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
         card.addEventListener('click', event => { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
         const star = card.querySelector('.hard-star');
         star.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); const active = star.classList.toggle('active'); star.textContent = active ? '★' : '☆'; star.setAttribute('aria-pressed', String(active)); });
@@ -103,7 +103,7 @@
     function appendSoundGroup(container, groupWords) {
         const group = document.createElement('div');
         group.className = 'similar-sound-group';
-        group.setAttribute('aria-label', 'Similar kind of Sound group');
+        group.setAttribute('aria-label', 'Similar Sound group');
         groupWords.forEach((word, index) => {
             group.appendChild(createCard(word, index));
             if (index < groupWords.length - 1) {

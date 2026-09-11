@@ -20,7 +20,7 @@ js:
             <label><input type="checkbox" value="what-kind-of" checked> What Kind Of</label>
             <label><input type="checkbox" value="and" checked> And</label>
             <label><input type="checkbox" value="questions-words" checked> Questions words</label>
-            <label><input type="checkbox" value="similar-kind-of-sound"> Similar kind of Sound</label>
+            <label><input type="checkbox" value="similar-kind-of-sound"> Similar Sound</label>
         </div>
     </div>
     <div class="field filter-field">
@@ -42,12 +42,11 @@ js:
 /* Give the card content comfortable breathing room. */
 .grid > .card > .inner,
 .similar-sound-group > .card > .inner {
-    padding: 52px 22px 28px !important;
     box-sizing: border-box;
 }
 .similar-sound-group > .card > .inner {
-    min-height: 190px;
-}
+        padding: 35px 0px 0px !important;
+    }
 
 /* Similar kind of Sound: each related set gets its own bordered group. */
 .grid.similar-sound-active{display:block!important;width:100%}
@@ -62,8 +61,7 @@ js:
     .similar-sound-group{width:calc(100% - 12px);margin:6px auto 16px;padding:12px 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:12px;overflow:visible}
     .similar-sound-group>.card{width:100%;max-width:none;min-width:0;flex:none}
     .similar-sound-group > .card > .inner {
-        padding: 48px 12px 24px !important;
-        min-height: 170px;
+        padding: 35px 0px 0px !important;
     }
     .similar-sound-connector{display:none}
     .lesson-card-topbar{height:38px}
