@@ -23,6 +23,20 @@
     return (man === 1 ? 'ichi' : numberToRomaji(man)) + 'man' + (rest ? numberToRomaji(rest) : '');
   }
 
+  function numberToBangla(n) {
+    const ones = ['', 'এক', 'দুই', 'তিন', 'চার', 'পাঁচ', 'ছয়', 'সাত', 'আট', 'নয়'];
+    const teens = ['দশ', 'এগারো', 'বারো', 'তেরো', 'চৌদ্দ', 'পনেরো', 'ষোল', 'সতেরো', 'আঠারো', 'উনিশ'];
+    const tens = ['', '', 'বিশ', 'ত্রিশ', 'চল্লিশ', 'পঞ্চাশ', 'ষাট', 'সত্তর', 'আশি', 'নব্বই'];
+    if (n < 10) return ones[n];
+    if (n < 20) return teens[n - 10];
+    if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+    if (n < 1000) return ones[Math.floor(n / 100)] + 'শ' + (n % 100 ? ' ' + numberToBangla(n % 100) : '');
+    if (n < 10000) return ones[Math.floor(n / 1000)] + ' হাজার' + (n % 1000 ? ' ' + numberToBangla(n % 1000) : '');
+    if (n < 100000) return numberToBangla(Math.floor(n / 10000)) + ' হাজার' + (n % 10000 ? ' ' + numberToBangla(n % 10000) : '');
+    if (n < 1000000) return numberToBangla(Math.floor(n / 100000)) + ' লাখ' + (n % 100000 ? ' ' + numberToBangla(n % 100000) : '');
+    return numberToBangla(Math.floor(n / 1000000)) + ' মিলিয়ন' + (n % 1000000 ? ' ' + numberToBangla(n % 1000000) : '');
+  }
+
   function init() {
     const grid = document.getElementById('grid');
     const count = document.getElementById('countDisplay');
@@ -183,12 +197,11 @@
         const groupSerial = groupSerials[item.group];
         const groupLabel = labels[item.group] || item.group;
 
-        // Keep the card sides stable, exactly like the lesson cards.
-        // The global Front / Back control only applies the .flipped class.
         const front = item.jp;
         let back = '';
         if (item.builtin) {
-          back = esc(item.num);
+          back = '<span class="english">' + esc(item.num) + '</span>' +
+            '<span class="bangla">' + esc(numberToBangla(item.num)) + '</span>';
         } else {
           back = '<span class="romaji">' + esc(item.romaji) + '</span>' +
             (item.en ? '<span class="english">' + esc(item.en) + '</span>' : '') +
