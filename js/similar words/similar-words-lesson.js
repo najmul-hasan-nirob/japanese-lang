@@ -11,6 +11,8 @@
 
     const words = [
         { jp: 'なんで', romaji: 'nande', bn: 'কেন', group: 'why' },
+        { jp: 'どうして', romaji: 'doushite', bn: 'কেন', group: 'why' },
+        { jp: 'なぜ', romaji: 'naze', bn: 'কেন', group: 'why' },
         { jp: 'が', romaji: 'ga', bn: 'কিন্তু', group: 'but' },
         { jp: 'でも', romaji: 'demo', bn: 'কিন্তু', group: 'but' },
         { jp: 'どこ', romaji: 'doko', bn: 'কোথায়', group: 'where' },
@@ -25,7 +27,6 @@
         { jp: 'どこから', romaji: 'doko kara', bn: 'কোথা থেকে', group: 'questions-words' },
         { jp: 'どこへ', romaji: 'doko e', bn: 'কোথায় (গন্তব্য)', group: 'questions-words' },
         { jp: 'いつ', romaji: 'itsu', bn: 'কখন', group: 'questions-words' },
-        { jp: 'どうして', romaji: 'doushite', bn: 'কেন', group: 'questions-words' },
         { jp: 'どう', romaji: 'dou', bn: 'কেমন / কীভাবে', group: 'questions-words' },
         { jp: 'どうやって', romaji: 'dou yatte', bn: 'কীভাবে / কেমন করে', group: 'questions-words' },
         { jp: 'どんな', romaji: 'donna', bn: 'কেমন / কী ধরনের', group: 'questions-words' },
