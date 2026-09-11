@@ -39,6 +39,16 @@ js:
     .grid > .card > .inner { padding-top: 35px; }
     .lesson-card-topbar{position:absolute;top:0;left:0;right:0;height:auto;z-index:20;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;align-items:center;justify-items:center;pointer-events:none;background-color:#18212c;padding:5px;box-sizing:border-box}.lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-card-number,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{position:static!important;transform:none!important;margin:0!important}.lesson-card-topbar .hard-star,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{pointer-events:auto}.lesson-card-topbar .hard-star{grid-column:1}.lesson-card-topbar .lesson-card-number{grid-column:3}.lesson-card-topbar .lesson-tag{grid-column:2;grid-row:1;margin-left:5px}.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{grid-column:4;display:flex!important;visibility:visible!important;opacity:1!important}.card .front,.card .back{text-align:center}.card .front> :not(.lesson-card-topbar),.card .back> :not(.lesson-card-topbar){margin-left:auto;margin-right:auto}
 
+/* Give the card content comfortable breathing room. */
+.grid > .card > .inner,
+.similar-sound-group > .card > .inner {
+    padding: 52px 22px 28px !important;
+    box-sizing: border-box;
+}
+.similar-sound-group > .card > .inner {
+    min-height: 190px;
+}
+
 /* Similar kind of Sound: each related set gets its own bordered group. */
 .grid.similar-sound-active{display:block!important;width:100%}
 .similar-sound-group{width:min(100%,1120px);margin:8px auto 20px;padding:22px;border:2px solid var(--paper-line);border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:18px;background:var(--paper-cell);box-shadow:var(--shadow);overflow:hidden}
@@ -51,6 +61,10 @@ js:
     .grid.similar-sound-active{display:block!important}
     .similar-sound-group{width:calc(100% - 12px);margin:6px auto 16px;padding:12px 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:12px;overflow:visible}
     .similar-sound-group>.card{width:100%;max-width:none;min-width:0;flex:none}
+    .similar-sound-group > .card > .inner {
+        padding: 48px 12px 24px !important;
+        min-height: 170px;
+    }
     .similar-sound-connector{display:none}
     .lesson-card-topbar{height:38px}
     .lesson-card-inner{padding-top:38px!important}
