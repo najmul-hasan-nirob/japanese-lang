@@ -198,8 +198,10 @@ const lesson12 = {
     {
       "jp": "てんぷら",
       "romaji": "tenpura",
-      "en": "tempura (seafood and vegetables deep fried in batter)",
-      "bn": "ব্যাটারে ডুবিয়ে ভাজা সামুদ্রিক খাবার ও সবজি"
+      "en": "seafood and vegetables deep fried in batter",
+      "bn": "ব্যাটারে ডুবিয়ে ভাজা সামুদ্রিক খাবার ও সবজি",
+      "type": "vocabulary",
+      "lesson": "Lesson 12"
     },
     {
       "jp": "ぶたにく",
