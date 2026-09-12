@@ -191,7 +191,7 @@ const lesson12 = {
       "jp": "[お]すし",
       "romaji": "[o]sushi",
       "en": "(vinegared rice topped with raw fish)",
-      "bn": "ভিনেগার মেশানো ভাতের সঙ্গে কাচা মাছ ও উপকরন",
+      "bn": "ভিনেগার মেশানো চালের সঙ্গে কাচা মাছ ও উপকরন",
       "type": "vocabulary",
       "lesson": "Lesson 12"
     },
