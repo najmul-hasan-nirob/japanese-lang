@@ -219,9 +219,6 @@
         number.className = 'lesson-card-number';
         number.textContent = card.dataset.no || '';
 
-        const tag = document.createElement('span');
-        tag.className = 'lesson-tag';
-        tag.textContent = card.dataset.level || '';
 
         const stroke = document.createElement('button');
         stroke.type = 'button';
