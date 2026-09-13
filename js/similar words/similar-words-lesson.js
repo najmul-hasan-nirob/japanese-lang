@@ -50,7 +50,9 @@
         { jp: 'きっぷ', romaji: 'kippu', bn: 'টিকিট', group: 'similar-kind-of-sound', soundGroup: 'kippu-ticket-group' },
         { jp: 'チケット', romaji: 'chiketto', bn: 'টিকিট', group: 'similar-kind-of-sound', soundGroup: 'kippu-ticket-group' },
         { jp: 'ビール', romaji: 'bīru', bn: 'বিয়ার', group: 'similar-kind-of-sound', soundGroup: 'biru-beer-group' },
-        { jp: 'ビル', romaji: 'biru', bn: 'ভবন / বিল্ডিং', group: 'similar-kind-of-sound', soundGroup: 'biru-beer-group' }
+        { jp: 'ビル', romaji: 'biru', bn: 'ভবন / বিল্ডিং', group: 'similar-kind-of-sound', soundGroup: 'biru-beer-group' },
+        { jp: 'もう', romaji: 'mou', bn: 'ইতিমধ্যে / আর নয়', group: 'similar-kind-of-sound', soundGroup: 'mou-group' },
+        { jp: 'もう', romaji: 'mou', bn: 'আরও / আরেকটি / আবার', group: 'similar-kind-of-sound', soundGroup: 'mou-group' }
     ];
     const validGroups = new Set(words.map(word => word.group));
     const DEFAULT_STATE = { selectedGroups: [...validGroups], orderMode: 'normal' };
@@ -98,7 +100,7 @@
         card.className = 'card';
         card.dataset.similarWordGroup = word.group;
         card.__similarWord = word;
-        const english = word.jp === 'おわります' ? 'finish' : word.jp === 'おわかります' ? 'understand' : word.jp === 'りょう' ? 'dormitory' : word.jp === 'りょうり' ? 'cooking / cooked food' : word.jp === 'りょこう' ? 'travel' : word.jp === 'きっぷ' ? 'ticket' : word.jp === 'チケット' ? 'ticket' : word.jp === 'ビール' ? 'beer' : word.jp === 'ビル' ? 'building' : word.soundGroup === 'ji-group' ? (index === 0 ? 'hour / o’clock' : 'character / letter') : '';
+        const english = word.jp === 'おわります' ? 'finish' : word.jp === 'おわかります' ? 'understand' : word.jp === 'りょう' ? 'dormitory' : word.jp === 'りょうり' ? 'cooking / cooked food' : word.jp === 'りょこう' ? 'travel' : word.jp === 'きっぷ' ? 'ticket' : word.jp === 'チケット' ? 'ticket' : word.jp === 'ビール' ? 'beer' : word.jp === 'ビル' ? 'building' : word.jp === 'もう' ? (word.bn.includes('ইতিমধ্যে') ? 'already / no longer' : 'more / another / again') : word.soundGroup === 'ji-group' ? (index === 0 ? 'hour / o’clock' : 'character / letter') : '';
         card.innerHTML = `<div class="lesson-card-topbar" aria-label="Card controls"><button type="button" class="hard-star" aria-label="Mark as hard vocabulary" title="Mark as hard vocabulary">☆</button><span class="lesson-card-number" aria-hidden="true">${index + 1}</span><span class="lesson-tag">${escapeHtml(word.group === 'similar-kind-of-sound' ? 'Similar Sound' : word.group.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span><button type="button" class="speaker-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button></div><div class="inner"><div class="front"><div class="lesson-japanese">${escapeHtml(word.jp)}</div></div><div class="back vocabulary-back"><span class="romaji">${escapeHtml(word.romaji)}</span><span class="english">${escapeHtml(english)}</span><span class="bangla">${escapeHtml(word.bn)}</span></div></div>`;
         card.addEventListener('click', event => { if (!event.target.closest('button')) card.classList.toggle('flipped'); });
         const star = card.querySelector('.hard-star');
