@@ -21,11 +21,30 @@
         return writingPractice;
     }
 
+    function applyCardPracticeVisual(card, active) {
+        if (!card) return;
+        card.classList.toggle('kanji-card-writing-practice', active);
+        const back = card.querySelector(':scope > .inner > .back');
+        if (!back) return;
+        const mnemonic = back.querySelector('.kanji-mnemonic-wrap');
+        const character = back.querySelector(':scope > .kanji-character');
+        const details = back.querySelector('.kanji-details');
+        if (mnemonic) mnemonic.style.display = active ? 'none' : '';
+        if (character) character.style.display = active ? 'none' : '';
+        if (details) {
+            details.querySelectorAll(':scope > *').forEach(function (item) {
+                item.style.display = active && !item.classList.contains('kanji-detail-meaning') ? 'none' : '';
+            });
+            details.style.minHeight = active ? '120px' : '';
+            details.style.justifyContent = active ? 'center' : '';
+        }
+    }
+
     function updateCardPracticeButton(card) {
         if (!card) return;
         const button = card.querySelector('.kanji-writing-practice-btn');
         const active = cardWritingPractice(card);
-        card.classList.toggle('kanji-card-writing-practice', active);
+        applyCardPracticeVisual(card, active);
         if (!button) return;
         button.setAttribute('aria-pressed', String(active));
         button.setAttribute('aria-label', active ? 'Disable writing practice for this card' : 'Enable writing practice for this card');
@@ -47,7 +66,6 @@
             button.title = showBack ? 'Show Front' : 'Show Back';
             button.innerHTML = labelledIcon('Front / Back');
         });
-
         const practiceDesktop = document.getElementById('kanjiWritingPractice');
         const practiceMobile = document.getElementById('kanjiMobileWritingPractice');
         [practiceDesktop, practiceMobile].forEach(function (button) {
