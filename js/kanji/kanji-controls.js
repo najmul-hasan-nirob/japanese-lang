@@ -10,17 +10,9 @@
     const WRITING_ICON = '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>';
     const NORMAL_ICON = '<svg class="lesson-control-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"></path><path d="M8 9h8M8 13h5"></path></svg>';
 
-    function labelledIcon(label) {
-        return '<span class="lesson-control-text">' + label + '</span>' + ICON;
-    }
-
-    function practiceIcon(isActive) {
-        return isActive ? NORMAL_ICON : WRITING_ICON;
-    }
-
-    function getCards() {
-        return Array.from(document.querySelectorAll('#kanjiGrid .card'));
-    }
+    function labelledIcon(label) { return '<span class="lesson-control-text">' + label + '</span>' + ICON; }
+    function practiceIcon(isActive) { return isActive ? NORMAL_ICON : WRITING_ICON; }
+    function getCards() { return Array.from(document.querySelectorAll('#kanjiGrid .card')); }
 
     function cardWritingPractice(card) {
         if (!card) return writingPractice;
@@ -32,8 +24,9 @@
     function updateCardPracticeButton(card) {
         if (!card) return;
         const button = card.querySelector('.kanji-writing-practice-btn');
-        if (!button) return;
         const active = cardWritingPractice(card);
+        card.classList.toggle('kanji-card-writing-practice', active);
+        if (!button) return;
         button.setAttribute('aria-pressed', String(active));
         button.setAttribute('aria-label', active ? 'Disable writing practice for this card' : 'Enable writing practice for this card');
         button.title = active ? 'Normal Backside' : 'Writing Practice';
@@ -41,9 +34,7 @@
         button.classList.toggle('right', active);
     }
 
-    function updateCardPracticeButtons() {
-        getCards().forEach(updateCardPracticeButton);
-    }
+    function updateCardPracticeButtons() { getCards().forEach(updateCardPracticeButton); }
 
     function updateUI() {
         const desktop = document.getElementById('kanjiDirection');
@@ -67,26 +58,12 @@
             button.innerHTML = practiceIcon(writingPractice);
             button.classList.toggle('right', writingPractice);
         });
-
         updateCardPracticeButtons();
     }
 
-    function applyCardState() {
-        getCards().forEach(function (card) {
-            card.classList.toggle('flipped', showBack);
-        });
-    }
-
-    function applyWritingPracticeState() {
-        document.documentElement.classList.toggle('kanji-writing-practice', writingPractice);
-        updateCardPracticeButtons();
-    }
-
-    function toggle() {
-        showBack = !showBack;
-        updateUI();
-        applyCardState();
-    }
+    function applyCardState() { getCards().forEach(function (card) { card.classList.toggle('flipped', showBack); }); }
+    function applyWritingPracticeState() { updateCardPracticeButtons(); }
+    function toggle() { showBack = !showBack; updateUI(); applyCardState(); }
 
     function toggleWritingPractice() {
         writingPractice = !writingPractice;
@@ -99,104 +76,42 @@
         if (!card) return;
         const next = !cardWritingPractice(card);
         card.dataset.writingPractice = next ? '1' : '0';
-        card.classList.toggle('kanji-card-writing-practice', next);
         updateCardPracticeButton(card);
     }
+
+    window.KanjiControls = { toggleCardWritingPractice: toggleCardWritingPractice };
 
     function ensureMobileControl() {
         const desktop = document.getElementById('kanjiDirection');
         if (!desktop) return;
-
         let bar = document.querySelector('.mobile-bottom-controls');
-        if (!bar) {
-            bar = document.createElement('div');
-            bar.className = 'mobile-bottom-controls';
-            bar.setAttribute('aria-label', 'Kanji controls');
-            document.body.appendChild(bar);
-        }
-
+        if (!bar) { bar = document.createElement('div'); bar.className = 'mobile-bottom-controls'; bar.setAttribute('aria-label', 'Kanji controls'); document.body.appendChild(bar); }
         let mobile = document.getElementById('kanjiMobileDirection');
-        if (!mobile) {
-            mobile = document.createElement('button');
-            mobile.type = 'button';
-            mobile.id = 'kanjiMobileDirection';
-            mobile.className = 'direction-toggle';
-            mobile.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggle();
-            });
-        }
-
+        if (!mobile) { mobile = document.createElement('button'); mobile.type='button'; mobile.id='kanjiMobileDirection'; mobile.className='direction-toggle'; mobile.addEventListener('click', function(e){e.preventDefault();e.stopPropagation();toggle();}); }
         let practiceMobile = document.getElementById('kanjiMobileWritingPractice');
-        if (!practiceMobile) {
-            practiceMobile = document.createElement('button');
-            practiceMobile.type = 'button';
-            practiceMobile.id = 'kanjiMobileWritingPractice';
-            practiceMobile.className = 'direction-toggle';
-            practiceMobile.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleWritingPractice();
-            });
-        }
-
-        bar.appendChild(mobile);
-        bar.appendChild(practiceMobile);
-        updateUI();
+        if (!practiceMobile) { practiceMobile=document.createElement('button');practiceMobile.type='button';practiceMobile.id='kanjiMobileWritingPractice';practiceMobile.className='direction-toggle';practiceMobile.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();toggleWritingPractice();}); }
+        bar.appendChild(mobile); bar.appendChild(practiceMobile); updateUI();
     }
 
     function syncResponsive() {
         const mobile = mobileQuery && mobileQuery.matches;
         const desktop = document.getElementById('kanjiDirection');
         const practiceDesktop = document.getElementById('kanjiWritingPractice');
-        if (desktop) {
-            const field = desktop.closest('.field');
-            if (field) field.style.display = mobile ? 'none' : '';
-        }
-        if (practiceDesktop) {
-            const field = practiceDesktop.closest('.field');
-            if (field) field.style.display = mobile ? 'none' : '';
-        }
-        if (mobile) ensureMobileControl();
-        else updateUI();
+        if (desktop) { const field=desktop.closest('.field'); if(field) field.style.display=mobile?'none':''; }
+        if (practiceDesktop) { const field=practiceDesktop.closest('.field'); if(field) field.style.display=mobile?'none':''; }
+        if (mobile) ensureMobileControl(); else updateUI();
     }
 
     function init() {
-        const desktop = document.getElementById('kanjiDirection');
-        const practiceDesktop = document.getElementById('kanjiWritingPractice');
-        const grid = document.getElementById('kanjiGrid');
-        if (!desktop || !practiceDesktop || !grid) return;
-
-        desktop.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggle();
-        });
-
-        practiceDesktop.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleWritingPractice();
-        });
-
-        try { writingPractice = localStorage.getItem('japanese-lang-kanji-writing-practice') === '1'; } catch (_) {}
-        applyWritingPracticeState();
-
-        mobileQuery = matchMedia('(max-width:520px)');
-        if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', syncResponsive);
-        else mobileQuery.addListener(syncResponsive);
-
-        updateUI();
-        applyCardState();
-        syncResponsive();
-
-        new MutationObserver(function () {
-            if (showBack) applyCardState();
-            updateCardPracticeButtons();
-        }).observe(grid, { childList: true });
+        const desktop=document.getElementById('kanjiDirection'), practiceDesktop=document.getElementById('kanjiWritingPractice'), grid=document.getElementById('kanjiGrid');
+        if(!desktop||!practiceDesktop||!grid)return;
+        desktop.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();toggle();});
+        practiceDesktop.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();toggleWritingPractice();});
+        try { writingPractice=localStorage.getItem('japanese-lang-kanji-writing-practice')==='1'; } catch(_) {}
+        mobileQuery=matchMedia('(max-width:520px)');
+        if(mobileQuery.addEventListener)mobileQuery.addEventListener('change',syncResponsive);else mobileQuery.addListener(syncResponsive);
+        updateUI(); applyCardState(); syncResponsive();
+        new MutationObserver(function(){if(showBack)applyCardState();updateCardPracticeButtons();}).observe(grid,{childList:true});
     }
-
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-    else init();
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
