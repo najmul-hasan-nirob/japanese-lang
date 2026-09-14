@@ -19,7 +19,7 @@
 .gs-source-grammar-heading{margin:0 0 18px;font-size:20px;line-height:1.5;color:var(--ink);font-family:'Shippori Mincho',serif}
 .gs-source-accordion-text h5{margin:22px 0 9px;font-size:15px;color:var(--ink)}
 .gs-source-accordion-text p{margin:8px 0;color:var(--ink-soft);font-size:16px;line-height:1.9}
-.gs-source-accordion-text ul{margin:8px 0 14px;padding-left:24px;color:var(--ink-soft);font-size:14px;line-height:1.9}
+.gs-source-accordion-text ul{margin:8px 0 16px;padding-left:24px;color:var(--ink-soft);font-size:14px;line-height:1.9}
 .gs-source-accordion-text li{margin:3px 0}
 .gs-source-accordion-text code{padding:2px 5px;border-radius:4px;background:rgba(86,93,102,.09);font-family:'JetBrains Mono',monospace;font-size:.9em}
 .gs-source-accordion-text strong{color:var(--ink)}
