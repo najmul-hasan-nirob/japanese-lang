@@ -5,51 +5,129 @@
     {
       title: 'Rule ①：N1 は N2 です',
       html: `
-        <h3 class="wp-block-heading has-medium-font-size">📖 Grammar ①：<strong>N1 は N2 です</strong></h3>
-        পরিচয় দেওয়া (N1 は N2 です)
+        <div aria-labelledby="gs-trigger-gsbp-7552c8d-0" class="gs-accordion-item__content" itemscope="" id="gspb-accordion-item-content-gsbp-805967f" aria-hidden="false" style="max-height: 1546px; user-select: text !important; pointer-events: auto !important;"><div class="gs-accordion-item__text" style="user-select: text !important; pointer-events: auto !important;">
+<h3 class="wp-block-heading has-medium-font-size" id="rule-1" style="user-select: text !important; pointer-events: auto !important;">📖 Grammar ①：<strong style="user-select: text !important; pointer-events: auto !important;">N1 は N2 です</strong></h3>
 
-স্বাগতম জাপানি ভাষা শিক্ষার প্রথম ধাপে! 🎉
 
-আমরা যখন ইংরেজিতে বলি “I am a student” বা বাংলায় বলি “আমি ছাত্র”, তখন জাপানি ভাষায় সেটি বলার নিয়মটা একটু আলাদা। জাপানি ভাষায় বাক্য গঠন অনেকটা বাংলার মতোই, কিন্তু এতে কিছু ছোট ছোট “আঠা” বা Particle থাকে যা শব্দগুলোকে জোড়া দেয়।
 
-আসুন প্রথম সূত্রটি শিখি।
+<p class="wp-block-paragraph" id="পর-চয-দ-ওয-n1-は-n2-です" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">পরিচয় দেওয়া (N1 は N2 です)</strong></p>
 
-এটি হলো জাপানি ভাষার সবচেয়ে বেসিক বা মৌলিক বাক্য গঠন। এর মাধ্যমে আপনি নিজের নাম, পেশা বা পরিচয় দিতে পারবেন।
 
-গঠন (Structure):
-Noun_1 (Subject/Topic) + は + Noun_2 (Identity) + です
 
-(উচ্চারণ: N1 wa N2 desu)
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;">স্বাগতম জাপানি ভাষা শিক্ষার প্রথম ধাপে! 🎉</p>
 
-বিশ্লেষণ (Breakdown):
-১. は (Wa):
 
-এটি একটি Particle বা বিভক্তি। এটি বাক্যের Topic বা বিষয়বস্তুকে চিহ্নিত করে।
-⚠️ সতর্কতা: হিরাগানায় লেখার সময় এটি ‘ha’ (は) লেখা হয়, কিন্তু বাক্যের মাঝখানে Particle হিসেবে বসলে এর উচ্চারণ হয় ‘wa’ (ওয়া)।
-২. です (Desu):
 
-এটি বাক্যের শেষে বসে। ইংরেজিতে যেমন is/am/are থাকে, এটি তেমনই কাজ করে।
-এটি বাক্যকে Polite (ভদ্র) করে এবং বাক্য শেষ হয়েছে তা বোঝায়।
-উচ্চারণ টিপস: ‘Desu’ এর উচ্চারণ দ্রুত করার সময় অনেকটা “Des” (দেস) এর মতো শোনায়, শেষের ‘u’ হালকা হয়ে যায়।
-উদাহরণ (Examples):
-১. আমি মাইক মিলার:
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;">আমরা যখন ইংরেজিতে বলি “I am a student” বা বাংলায় বলি “আমি ছাত্র”, তখন জাপানি ভাষায় সেটি বলার নিয়মটা একটু আলাদা। জাপানি ভাষায় বাক্য গঠন অনেকটা বাংলার মতোই, কিন্তু এতে কিছু ছোট ছোট “আঠা” বা <strong style="user-select: text !important; pointer-events: auto !important;">Particle</strong> থাকে যা শব্দগুলোকে জোড়া দেয়।</p>
 
-わたしは マイク・ミラーです。
-(Watashi wa Maiku Miraa desu.)
-আমি (হলাম) মাইক মিলার।
-২. আমি ছাত্র:
 
-わたしは がくせい です。
-(Watashi wa gakusei desu.)
-আমি ছাত্র।
-৩. উনি মিস্টার তানাকা:
 
-あのひとは たなかさん です。
-(Ano hito wa Tanaka-san desu.)
-ওই লোকটি (হলেন) মিস্টার তানাকা।
-শিক্ষকের টিপস (Teacher’s Note):
-বাংলায় যেমন আমরা বলি “আমি ছাত্র” (মাঝখানে ‘হলাম’ বা ‘হই’ উহ্য থাকে), জাপানি ভাষায় ঠিক তেমনই Wa দিয়ে সাবজেক্টকে আলাদা করে শেষে Desu দিয়ে বাক্য শেষ করতে হয়।
-সূত্র: A হলো B = A は B です।`
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;">আসুন প্রথম সূত্রটি শিখি।</p>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;">এটি হলো জাপানি ভাষার সবচেয়ে বেসিক বা মৌলিক বাক্য গঠন। এর মাধ্যমে আপনি নিজের নাম, পেশা বা পরিচয় দিতে পারবেন।</p>
+
+
+
+<h5 class="wp-block-heading" id="গঠন-structure" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">গঠন (Structure):</strong></h5>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">Noun_1 (Subject/Topic) + は + Noun_2 (Identity) + です</strong></p>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;"><em style="user-select: text !important; pointer-events: auto !important;">(উচ্চারণ: N1 wa N2 desu)</em></p>
+
+
+
+<h5 class="wp-block-heading" id="ব-শ-ল-ষণ-breakdown" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">বিশ্লেষণ (Breakdown):</strong></h5>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;">১. <strong style="user-select: text !important; pointer-events: auto !important;">は (Wa):</strong></p>
+
+
+
+<ul class="wp-block-list" style="user-select: text !important; pointer-events: auto !important;">
+<li style="user-select: text !important; pointer-events: auto !important;">এটি একটি <strong style="user-select: text !important; pointer-events: auto !important;">Particle</strong> বা বিভক্তি। এটি বাক্যের <strong style="user-select: text !important; pointer-events: auto !important;">Topic</strong> বা বিষয়বস্তুকে চিহ্নিত করে।</li>
+
+
+
+<li style="user-select: text !important; pointer-events: auto !important;">⚠️ <strong style="user-select: text !important; pointer-events: auto !important;">সতর্কতা:</strong> হিরাগানায় লেখার সময় এটি <strong style="user-select: text !important; pointer-events: auto !important;">‘ha’ (は)</strong> লেখা হয়, কিন্তু বাক্যের মাঝখানে Particle হিসেবে বসলে এর উচ্চারণ হয় <strong style="user-select: text !important; pointer-events: auto !important;">‘wa’ (ওয়া)</strong>।</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;">২. <strong style="user-select: text !important; pointer-events: auto !important;">です (Desu):</strong></p>
+
+
+
+<ul class="wp-block-list" style="user-select: text !important; pointer-events: auto !important;">
+<li style="user-select: text !important; pointer-events: auto !important;">এটি বাক্যের শেষে বসে। ইংরেজিতে যেমন <code style="user-select: text !important; pointer-events: auto !important;">is/am/are</code> থাকে, এটি তেমনই কাজ করে।</li>
+
+
+
+<li style="user-select: text !important; pointer-events: auto !important;">এটি বাক্যকে <strong style="user-select: text !important; pointer-events: auto !important;">Polite (ভদ্র)</strong> করে এবং বাক্য শেষ হয়েছে তা বোঝায়।</li>
+
+
+
+<li style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">উচ্চারণ টিপস:</strong> ‘Desu’ এর উচ্চারণ দ্রুত করার সময় অনেকটা <strong style="user-select: text !important; pointer-events: auto !important;">“Des” (দেস)</strong> এর মতো শোনায়, শেষের ‘u’ হালকা হয়ে যায়।</li>
+</ul>
+
+
+
+
+
+
+<h5 class="wp-block-heading" id="উদ-হরণ-examples" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">উদাহরণ (Examples):</strong></h5>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">১. আমি মাইক মিলার:</strong></p>
+
+
+
+<ul class="wp-block-list" style="user-select: text !important; pointer-events: auto !important;">
+<li style="user-select: text !important; pointer-events: auto !important;">わたしは マイク・ミラーです。<br style="user-select: text !important; pointer-events: auto !important;">(Watashi wa Maiku Miraa desu.)<br style="user-select: text !important; pointer-events: auto !important;">আমি (হলাম) মাইক মিলার।</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">২. আমি ছাত্র:</strong></p>
+
+
+
+<ul class="wp-block-list" style="user-select: text !important; pointer-events: auto !important;">
+<li style="user-select: text !important; pointer-events: auto !important;">わたしは がくせい です。<br style="user-select: text !important; pointer-events: auto !important;">(Watashi wa gakusei desu.)<br style="user-select: text !important; pointer-events: auto !important;">আমি ছাত্র।</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">৩. উনি মিস্টার তানাকা:</strong></p>
+
+
+
+<ul class="wp-block-list" style="user-select: text !important; pointer-events: auto !important;">
+<li style="user-select: text !important; pointer-events: auto !important;">あのひとは たなかさん です。<br style="user-select: text !important; pointer-events: auto !important;">(Ano hito wa Tanaka-san desu.)<br style="user-select: text !important; pointer-events: auto !important;">ওই লোকটি (হলেন) মিস্টার তানাকা।</li>
+</ul>
+
+
+
+<h5 class="wp-block-heading" id="শ-ক-ষক-র-ট-পস-teacher-s-note-6" style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">শিক্ষকের টিপস (Teacher’s Note):</strong></h5>
+
+
+
+<ul class="wp-block-list" style="user-select: text !important; pointer-events: auto !important;">
+<li style="user-select: text !important; pointer-events: auto !important;">বাংলায় যেমন আমরা বলি “আমি ছাত্র” (মাঝখানে ‘হলাম’ বা ‘হই’ উহ্য থাকে), জাপানি ভাষায় ঠিক তেমনই <code style="user-select: text !important; pointer-events: auto !important;">Wa</code> দিয়ে সাবজেক্টকে আলাদা করে শেষে <code style="user-select: text !important; pointer-events: auto !important;">Desu</code> দিয়ে বাক্য শেষ করতে হয়।</li>
+
+
+
+<li style="user-select: text !important; pointer-events: auto !important;"><strong style="user-select: text !important; pointer-events: auto !important;">সূত্র:</strong> <code style="user-select: text !important; pointer-events: auto !important;">A</code> হলো <code style="user-select: text !important; pointer-events: auto !important;">B</code> = <strong style="user-select: text !important; pointer-events: auto !important;">A は B です</strong>।</li>
+</ul>
+</div></div>
+        `
     },
     {
       title: 'Rule ②：N1 は N2 じゃ ありません',
