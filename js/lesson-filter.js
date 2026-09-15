@@ -54,10 +54,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const bn={"I":"আমি","you":"তুমি / আপনি","student":"ছাত্র / শিক্ষার্থী","company employee":"কোম্পানির কর্মচারী","bank employee":"ব্যাংকের কর্মচারী","[medical] doctor":"ডাক্তার","researcher, scholar":"গবেষক","university":"বিশ্ববিদ্যালয়","hospital":"হাসপাতাল","yes":"হ্যাঁ","no":"না","~ years old":"~ বছর বয়স","how old (おいくつ is the polite form of なんさい)":"কত বছর বয়স","U.S.A.":"যুক্তরাষ্ট্র","U.K.":"যুক্তরাজ্য","India":"ভারত","Indonesia":"ইন্দোনেশিয়া","South Korea":"দক্ষিণ কোরিয়া","Thailand":"থাইল্যান্ড","China":"চীন","Germany":"জার্মানি","Japan":"জাপান","Brazil":"ব্রাজিল","this (thing here)":"এটি / এটা","that (thing near the listener)":"সেটি / ওটা","that (thing over there)":"ওটি / ওটা","book":"বই","dictionary":"অভিধান","magazine":"ম্যাগাজিন","newspaper":"সংবাদপত্র","notebook":"নোটবুক","business card":"ব্যবসায়িক কার্ড","(credit) card":"(ক্রেডিট) কার্ড","pencil":"পেন্সিল","ballpoint pen":"বলপেন","key":"চাবি","watch, clock":"ঘড়ি","umbrella":"ছাতা","bag, briefcase":"ব্যাগ / ব্রিফকেস","television":"টেলিভিশন","radio":"রেডিও","camera":"ক্যামেরা","computer":"কম্পিউটার","car, vehicle":"গাড়ি / যানবাহন","desk":"ডেস্ক","chair":"চেয়ার","chocolate":"চকলেট","coffee":"কফি"};
     function banglaMeaning(item){return item.bn||bn[item.en]||"বাংলা অর্থ যোগ করা হবে";}
 
+    // Japanese words ending in い are normally い-adjectives. Exclude common
+    // な-adjectives and non-adjective vocabulary that also ends in い.
+    const nonIAdjectives = new Set(["きれい", "きらい", "ゆうめい", "ていねい", "せんせい", "がくせい", "かいしゃいん", "ぎんこういん", "はい", "いいえ", "～さい"]);
+    function isIAdjective(item) {
+        if (!item || item.type !== "vocabulary") return false;
+        const jp = String(item.jp || "").trim();
+        return jp.endsWith("い") && !nonIAdjectives.has(jp);
+    }
+
+    function adjectiveLabel(item) {
+        return isIAdjective(item) ? '<span class="adjective-label">(い adj.)</span>' : '';
+    }
+
     function renderLessons(){
         const grid=document.getElementById("grid"),mode=document.getElementById("mode"),typePanel=document.getElementById("typePanel");
         if(!grid||!mode||!typePanel)return;
-        // Hard vocabulary is an overlay filter, not a lesson-card type.
         const types=Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked"))
             .map(cb=>cb.value)
             .filter(value=>value!=="hard");
@@ -67,8 +79,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cards.forEach(item=>{
             const card=document.createElement("div");card.className="card"+(item.type==="grammar"?" grammar":"");
             const romaji=toRomaji(item.jp||"");card.__lessonItem=item;card.__lessonItem.romaji=romaji;card.__teacherBangla=banglaMeaning(item);card.dataset.romaji=romaji;
-            const tag=`${item.lesson} · ${item.type==="grammar"?"Grammar":"Vocabulary"}`;const isVocab=item.type==="vocabulary"||item.type==="cpart"||item.type==="country";const frontText=showJapaneseFirst?item.jp:(isVocab?romaji:item.en);
-            if(isVocab){const hideRomaji=window.lessonBackRomajiVisible===false;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back vocabulary-back"><span class="romaji" style="display:${hideRomaji?'none':''}">${romaji}</span><span class="english">${item.en}</span><span class="bangla">${banglaMeaning(item)}</span></div></div>`;}else{const backText=showJapaneseFirst?item.en:item.jp;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div>`;}
+            const tag=`${item.lesson} · ${item.type==="grammar"?"Grammar":"Vocabulary"}`;const isVocab=item.type==="vocabulary"||item.type==="cpart"||item.type==="country";const frontText=showJapaneseFirst?item.jp:(isVocab?romaji:item.en);const adjLabel=adjectiveLabel(item);
+            if(isVocab){const hideRomaji=window.lessonBackRomajiVisible===false;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div>${showJapaneseFirst?adjLabel:''}</div><div class="back vocabulary-back"><span class="romaji" style="display:${hideRomaji?'none':''}">${romaji}</span><span class="english">${item.en}</span>${adjLabel}<span class="bangla">${banglaMeaning(item)}</span></div></div>`;}else{const backText=showJapaneseFirst?item.en:item.jp;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div>`;}
             card.addEventListener("click",()=>card.classList.toggle("flipped"));const speakText=isVocab?item.jp:cleanForSpeech(item.jp);if(speakText&&isSpeakableJapanese(speakText))card.appendChild(createSpeakerButton(speakText));frag.appendChild(card);
         });
         grid.appendChild(frag);const counter=document.getElementById("cardCount");if(counter)counter.textContent=`Showing ${cards.length} cards`;document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
