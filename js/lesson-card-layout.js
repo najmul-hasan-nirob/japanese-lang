@@ -70,21 +70,18 @@ document.addEventListener("DOMContentLoaded", () => {
     observer.observe(grid, { childList: true, subtree: true });
 });
 
-// Add the な-adjective marker on its own line to both sides of matching vocabulary cards.
+// Add the な-adjective marker from the lesson data itself.
+// Lesson vocabulary marks な-adjectives with [な], so this stays
+// synchronized automatically as Lessons 1–25 are updated.
 (function addNaAdjectiveLabels() {
-    const naAdjectives = new Set([
-        "きれい", "きらい", "ゆうめい", "ていねい",
-        "しずか", "にぎやか", "げんき", "ひま", "べんり",
-        "すき", "だいすき", "じょうず", "へた", "しんせつ",
-        "たいへん", "いろいろ", "すてき", "じょうぶ", "あんぜん",
-        "かんたん", "ふくざつ", "たいせつ", "ひつよう", "とくべつ",
-        "まじめ", "らく", "にがて", "とくい", "しあわせ", "へいき"
-    ]);
-
     function addLabels() {
         document.querySelectorAll('#grid > .card').forEach(card => {
             const item = card.__lessonItem;
-            if (!item || item.type !== 'vocabulary' || !naAdjectives.has(String(item.jp || '').trim())) return;
+            if (!item || item.type !== 'vocabulary') return;
+
+            const jp = String(item.jp || '').trim();
+            if (!/\[な\]/.test(jp)) return;
+
             card.querySelectorAll('.front, .back').forEach(side => {
                 if (side.querySelector('.na-adjective-label')) return;
                 const label = document.createElement('span');
