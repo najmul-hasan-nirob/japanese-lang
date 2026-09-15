@@ -64,6 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function adjectiveLabel(item) {
+        if (!item || item.type !== "vocabulary") return "";
+        const jp = String(item.jp || "").trim();
+        if (/\[な\]/.test(jp)) return '<span class="adjective-label">(な adj.)</span>';
         return isIAdjective(item) ? '<span class="adjective-label">(い adj.)</span>' : '';
     }
 
