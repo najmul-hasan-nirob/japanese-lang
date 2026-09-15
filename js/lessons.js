@@ -155,3 +155,10 @@ let showJapaneseFirst = true;
         init();
     }
 })();
+
+// Keep the い-adjective marker on its own line on both sides of lesson cards.
+(function addAdjectiveLabelStyle() {
+    const style = document.createElement('style');
+    style.textContent = '.adjective-label{display:block;margin-top:2px;font-size:.78em;line-height:1.2;font-weight:600;opacity:.85;}';
+    document.head.appendChild(style);
+})();
