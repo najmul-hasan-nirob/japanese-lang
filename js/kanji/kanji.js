@@ -1,7 +1,7 @@
 (function () {
     function init() {
-        const grid=document.getElementById('kanjiGrid'), search=document.getElementById('kanjiSearch'), clear=document.getElementById('kanjiSearchClear'), levelPanel=document.getElementById('kanjiLevelPanel'), levelBtn=document.getElementById('kanjiLevelBtn'), mode=document.getElementById('kanjiMode'), shuffleBtn=document.getElementById('shuffleBtn'), count=document.getElementById('kanjiCount');
-        if(!grid||!levelPanel||!search||!clear||!mode||!shuffleBtn||!count||!Array.isArray(window.kanjiData)) return;
+        const grid=document.getElementById('kanjiGrid'), search=document.getElementById('kanjiSearch'), clear=document.getElementById('kanjiSearchClear'), levelPanel=document.getElementById('kanjiLevelPanel'), levelBtn=document.getElementById('kanjiLevelBtn'), mode=document.getElementById('kanjiMode'), shuffleBtn=document.getElementById('shuffleBtn')||document.getElementById('kanjiShuffleBtn'), count=document.getElementById('kanjiCount');
+        if(!grid||!levelPanel||!search||!clear||!mode||!count||!Array.isArray(window.kanjiData)) return;
 
         const HARD_STORAGE_KEY='japanese-lang-hard-vocabulary';
         const FILTER_STORAGE_KEY='japanese-lang-kanji-filter';
@@ -57,7 +57,7 @@
         document.addEventListener('click',function(){levelPanel.classList.remove('open');levelBtn.setAttribute('aria-expanded','false');});
         search.addEventListener('input',render);clear.addEventListener('click',function(){search.value='';render();search.focus();});
         mode.addEventListener('change',function(){saveFilterState();render();});
-        shuffleBtn.addEventListener('click',function(){mode.value='shuffle';saveFilterState();render();});
+        if(shuffleBtn)shuffleBtn.addEventListener('click',function(){mode.value='shuffle';saveFilterState();render();});
         updateLevelLabel();render();
         window.addEventListener('japaneseLangFavouriteChanged',render);
         window.addEventListener('japaneseLangCloudLoaded',render);
