@@ -22,6 +22,15 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
   }
 
+  function savedHardMode() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(FILTER_KEY) || 'null');
+      return Array.isArray(saved?.selectedTypes) && saved.selectedTypes.includes('hard');
+    } catch (_) {
+      return false;
+    }
+  }
+
   loadStored();
 
   const grid = () => document.getElementById('grid') || document.getElementById('importantRulesList');
@@ -148,23 +157,24 @@
     document.dispatchEvent(new CustomEvent('hardVocabularyFilterReady'));
   }
 
-  // Persistence restores the checkbox too, but this script loads later than
-  // the persistence script. Restore it directly so reload timing cannot break
-  // the Hard mode state.
   function restoreCheckboxFromFilterState() {
     const checkbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
     if (!checkbox) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem(FILTER_KEY) || 'null');
-      checkbox.checked = Array.isArray(saved?.selectedTypes) && saved.selectedTypes.includes('hard');
-    } catch (_) {}
+    const shouldBeHard = savedHardMode();
+    checkbox.checked = shouldBeHard;
   }
 
   function syncModeFromCheckbox() {
     const checkbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
     if (!checkbox) return;
+
+    // The persisted filter state is authoritative during page initialization.
+    // This prevents a later lesson render from briefly unchecking Hard and
+    // clearing the filter while lazy lesson data is loading.
+    if (savedHardMode()) checkbox.checked = true;
+
     hardMode = checkbox.checked;
-    if (hardMode) setTimeout(applyFilter, 0);
+    if (hardMode) applyFilter();
     else clearFilter();
   }
 
@@ -182,11 +192,16 @@
     panel()?.addEventListener('change', event => {
       if (event.target?.value === 'hard') {
         hardMode = event.target.checked;
-        if (hardMode) setTimeout(applyFilter, 0);
+        if (hardMode) applyFilter();
         else clearFilter();
         return;
       }
-      if (hardMode) setTimeout(applyFilter, 0);
+      if (hardMode || savedHardMode()) {
+        const checkbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
+        if (checkbox) checkbox.checked = true;
+        hardMode = true;
+        applyFilter();
+      }
     });
 
     addStars();
@@ -194,7 +209,9 @@
 
     document.addEventListener('lessonCardsRendered', () => {
       addStars();
-      if (panel()?.querySelector('input[value="hard"]')?.checked) {
+      if (savedHardMode()) {
+        const checkbox = panel()?.querySelector('input[value="hard"]');
+        if (checkbox) checkbox.checked = true;
         hardMode = true;
         applyFilter();
       }
@@ -202,7 +219,9 @@
 
     document.addEventListener('lessonDataLoaded', () => {
       addStars();
-      if (panel()?.querySelector('input[value="hard"]')?.checked) {
+      if (savedHardMode()) {
+        const checkbox = panel()?.querySelector('input[value="hard"]');
+        if (checkbox) checkbox.checked = true;
         hardMode = true;
         applyFilter();
       }
