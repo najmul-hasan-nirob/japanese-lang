@@ -1,19 +1,15 @@
 // =====================================================
 // Favourite / Hard Vocabulary system
 // - Stores favourite keys in localStorage
-// - Existing vocabulary cards use the same store as before
-// - Any card with data-favorite-key can use the same star system
-// - Kanji cards also use this persistent favourite store
-// - Changes are exposed to supabase-sync.js through japaneseLangDataChanged
-// - Hard vocabulary filter selection is also persisted locally
+// - Existing vocabulary cards and Kanji cards share the same store
+// - Injects the Hard vocabulary checkbox into the lesson Type filter
+// - Filtering itself is handled by lesson-filter.js
 // =====================================================
 (() => {
   'use strict';
 
   const STORAGE_KEY = 'japanese-lang-hard-vocabulary';
-  const FILTER_STORAGE_KEY = 'japanese-lang-hard-filter';
   let hardWords = new Set();
-  let hardMode = false;
 
   function loadStored() {
     try {
@@ -24,28 +20,14 @@
     }
   }
 
-  function loadFilterState() {
-    try {
-      return localStorage.getItem(FILTER_STORAGE_KEY) === 'true';
-    } catch (_) {
-      return false;
-    }
-  }
-
-  function saveFilterState() {
-    try {
-      localStorage.setItem(FILTER_STORAGE_KEY, String(hardMode));
-    } catch (_) {}
-  }
-
   loadStored();
-  hardMode = loadFilterState();
 
   const save = () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords]));
       window.dispatchEvent(new Event('japaneseLangFavouriteChanged'));
       window.dispatchEvent(new Event('japaneseLangDataChanged'));
+      document.dispatchEvent(new CustomEvent('hardVocabularyUpdated'));
     } catch (_) {}
   };
 
@@ -102,8 +84,6 @@
         hardWords.has(key) ? hardWords.delete(key) : hardWords.add(key);
         save();
         updateStar(card);
-
-        if (hardMode && card.closest('#grid')) applyFilter();
       });
     }
 
@@ -119,29 +99,6 @@
     grids().forEach(g => g.querySelectorAll(':scope > .card').forEach(updateStar));
   }
 
-  function applyFilter() {
-    addStars();
-
-    const cards = [...(document.getElementById('grid')?.querySelectorAll(':scope > .card') || [])];
-    let visible = 0;
-
-    cards.forEach(card => {
-      const isHard = !!card.querySelector('.vocabulary-back') && hardWords.has(cardKey(card));
-      card.style.display = isHard ? '' : 'none';
-      if (isHard) visible++;
-    });
-
-    const count = document.getElementById('cardCount');
-    if (count) count.textContent = `Showing ${visible} hard vocabulary cards`;
-  }
-
-  function clearFilter() {
-    hardMode = false;
-    saveFilterState();
-    document.getElementById('grid')?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
-    addStars();
-  }
-
   function ensureCheckbox() {
     const p = panel();
     if (!p || p.querySelector('input[value="hard"]')) return;
@@ -152,43 +109,16 @@
     document.dispatchEvent(new CustomEvent('hardVocabularyFilterReady'));
   }
 
-  function restoreCheckbox() {
-    const input = panel()?.querySelector('input[value="hard"]');
-    if (!input) return;
-    input.checked = hardMode;
-    if (hardMode) setTimeout(applyFilter, 0);
-  }
-
   function init() {
     ensureCheckbox();
-
-    panel()?.addEventListener('change', event => {
-      if (event.target?.value === 'hard') {
-        hardMode = event.target.checked;
-        saveFilterState();
-        if (hardMode) {
-          setTimeout(applyFilter, 0);
-        } else {
-          clearFilter();
-        }
-        return;
-      }
-
-      if (hardMode) setTimeout(applyFilter, 0);
-    });
-
-    restoreCheckbox();
     addStars();
 
-    document.addEventListener('lessonCardsRendered', () => {
-      addStars();
-      if (hardMode) applyFilter();
-    });
+    document.addEventListener('lessonCardsRendered', addStars);
 
     window.addEventListener('japaneseLangCloudLoaded', () => {
       loadStored();
       addStars();
-      if (hardMode) applyFilter();
+      document.dispatchEvent(new CustomEvent('hardVocabularyUpdated'));
     });
 
     const kanjiGrid = document.getElementById('kanjiGrid');
@@ -202,4 +132,10 @@
   } else {
     init();
   }
+
+  window.japaneseLangHardVocabulary = {
+    getKey: cardKey,
+    isHard: card => hardWords.has(cardKey(card)),
+    sync: addStars
+  };
 })();
