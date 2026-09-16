@@ -5,11 +5,13 @@
 // - Any card with data-favorite-key can use the same star system
 // - Kanji cards also use this persistent favourite store
 // - Changes are exposed to supabase-sync.js through japaneseLangDataChanged
+// - Hard vocabulary filter selection is also persisted locally
 // =====================================================
 (() => {
   'use strict';
 
   const STORAGE_KEY = 'japanese-lang-hard-vocabulary';
+  const FILTER_STORAGE_KEY = 'japanese-lang-hard-filter';
   let hardWords = new Set();
   let hardMode = false;
 
@@ -22,7 +24,22 @@
     }
   }
 
+  function loadFilterState() {
+    try {
+      return localStorage.getItem(FILTER_STORAGE_KEY) === 'true';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function saveFilterState() {
+    try {
+      localStorage.setItem(FILTER_STORAGE_KEY, String(hardMode));
+    } catch (_) {}
+  }
+
   loadStored();
+  hardMode = loadFilterState();
 
   const save = () => {
     try {
@@ -120,6 +137,7 @@
 
   function clearFilter() {
     hardMode = false;
+    saveFilterState();
     document.getElementById('grid')?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
     addStars();
   }
@@ -134,12 +152,20 @@
     document.dispatchEvent(new CustomEvent('hardVocabularyFilterReady'));
   }
 
+  function restoreCheckbox() {
+    const input = panel()?.querySelector('input[value="hard"]');
+    if (!input) return;
+    input.checked = hardMode;
+    if (hardMode) setTimeout(applyFilter, 0);
+  }
+
   function init() {
     ensureCheckbox();
 
     panel()?.addEventListener('change', event => {
       if (event.target?.value === 'hard') {
         hardMode = event.target.checked;
+        saveFilterState();
         if (hardMode) {
           setTimeout(applyFilter, 0);
         } else {
@@ -151,6 +177,7 @@
       if (hardMode) setTimeout(applyFilter, 0);
     });
 
+    restoreCheckbox();
     addStars();
 
     document.addEventListener('lessonCardsRendered', () => {
