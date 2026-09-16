@@ -11,13 +11,13 @@ js:
 - /js/lesson-filter-persistence.js
 - /js/lesson-type.js
 - /js/hard-vocabulary.js
+- /js/lesson-hard-filter.js
 - /js/lesson-card-number.js
 - /js/lesson-card-topbar.js
 - /js/vocabulary-clues.js
 - /js/lesson-teacher-mode.js
 - /js/lesson-controls.js
 - /js/admin-card-edit.js
----
 
 <div class="toolbar">
     <div class="field filter-field">
@@ -55,5 +55,5 @@ js:
 </style>
 
 <script>
-(function(){const grid=document.getElementById('grid'),count=document.getElementById('countDisplay'),typePanel=document.getElementById('typePanel');function getVisibleCount(){return grid?grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length:0}function getSelectedNormalTypes(){return typePanel?Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).filter(box=>box.value!=='hard'&&box.checked).map(box=>({value:box.value,label:box.closest('label')?.textContent.trim()||box.value})):[]}function getHardCountForCurrentCards(){return grid?Array.from(grid.querySelectorAll(':scope > .card')).filter(card=>card.querySelector('.hard-star.active')).length:0}function getCountLabel(){if(!typePanel)return null;const hard=Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).find(box=>box.value==='hard');if(!hard?.checked)return null;const selected=getSelectedNormalTypes();if(selected.length===1&&selected[0].value==='vocabulary')return'Hard Vocabulary';const typeName=selected.length?selected.map(item=>item.label).join(' + '):'Vocabulary';return`Hard ${typeName} Vocabulary`}function updateCount(){if(!grid||!count)return;const total=getVisibleCount(),hardLabel=getCountLabel();if(!hardLabel){const selected=getSelectedNormalTypes();if(selected.length===1&&selected[0].value==='vocabulary'){const hardCount=getHardCountForCurrentCards();count.textContent=hardCount>0?`Showing ${total} vocabulary + ${hardCount} hard vocabulary`:`Showing ${total} vocabulary`;return}}count.textContent=hardLabel?`Showing ${total} ${hardLabel}`:`Showing ${total} ${total===1?'card':'cards'}`}updateCount();if(grid)new MutationObserver(updateCount).observe(grid,{childList:true,attributes:true,attributeFilter:['style']});if(typePanel)typePanel.addEventListener('change',()=>setTimeout(updateCount,0));document.addEventListener('hardVocabularyUpdated',updateCount)})();
+(function(){const grid=document.getElementById('grid'),count=document.getElementById('countDisplay'),typePanel=document.getElementById('typePanel');function getVisibleCount(){return grid?grid.querySelectorAll(':scope > .card:not([style*="display: none"])').length:0}function getSelectedNormalTypes(){return typePanel?Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).filter(box=>box.value!=='hard'&&box.checked).map(box=>({value:box.value,label:box.closest('label')?.textContent.trim()||box.value})):[]}function getCountLabel(){if(!typePanel)return null;const hard=Array.from(typePanel.querySelectorAll('input[type="checkbox"]')).find(box=>box.value==='hard');if(!hard?.checked)return null;const selected=getSelectedNormalTypes();const typeName=selected.length?selected.map(item=>item.label).join(' + '):'Vocabulary';return`Hard ${typeName}`}function updateCount(){if(!grid||!count)return;const total=getVisibleCount(),hardLabel=getCountLabel();count.textContent=hardLabel?`Showing ${total} ${hardLabel}`:`Showing ${total} ${total===1?'card':'cards'}`}updateCount();if(grid)new MutationObserver(updateCount).observe(grid,{childList:true,attributes:true,attributeFilter:['style']});if(typePanel)typePanel.addEventListener('change',()=>setTimeout(updateCount,0));document.addEventListener('hardVocabularyUpdated',updateCount)})();
 </script>
