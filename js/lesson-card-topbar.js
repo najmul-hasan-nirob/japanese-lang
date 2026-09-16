@@ -128,7 +128,7 @@
         const star = inner.querySelector(':scope > .hard-star');
         const number = inner.querySelector(':scope > .lesson-card-number');
         const speaker = findSpeaker(inner);
-        const clue = inner.querySelector(':scope > .vocabulary-clue-btn');
+        const clue = inner.querySelector('.vocabulary-clue-btn');
         const adminActions = card.querySelector(':scope > .admin-card-actions');
 
         if (star && star.parentElement !== bar) bar.appendChild(star);
