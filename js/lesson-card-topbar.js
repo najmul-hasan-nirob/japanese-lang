@@ -263,7 +263,22 @@
         if (!grid) return;
         injectStyles();
         setupAll(grid);
-        const observer = new MutationObserver(() => setTimeout(() => setupAll(grid), 0));
+
+        // Do not observe our own DOM rearrangements. Without this guard, moving
+        // the tag/clue/admin controls fires the observer again and again, making
+        // the Inspector highlight the .lesson-tag as if it were blinking.
+        let processing = false;
+        const observer = new MutationObserver(() => {
+            if (processing) return;
+            processing = true;
+            observer.disconnect();
+            try {
+                setupAll(grid);
+            } finally {
+                processing = false;
+                observer.observe(grid, { childList: true, subtree: true });
+            }
+        });
         observer.observe(grid, { childList: true, subtree: true });
     }
 
