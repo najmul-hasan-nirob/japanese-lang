@@ -1,6 +1,6 @@
 (function () {
     function init() {
-        const grid=document.getElementById('kanjiGrid'), search=document.getElementById('kanjiSearch'), clear=document.getElementById('kanjiSearchClear'), levelPanel=document.getElementById('kanjiLevelPanel'), levelBtn=document.getElementById('kanjiLevelBtn'), mode=document.getElementById('kanjiMode'), shuffleBtn=document.getElementById('kanjiShuffleBtn'), count=document.getElementById('kanjiCount');
+        const grid=document.getElementById('kanjiGrid'), search=document.getElementById('kanjiSearch'), clear=document.getElementById('kanjiSearchClear'), levelPanel=document.getElementById('kanjiLevelPanel'), levelBtn=document.getElementById('kanjiLevelBtn'), mode=document.getElementById('kanjiMode'), shuffleBtn=document.getElementById('shuffleBtn'), count=document.getElementById('kanjiCount');
         if(!grid||!levelPanel||!search||!clear||!mode||!shuffleBtn||!count||!Array.isArray(window.kanjiData)) return;
 
         const HARD_STORAGE_KEY='japanese-lang-hard-vocabulary';
@@ -13,7 +13,7 @@
         function storedHard(){try{const saved=JSON.parse(localStorage.getItem(HARD_STORAGE_KEY)||'[]');return new Set(Array.isArray(saved)?saved:[]);}catch(_){return new Set();}}
         function selectedLevels(){return Array.from(levelPanel.querySelectorAll('input[type="checkbox"][data-kanji-level]:checked')).map(function(x){return x.value;});}
         function hardSelected(){const input=levelPanel.querySelector('input[value="hard-kanji"]');return !!input&&input.checked;}
-        function saveFilterState(){try{localStorage.setItem(FILTER_STORAGE_KEY,JSON.stringify({levels:selectedLevels(),hard:hardSelected()}));}catch(_) {}}
+        function saveFilterState(){try{localStorage.setItem(FILTER_STORAGE_KEY,JSON.stringify({levels:selectedLevels(),hard:hardSelected(),order:mode.value==='shuffle'?'shuffle':'normal'}));}catch(_) {}}
         function loadFilterState(){
             let state=null;
             try{state=JSON.parse(localStorage.getItem(FILTER_STORAGE_KEY)||'null');}catch(_){state=null;}
@@ -21,6 +21,7 @@
             if(state&&Array.isArray(state.levels)){
                 levelInputs.forEach(function(input){input.checked=state.levels.includes(input.value);});
                 if(hard) hard.checked=state.hard===true;
+                if(state.order==='shuffle'||state.order==='normal') mode.value=state.order;
             } else {
                 levelInputs.forEach(function(input){input.checked=input.value==='N5'||input.value==='N4';});
                 if(hard) hard.checked=false;
@@ -54,7 +55,9 @@
             }
         });
         document.addEventListener('click',function(){levelPanel.classList.remove('open');levelBtn.setAttribute('aria-expanded','false');});
-        search.addEventListener('input',render);clear.addEventListener('click',function(){search.value='';render();search.focus();});mode.addEventListener('change',render);shuffleBtn.addEventListener('click',function(){mode.value='shuffle';render();});
+        search.addEventListener('input',render);clear.addEventListener('click',function(){search.value='';render();search.focus();});
+        mode.addEventListener('change',function(){saveFilterState();render();});
+        shuffleBtn.addEventListener('click',function(){mode.value='shuffle';saveFilterState();render();});
         updateLevelLabel();render();
         window.addEventListener('japaneseLangFavouriteChanged',render);
         window.addEventListener('japaneseLangCloudLoaded',render);
