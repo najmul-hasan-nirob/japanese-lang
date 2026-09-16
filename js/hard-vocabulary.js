@@ -3,6 +3,7 @@
 // - Stores favourite keys in localStorage
 // - Existing vocabulary cards use the same store as before
 // - Any card with data-favorite-key can use the same star system
+// - Kanji cards also use this persistent favourite store
 // - supabase-sync.js mirrors this local store to Supabase
 // =====================================================
 (() => {
@@ -26,12 +27,21 @@
   const save = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
   };
-  const grid = () => document.getElementById('grid') || document.getElementById('importantRulesList');
+  const grids = () => [
+    document.getElementById('grid'),
+    document.getElementById('importantRulesList'),
+    document.getElementById('kanjiGrid')
+  ].filter(Boolean);
   const panel = () => document.getElementById('typePanel');
 
   function cardKey(card) {
     const custom = card.getAttribute('data-favorite-key');
     if (custom) return custom;
+
+    const kanji = card.dataset.kanji || card.querySelector('.kanji-character')?.textContent?.trim() || '';
+    if (kanji && (card.closest('#kanjiGrid') || card.classList.contains('kanji-card'))) {
+      return `kanji|${kanji}`;
+    }
 
     const front = card.querySelector('.front > div')?.textContent?.trim() || '';
     const romaji = card.querySelector('.romaji')?.textContent?.trim() || '';
@@ -40,7 +50,10 @@
   }
 
   function canFavourite(card) {
-    return !!card.getAttribute('data-favorite-key') || !!card.querySelector('.vocabulary-back');
+    return !!card.getAttribute('data-favorite-key') ||
+      !!card.querySelector('.vocabulary-back') ||
+      !!card.closest('#kanjiGrid') ||
+      card.classList.contains('kanji-card');
   }
 
   function updateStar(card) {
@@ -67,7 +80,7 @@
         save();
         updateStar(card);
 
-        if (hardMode) applyFilter();
+        if (hardMode && card.closest('#grid')) applyFilter();
       });
     }
 
@@ -80,7 +93,7 @@
   }
 
   function addStars() {
-    grid()?.querySelectorAll(':scope > .card').forEach(updateStar);
+    grids().forEach(g => g.querySelectorAll(':scope > .card').forEach(updateStar));
   }
 
   function applyFilter() {
@@ -144,6 +157,11 @@
       addStars();
       if (hardMode) applyFilter();
     });
+
+    const kanjiGrid = document.getElementById('kanjiGrid');
+    if (kanjiGrid) {
+      new MutationObserver(() => setTimeout(addStars, 0)).observe(kanjiGrid, { childList: true, subtree: true });
+    }
   }
 
   if (document.readyState === 'loading') {
