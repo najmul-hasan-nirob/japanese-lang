@@ -78,13 +78,13 @@
         event.preventDefault();
         event.stopPropagation();
 
-        // A favourite click only changes the saved hard-vocabulary state.
-        // It must NOT activate/rebuild the Hard filter when the Hard checkbox
-        // is not being used. If Hard mode is already active, only removing a
-        // hard word needs a filter refresh so that the removed card disappears.
+        // The star is only a favourite toggle. It must never turn the Hard
+        // filter on or cause all saved hard vocabulary to appear.
         const wasHard = isHardCard(card);
         const item = card.__lessonItem || {};
         const key = `v2|${String(item.lesson || '')}|${String(item.type || '')}|${String(item.jp || '').trim()}|${String(item.en || '').trim()}`;
+        const hardCheckbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
+        const hardFilterActive = !!hardCheckbox?.checked;
 
         if (wasHard) {
           keyCandidates(card).forEach(candidate => hardWords.delete(candidate));
@@ -95,7 +95,13 @@
         save();
         updateStar(card);
 
-        if (hardMode && wasHard) applyFilter();
+        // If the Hard filter is already active and this click removes the
+        // current card from Hard vocabulary, hide only this card. Do not
+        // rebuild/reveal the entire Hard vocabulary list.
+        if (hardFilterActive && wasHard) {
+          card.style.display = 'none';
+          updateHardCount();
+        }
       });
     }
 
@@ -109,6 +115,14 @@
 
   function addStars() {
     grid()?.querySelectorAll(':scope > .card').forEach(updateStar);
+  }
+
+  function updateHardCount() {
+    const count = document.getElementById('cardCount');
+    if (!count) return;
+    const cards = [...(document.getElementById('grid')?.querySelectorAll(':scope > .card') || [])];
+    const visible = cards.filter(card => card.style.display !== 'none' && !!card.querySelector('.vocabulary-back') && isHardCard(card)).length;
+    count.textContent = `Showing ${visible} hard vocabulary cards`;
   }
 
   function applyFilter() {
