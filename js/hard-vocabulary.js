@@ -1,9 +1,5 @@
 // =====================================================
 // Favourite / Hard Vocabulary system
-// - Stores favourite keys in localStorage
-// - Existing vocabulary cards use the same store as before
-// - Any card with data-favorite-key can use the same star system
-// - supabase-sync.js mirrors this local store to Supabase
 // =====================================================
 (() => {
   'use strict';
@@ -32,7 +28,6 @@
   function cardKey(card) {
     const custom = card.getAttribute('data-favorite-key');
     if (custom) return custom;
-
     const front = card.querySelector('.front > div')?.textContent?.trim() || '';
     const romaji = card.querySelector('.romaji')?.textContent?.trim() || '';
     const english = card.querySelector('.english')?.textContent?.trim() || '';
@@ -61,12 +56,10 @@
       star.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
-
         const key = cardKey(card);
         hardWords.has(key) ? hardWords.delete(key) : hardWords.add(key);
         save();
         updateStar(card);
-
         if (hardMode) applyFilter();
       });
     }
@@ -85,7 +78,6 @@
 
   function applyFilter() {
     addStars();
-
     const cards = [...(document.getElementById('grid')?.querySelectorAll(':scope > .card') || [])];
     let visible = 0;
 
@@ -108,37 +100,38 @@
   function ensureCheckbox() {
     const p = panel();
     if (!p || p.querySelector('input[value="hard"]')) return;
-
     const label = document.createElement('label');
     label.innerHTML = '<input type="checkbox" value="hard"> Hard vocabulary';
     p.appendChild(label);
     document.dispatchEvent(new CustomEvent('hardVocabularyFilterReady'));
   }
 
+  function syncModeFromCheckbox() {
+    const checkbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
+    if (!checkbox) return;
+    hardMode = checkbox.checked;
+    if (hardMode) setTimeout(applyFilter, 0);
+    else clearFilter();
+  }
+
   function init() {
     ensureCheckbox();
-
-    // Persistence may restore the checkbox before this script initializes.
-    // Read its current state so the actual hard-card filter is also restored.
-    const hardCheckbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
-    hardMode = !!hardCheckbox?.checked;
 
     panel()?.addEventListener('change', event => {
       if (event.target?.value === 'hard') {
         hardMode = event.target.checked;
-        if (hardMode) {
-          setTimeout(applyFilter, 0);
-        } else {
-          clearFilter();
-        }
+        if (hardMode) setTimeout(applyFilter, 0);
+        else clearFilter();
         return;
       }
-
       if (hardMode) setTimeout(applyFilter, 0);
     });
 
     addStars();
-    if (hardMode) setTimeout(applyFilter, 0);
+
+    // The persistence script may restore the checkbox before/while this script initializes.
+    // Always synchronize the internal mode with the actual checkbox state.
+    syncModeFromCheckbox();
 
     document.addEventListener('lessonCardsRendered', () => {
       addStars();
@@ -148,7 +141,7 @@
     window.addEventListener('japaneseLangCloudLoaded', () => {
       loadStored();
       addStars();
-      if (hardMode) applyFilter();
+      syncModeFromCheckbox();
     });
   }
 
