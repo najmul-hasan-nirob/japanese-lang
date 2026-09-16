@@ -131,11 +131,11 @@
             if (event.target?.matches("input[type=checkbox]")) saveState();
         });
         mode?.addEventListener("change", saveState);
+
+        document.addEventListener("hardVocabularyFilterReady", restoreState);
     }
 
     window.addEventListener("japaneseLangCloudLoaded", () => {
-        // Cloud Sync has already written the cloud values into localStorage.
-        // Restore Lesson, Type, and Order after that pull.
         restoreState();
     });
 
