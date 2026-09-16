@@ -84,7 +84,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if(isVocab){const hideRomaji=window.lessonBackRomajiVisible===false;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div>${showJapaneseFirst?adjLabel:''}</div><div class="back vocabulary-back"><span class="lesson-tag">${tag}</span><span class="romaji" style="display:${hideRomaji?'none':''}">${romaji}</span><span class="english">${item.en}</span>${adjLabel}<span class="bangla">${banglaMeaning(item)}</span></div></div>`;}else{const backText=showJapaneseFirst?item.en:item.jp;card.innerHTML=`<div class="inner"><div class="front"><span class="lesson-tag">${tag}</span><div>${frontText}</div></div><div class="back"><span class="lesson-tag">${tag}</span><div>${backText}</div>`;}
             card.addEventListener("click",()=>card.classList.toggle("flipped"));const speakText=isVocab?item.jp:cleanForSpeech(item.jp);if(speakText&&isSpeakableJapanese(speakText))card.appendChild(createSpeakerButton(speakText));frag.appendChild(card);
         });
-        grid.appendChild(frag);const counter=document.getElementById("cardCount");if(counter)counter.textContent=`Showing ${cards.length} cards`;document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
+        grid.appendChild(frag);
+        const counter=document.getElementById("cardCount");
+        if(counter)counter.textContent=`Showing ${cards.length} cards`;
+
+        // Hard vocabulary is a second-stage filter. The card renderer can run
+        // multiple times (lesson loading, type changes, cloud restore, shuffle),
+        // so always re-apply the hard state after the new cards exist.
+        if (window.japaneseLangHardVocabulary?.sync) {
+            window.japaneseLangHardVocabulary.sync();
+        }
+
+        document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
     }
 
     function rerenderAfterLessonData(){updateLessonLabel();renderLessons();}
