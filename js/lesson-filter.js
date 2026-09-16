@@ -4,6 +4,7 @@
 // Lesson 1 is selected by default and an "All Lesson"
 // checkbox controls all lesson selections.
 // Vocabulary back cards: Romaji → English → Bangla.
+// Hard vocabulary is an independent modifier for vocabulary cards.
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -68,20 +69,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return isIAdjective(item) ? '<span class="adjective-label">(い adj.)</span>' : '';
     }
 
+    function isHardVocabulary(card) {
+        return !!card.querySelector('.vocabulary-back') && !!window.japaneseLangHardVocabulary?.isHard?.(card);
+    }
+
     function renderLessons(){
         const grid=document.getElementById("grid"),mode=document.getElementById("mode"),typePanel=document.getElementById("typePanel");
         if(!grid||!mode||!typePanel)return;
 
         const checkedTypes=Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked")).map(cb=>cb.value);
         const hardSelected=checkedTypes.includes("hard");
-        // Hard vocabulary is a filter over vocabulary cards, not a replacement
-        // for the base vocabulary type. If Hard is the only selected checkbox,
-        // vocabulary must still be rendered so the hard filter has cards to test.
-        const types=checkedTypes
-            .filter(value=>value!=="hard");
+        const types=checkedTypes.filter(value=>value!=="hard");
         if (hardSelected && !types.includes("vocabulary")) types.push("vocabulary");
 
         let cards=[];selectedLessons().forEach(key=>{cards=cards.concat(buildLessonCards(key).filter(card=>types.includes(card.type)));});
+
+        if (hardSelected) {
+            cards = cards.filter(card => card.type !== "vocabulary" || isHardVocabularyCardData(card));
+        }
+
         if(mode.value==="shuffle")shuffle(cards);
         grid.innerHTML="";const frag=document.createDocumentFragment();
         cards.forEach(item=>{
@@ -95,15 +101,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const counter=document.getElementById("cardCount");
         if(counter)counter.textContent=`Showing ${cards.length} cards`;
 
-        if (window.japaneseLangHardVocabulary?.sync) {
-            window.japaneseLangHardVocabulary.sync();
-        }
-
+        if (window.japaneseLangHardVocabulary?.sync) window.japaneseLangHardVocabulary.sync();
         document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
+    }
+
+    // This is deliberately checked against the same favourite store used by the stars.
+    // It runs on the data object before cards are rendered, so Hard Vocabulary never
+    // needs a second pass that can fight the main lesson filter.
+    function isHardVocabularyCardData(item) {
+        if (!item || item.type !== "vocabulary") return true;
+        const key = `${item.jp || ""}|${toRomaji(item.jp || "")}|${item.en || ""}`;
+        const stored = (() => {
+            try { return JSON.parse(localStorage.getItem("japanese-lang-hard-vocabulary") || "[]"); }
+            catch (_) { return []; }
+        })();
+        return Array.isArray(stored) && stored.includes(key);
     }
 
     function rerenderAfterLessonData(){updateLessonLabel();renderLessons();}
     document.addEventListener("lessonDataLoaded",rerenderAfterLessonData);
+    document.addEventListener("hardVocabularyFilterReady",()=>setTimeout(renderLessons,0));
+    document.addEventListener("hardVocabularyUpdated",()=>renderLessons());
 
     lessonBtn.addEventListener("click",e=>{e.stopPropagation();const open=lessonPanel.classList.contains("open");document.querySelectorAll(".multiselect-panel.open").forEach(p=>p.classList.remove("open"));lessonPanel.classList.toggle("open",!open);lessonBtn.setAttribute("aria-expanded",String(!open));});
     allCheckbox.addEventListener("change",()=>{lessonCheckboxes().forEach(cb=>cb.checked=allCheckbox.checked);updateLessonLabel();window.lessonLoader?.syncSelectedLessons();});
