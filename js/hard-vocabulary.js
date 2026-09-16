@@ -51,10 +51,6 @@
     return [...new Set(keys)];
   }
 
-  function cardKey(card) {
-    return keyCandidates(card)[0] || '';
-  }
-
   function isHardCard(card) {
     return keyCandidates(card).some(key => key && hardWords.has(key));
   }
@@ -82,15 +78,24 @@
         event.preventDefault();
         event.stopPropagation();
 
-        const key = `v2|${String(card.__lessonItem?.lesson || '')}|${String(card.__lessonItem?.type || '')}|${String(card.__lessonItem?.jp || '').trim()}|${String(card.__lessonItem?.en || '').trim()}`;
-        if (isHardCard(card)) {
+        // A favourite click only changes the saved hard-vocabulary state.
+        // It must NOT activate/rebuild the Hard filter when the Hard checkbox
+        // is not being used. If Hard mode is already active, only removing a
+        // hard word needs a filter refresh so that the removed card disappears.
+        const wasHard = isHardCard(card);
+        const item = card.__lessonItem || {};
+        const key = `v2|${String(item.lesson || '')}|${String(item.type || '')}|${String(item.jp || '').trim()}|${String(item.en || '').trim()}`;
+
+        if (wasHard) {
           keyCandidates(card).forEach(candidate => hardWords.delete(candidate));
         } else {
           hardWords.add(key);
         }
+
         save();
         updateStar(card);
-        if (hardMode) applyFilter();
+
+        if (hardMode && wasHard) applyFilter();
       });
     }
 
