@@ -5,6 +5,7 @@
   'use strict';
 
   const STORAGE_KEY = 'japanese-lang-hard-vocabulary';
+  const FILTER_KEY = 'japanese-lang-lesson-filter-v1';
   let hardWords = new Set();
   let hardMode = false;
 
@@ -17,18 +18,15 @@
     }
   }
 
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
+  }
+
   loadStored();
 
-  const save = () => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
-  };
   const grid = () => document.getElementById('grid') || document.getElementById('importantRulesList');
   const panel = () => document.getElementById('typePanel');
 
-  // Keep the old key format for compatibility, but also use a stable key based
-  // on the actual lesson item. The old key depended on the current front side
-  // (Japanese/romaji), so changing direction could make a saved hard word
-  // impossible to find after a re-render.
   function keyCandidates(card) {
     const keys = [];
     const custom = card.getAttribute('data-favorite-key');
@@ -36,27 +34,27 @@
 
     const item = card.__lessonItem;
     if (item) {
-      const lesson = String(item.lesson || '');
-      const type = String(item.type || '');
+      const lesson = String(item.lesson || '').trim();
+      const type = String(item.type || '').trim();
       const jp = String(item.jp || '').trim();
-      const english = String(item.en || '').trim();
-      keys.push(`v2|${lesson}|${type}|${jp}|${english}`);
+      const en = String(item.en || '').trim();
+      if (jp || en) keys.push(`v2|${lesson}|${type}|${jp}|${en}`);
     }
 
     const front = card.querySelector('.front > div')?.textContent?.trim() || '';
     const romaji = card.querySelector('.romaji')?.textContent?.trim() || '';
     const english = card.querySelector('.english')?.textContent?.trim() || '';
-    keys.push(`${front}|${romaji}|${english}`);
+    if (front || romaji || english) keys.push(`${front}|${romaji}|${english}`);
 
     return [...new Set(keys)];
   }
 
   function isHardCard(card) {
-    return keyCandidates(card).some(key => key && hardWords.has(key));
+    return keyCandidates(card).some(key => hardWords.has(key));
   }
 
   function canFavourite(card) {
-    return !!card.getAttribute('data-favorite-key') || !!card.querySelector('.vocabulary-back');
+    return !!card.querySelector('.vocabulary-back');
   }
 
   function updateStar(card) {
@@ -78,13 +76,9 @@
         event.preventDefault();
         event.stopPropagation();
 
-        // The star is only a favourite toggle. It must never turn the Hard
-        // filter on or cause all saved hard vocabulary to appear.
         const wasHard = isHardCard(card);
         const item = card.__lessonItem || {};
-        const key = `v2|${String(item.lesson || '')}|${String(item.type || '')}|${String(item.jp || '').trim()}|${String(item.en || '').trim()}`;
-        const hardCheckbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
-        const hardFilterActive = !!hardCheckbox?.checked;
+        const key = `v2|${String(item.lesson || '').trim()}|${String(item.type || '').trim()}|${String(item.jp || '').trim()}|${String(item.en || '').trim()}`;
 
         if (wasHard) {
           keyCandidates(card).forEach(candidate => hardWords.delete(candidate));
@@ -94,11 +88,10 @@
 
         save();
         updateStar(card);
+        document.dispatchEvent(new CustomEvent('hardVocabularyUpdated'));
 
-        // If the Hard filter is already active and this click removes the
-        // current card from Hard vocabulary, hide only this card. Do not
-        // rebuild/reveal the entire Hard vocabulary list.
-        if (hardFilterActive && wasHard) {
+        const checkbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
+        if (checkbox?.checked && wasHard) {
           card.style.display = 'none';
           updateHardCount();
         }
@@ -120,18 +113,18 @@
   function updateHardCount() {
     const count = document.getElementById('cardCount');
     if (!count) return;
-    const cards = [...(document.getElementById('grid')?.querySelectorAll(':scope > .card') || [])];
-    const visible = cards.filter(card => card.style.display !== 'none' && !!card.querySelector('.vocabulary-back') && isHardCard(card)).length;
+    const visible = [...(grid()?.querySelectorAll(':scope > .card') || [])]
+      .filter(card => card.style.display !== 'none' && canFavourite(card) && isHardCard(card)).length;
     count.textContent = `Showing ${visible} hard vocabulary cards`;
   }
 
   function applyFilter() {
     addStars();
-    const cards = [...(document.getElementById('grid')?.querySelectorAll(':scope > .card') || [])];
+    const cards = [...(grid()?.querySelectorAll(':scope > .card') || [])];
     let visible = 0;
 
     cards.forEach(card => {
-      const isHard = !!card.querySelector('.vocabulary-back') && isHardCard(card);
+      const isHard = canFavourite(card) && isHardCard(card);
       card.style.display = isHard ? '' : 'none';
       if (isHard) visible++;
     });
@@ -142,7 +135,7 @@
 
   function clearFilter() {
     hardMode = false;
-    document.getElementById('grid')?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
+    grid()?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
     addStars();
   }
 
@@ -153,6 +146,18 @@
     label.innerHTML = '<input type="checkbox" value="hard"> Hard vocabulary';
     p.appendChild(label);
     document.dispatchEvent(new CustomEvent('hardVocabularyFilterReady'));
+  }
+
+  // Persistence restores the checkbox too, but this script loads later than
+  // the persistence script. Restore it directly so reload timing cannot break
+  // the Hard mode state.
+  function restoreCheckboxFromFilterState() {
+    const checkbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
+    if (!checkbox) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(FILTER_KEY) || 'null');
+      checkbox.checked = Array.isArray(saved?.selectedTypes) && saved.selectedTypes.includes('hard');
+    } catch (_) {}
   }
 
   function syncModeFromCheckbox() {
@@ -172,6 +177,7 @@
 
   function init() {
     ensureCheckbox();
+    restoreCheckboxFromFilterState();
 
     panel()?.addEventListener('change', event => {
       if (event.target?.value === 'hard') {
@@ -188,11 +194,23 @@
 
     document.addEventListener('lessonCardsRendered', () => {
       addStars();
-      if (hardMode) applyFilter();
+      if (panel()?.querySelector('input[value="hard"]')?.checked) {
+        hardMode = true;
+        applyFilter();
+      }
+    });
+
+    document.addEventListener('lessonDataLoaded', () => {
+      addStars();
+      if (panel()?.querySelector('input[value="hard"]')?.checked) {
+        hardMode = true;
+        applyFilter();
+      }
     });
 
     window.addEventListener('japaneseLangCloudLoaded', () => {
       loadStored();
+      restoreCheckboxFromFilterState();
       addStars();
       syncModeFromCheckbox();
     });
