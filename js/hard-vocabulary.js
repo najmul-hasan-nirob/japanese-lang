@@ -56,8 +56,6 @@
       card.querySelector('.lesson-card-topbar')?.appendChild(star) || card.appendChild(star);
     }
 
-    // Some cards (such as Important Rules) render their own star before this
-    // system runs. Always bind the handler once, regardless of who created it.
     if (!star.dataset.favouriteBound) {
       star.dataset.favouriteBound = 'true';
       star.addEventListener('click', event => {
@@ -114,14 +112,12 @@
     const label = document.createElement('label');
     label.innerHTML = '<input type="checkbox" value="hard"> Hard vocabulary';
     p.appendChild(label);
+    document.dispatchEvent(new CustomEvent('hardVocabularyFilterReady'));
   }
 
   function init() {
     ensureCheckbox();
 
-    // Hard vocabulary is an overlay filter. Any change in the normal type
-    // filters must be followed by the hard filter, otherwise a lesson render
-    // can temporarily restore all vocabulary cards while Hard vocabulary is on.
     panel()?.addEventListener('change', event => {
       if (event.target?.value === 'hard') {
         hardMode = event.target.checked;
@@ -143,8 +139,6 @@
       if (hardMode) applyFilter();
     });
 
-    // supabase-sync.js pulls the cloud copy into localStorage and then
-    // dispatches this event. Refresh the visible stars from that store.
     window.addEventListener('japaneseLangCloudLoaded', () => {
       loadStored();
       addStars();
