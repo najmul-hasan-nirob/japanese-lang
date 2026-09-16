@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!saved || !Array.isArray(saved.order) || !currentKeys.length) return false;
         if (saved.signature !== orderSignature(cards) || saved.order.length !== currentKeys.length) return false;
 
-        // Already in the saved order — do not touch the DOM or trigger our observer again.
         if (saved.order.length === currentKeys.length && saved.order.every((key, i) => key === currentKeys[i])) return true;
 
         const byKey = new Map();
@@ -86,18 +85,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (badge.textContent !== nextNumber) badge.textContent = nextNumber;
             if (badge.parentElement !== topbar) topbar.appendChild(badge);
 
-            // The visible topbar label combines the lesson and this card's serial.
-            // Only write when the value actually changes. This is important because
-            // lesson-card-number.js observes the grid; repeatedly assigning the same
-            // text would create DOM mutations and make the Inspector show the tag as
-            // continuously changing/blinking.
             const tag = topbar.querySelector(":scope > .lesson-tag");
             const item = card.__lessonItem || {};
             if (tag) {
-                const lesson = String(item.lesson || "").trim();
+                const rawLesson = String(item.lesson || "").trim();
+                const lessonMatch = rawLesson.match(/(\d+)\s*$/);
+                const lessonNumber = lessonMatch ? lessonMatch[1] : rawLesson.replace(/^lesson\s*/i, "").trim();
                 const type = String(item.type || "").trim().toLowerCase();
                 const prefix = type === "grammar" ? "Gram." : "Voca.";
-                const label = lesson ? `${lesson} & ${prefix}${nextNumber}` : `${prefix}${nextNumber}`;
+                const label = lessonNumber ? `L.${lessonNumber} & ${prefix}${nextNumber}` : `${prefix}${nextNumber}`;
                 if (tag.textContent !== label) tag.textContent = label;
             }
         });
@@ -205,7 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.appendChild(message);
         }
 
-        // Keep the summary above the cards synchronized with the visible search results.
         const visibleCards = cards.filter(card => card.style.display !== "none");
         const vocabularyCount = visibleCards.filter(card => card.querySelector(".vocabulary-back")).length;
         const hardCount = visibleCards.filter(card => {
