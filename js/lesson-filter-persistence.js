@@ -1,6 +1,9 @@
 // =====================================================
 // Lesson filter persistence
 // =====================================================
+// Keeps Lesson selection, Type filters, and Order mode in the existing
+// local cache and lets supabase-sync.js include the same state in Cloud Sync.
+// =====================================================
 (() => {
     const KEY = "japanese-lang-lesson-filter-v1";
     const DEFAULT = {
@@ -108,13 +111,6 @@
             target?.dispatchEvent(new Event("change", { bubbles: true }));
         } else if (modeChanged) {
             mode.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-
-        // Hard vocabulary is injected dynamically, so after restoring the checkbox
-        // explicitly notify its filter system that its saved state is active.
-        const hardBox = typePanel?.querySelector("input[type=checkbox][value='hard']");
-        if (hardBox && hardBox.checked) {
-            hardBox.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
         return true;
