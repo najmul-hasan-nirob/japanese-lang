@@ -11,6 +11,7 @@
     const LESSON_FILTER_KEY = "japanese-lang-lesson-filter-v1";
     const SIMILAR_WORDS_FILTER_KEY = "japanese-lang-similar-words-filter-v1";
     const SHUFFLE_KEY = "japanese-lang-lesson-shuffle-v1";
+    const KANJI_SHUFFLE_KEY = "japanese-lang-kanji-shuffle-v1";
     const DEFAULT_LESSON_FILTER = { selectedLessons: ["lesson1"], selectedTypes: ["vocabulary"], orderMode: "normal" };
     const DEFAULT_SIMILAR_WORDS_FILTER = { selectedGroups: ["why", "but"], orderMode: "normal" };
     let client = null, lastSnapshot = "", currentUserId = null, pushTimer = null;
@@ -25,7 +26,8 @@
             selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
             selectedTypes: selectedTypes.length ? selectedTypes : ["vocabulary"],
             orderMode: value.orderMode === "shuffle" ? "shuffle" : "normal",
-            ...(value.shuffleState && typeof value.shuffleState === "object" ? { shuffleState: value.shuffleState } : {})
+            ...(value.shuffleState && typeof value.shuffleState === "object" ? { shuffleState: value.shuffleState } : {}),
+            ...(value.kanjiShuffleState && typeof value.kanjiShuffleState === "object" ? { kanjiShuffleState: value.kanjiShuffleState } : {})
         };
     }
     function normalizeSimilarWordsFilter(value) {
@@ -33,19 +35,27 @@
         const selectedGroups = value.selectedGroups.filter(item => typeof item === "string");
         return { selectedGroups: selectedGroups.length ? selectedGroups : [...DEFAULT_SIMILAR_WORDS_FILTER.selectedGroups], orderMode: value.orderMode === "shuffle" ? "shuffle" : "normal" };
     }
+    function normalizeShuffleStore(value) {
+        return value && typeof value === "object" && value.states && typeof value.states === "object" ? value : { version: 1, states: {} };
+    }
     function mergeShuffleStores(localValue, cloudValue) {
-        const local = localValue && typeof localValue === "object" && localValue.states && typeof localValue.states === "object" ? localValue : { version: 3, states: {} };
-        const cloud = cloudValue && typeof cloudValue === "object" && cloudValue.states && typeof cloudValue.states === "object" ? cloudValue : { version: 3, states: {} };
-        const states = { ...cloud.states };
+        const local = normalizeShuffleStore(localValue), cloud = normalizeShuffleStore(cloudValue), states = { ...cloud.states };
         Object.entries(local.states).forEach(([key, localState]) => {
             const cloudState = states[key];
             if (!cloudState || Number(localState?.updatedAt || 0) >= Number(cloudState?.updatedAt || 0)) states[key] = localState;
         });
-        return { version: 3, states };
+        return { version: 1, states };
     }
     function buildLessonFilterSnapshot() {
         const saved = normalizeLessonFilter(get(LESSON_FILTER_KEY, DEFAULT_LESSON_FILTER));
-        return { selectedLessons: saved.selectedLessons, selectedTypes: saved.selectedTypes, orderMode: saved.orderMode, shuffleState: get(SHUFFLE_KEY, null), similarWordsFilter: normalizeSimilarWordsFilter(get(SIMILAR_WORDS_FILTER_KEY, DEFAULT_SIMILAR_WORDS_FILTER)) };
+        return {
+            selectedLessons: saved.selectedLessons,
+            selectedTypes: saved.selectedTypes,
+            orderMode: saved.orderMode,
+            shuffleState: get(SHUFFLE_KEY, null),
+            kanjiShuffleState: get(KANJI_SHUFFLE_KEY, null),
+            similarWordsFilter: normalizeSimilarWordsFilter(get(SIMILAR_WORDS_FILTER_KEY, DEFAULT_SIMILAR_WORDS_FILTER))
+        };
     }
     function snapshot() { return JSON.stringify({ hard: get(HARD_KEY, []), sr: get(SR_KEY, {}), lessons: get(PRACTICE_KEY, []), lessonFilter: buildLessonFilterSnapshot() }); }
 
@@ -60,9 +70,11 @@
         if (data.lesson_filter && typeof data.lesson_filter === "object") {
             const cloudFilter = normalizeLessonFilter(data.lesson_filter);
             const mergedShuffle = mergeShuffleStores(get(SHUFFLE_KEY, null), cloudFilter.shuffleState);
+            const mergedKanjiShuffle = mergeShuffleStores(get(KANJI_SHUFFLE_KEY, null), cloudFilter.kanjiShuffleState);
             const cloudSimilarWords = normalizeSimilarWordsFilter(data.lesson_filter.similarWordsFilter);
-            set(LESSON_FILTER_KEY, { selectedLessons: cloudFilter.selectedLessons, selectedTypes: cloudFilter.selectedTypes, orderMode: cloudFilter.orderMode, shuffleState: mergedShuffle });
+            set(LESSON_FILTER_KEY, { selectedLessons: cloudFilter.selectedLessons, selectedTypes: cloudFilter.selectedTypes, orderMode: cloudFilter.orderMode, shuffleState: mergedShuffle, kanjiShuffleState: mergedKanjiShuffle });
             set(SHUFFLE_KEY, mergedShuffle);
+            set(KANJI_SHUFFLE_KEY, mergedKanjiShuffle);
             set(SIMILAR_WORDS_FILTER_KEY, cloudSimilarWords);
         }
         lastSnapshot = snapshot();
@@ -108,6 +120,7 @@
         window.addEventListener("online", () => { if (currentUserId) pullCloud(currentUserId); });
         window.addEventListener("similarWordsFilterStateChanged", queueCloudPush);
         window.addEventListener("lessonFilterStateChanged", queueCloudPush);
+        window.addEventListener("japaneseLangKanjiShuffleChanged", queueCloudPush);
         window.addEventListener("japaneseLangDataChanged", queueCloudPush);
     }
     document.addEventListener("DOMContentLoaded", init);
