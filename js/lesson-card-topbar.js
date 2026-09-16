@@ -2,7 +2,7 @@
 // Lesson card structure
 // .card > .lesson-card-inner
 //     > .lesson-card-topbar
-//         star | clue | edit | number | delete | speaker
+//         star | lesson tag | edit | number | delete | speaker
 //     > .lesson-card-content
 //         front / back
 // Lessons page only.
@@ -131,6 +131,14 @@
         const clue = inner.querySelector('.vocabulary-clue-btn');
         const adminActions = card.querySelector(':scope > .admin-card-actions');
 
+        let tag = bar.querySelector(':scope > .lesson-tag');
+        if (!tag) {
+            tag = document.createElement('span');
+            tag.className = 'lesson-tag';
+            tag.setAttribute('aria-hidden', 'true');
+            bar.appendChild(tag);
+        }
+
         if (star && star.parentElement !== bar) bar.appendChild(star);
         if (number && number.parentElement !== bar) bar.appendChild(number);
         if (speaker && speaker.parentElement !== bar) bar.appendChild(speaker);
@@ -184,6 +192,7 @@
     justify-content:center; text-align:center; pointer-events:auto;
 }
 .lesson-card-topbar .hard-star,
+.lesson-card-topbar .lesson-tag,
 .lesson-card-topbar .lesson-card-number,
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
@@ -196,12 +205,12 @@
     margin:0 !important; pointer-events:auto; align-self:center; justify-self:center;
 }
 .lesson-card-topbar .hard-star { grid-column:1; grid-row:1; }
-.lesson-card-topbar .vocabulary-clue-btn { grid-column:2 !important; grid-row:1 !important; }
-.lesson-card-topbar .admin-card-edit { grid-column:3; grid-row:1; }
-.lesson-card-topbar .lesson-card-number {
-    grid-column:4; grid-row:1; z-index:60; display:flex !important;
-    align-items:center; justify-content:center; pointer-events:none !important;
+.lesson-card-topbar .lesson-tag {
+    grid-column:2; grid-row:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width:100%; font-size:9.5px; text-align:center; pointer-events:none;
 }
+.lesson-card-topbar .lesson-card-number { display:none !important; }
+.lesson-card-topbar .admin-card-edit { grid-column:3; grid-row:1; }
 .lesson-card-topbar .admin-card-delete { grid-column:5; grid-row:1; }
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
