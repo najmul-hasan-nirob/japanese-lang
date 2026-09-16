@@ -175,7 +175,7 @@
 }
 .lesson-card-topbar {
     position:absolute; top:0; left:0; right:0; width:100%; height:42px;
-    display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); align-items:center;
+    display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); align-items:center;
     justify-items:center; box-sizing:border-box; z-index:50; pointer-events:none;
 }
 .lesson-card-content {
@@ -206,16 +206,16 @@
 }
 .lesson-card-topbar .hard-star { grid-column:1; grid-row:1; }
 .lesson-card-topbar .lesson-tag {
-    grid-column:2; grid-row:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    max-width:100%; font-size:9.5px; text-align:center; pointer-events:none;
+    grid-column:2; grid-row:1; white-space:nowrap; overflow:visible; text-overflow:clip;
+    max-width:none; font-size:9.5px; text-align:center; pointer-events:none;
 }
 .lesson-card-topbar .lesson-card-number { display:none !important; }
 .lesson-card-topbar .admin-card-edit { grid-column:3; grid-row:1; }
-.lesson-card-topbar .admin-card-delete { grid-column:5; grid-row:1; }
+.lesson-card-topbar .admin-card-delete { grid-column:3; grid-row:1; }
 .lesson-card-topbar .speaker-btn,
 .lesson-card-topbar .speak-btn,
 .lesson-card-topbar .pronunciation-btn {
-    grid-column:6; grid-row:1; display:flex !important;
+    grid-column:3; grid-row:1; display:flex !important;
     visibility:visible !important; opacity:1 !important; pointer-events:auto !important;
 }
 .lesson-card-bottombar {
