@@ -42,7 +42,6 @@
         if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
             const s = window.speechSynthesis;
             try { s.cancel(); s.resume(); } catch (e) {}
-
             const queue = [];
             if (bangla) {
                 const u = new SpeechSynthesisUtterance(bangla);
@@ -96,6 +95,7 @@
 
         let inner = card.querySelector(':scope > .lesson-card-inner');
         let bar = inner?.querySelector(':scope > .lesson-card-topbar');
+        let bottomBar = inner?.querySelector(':scope > .lesson-card-bottombar');
         let content = inner?.querySelector(':scope > .lesson-card-content');
 
         if (!inner) {
@@ -118,16 +118,27 @@
             inner.appendChild(content);
         }
 
+        if (!bottomBar) {
+            bottomBar = document.createElement('div');
+            bottomBar.className = 'lesson-card-bottombar';
+            bottomBar.setAttribute('aria-label', 'Card bottom controls');
+            inner.appendChild(bottomBar);
+        }
+
         const star = inner.querySelector(':scope > .hard-star');
         const number = inner.querySelector(':scope > .lesson-card-number');
         const speaker = findSpeaker(inner);
+        const clue = inner.querySelector(':scope > .vocabulary-clue-btn');
+        const adminActions = card.querySelector(':scope > .admin-card-actions');
 
         if (star && star.parentElement !== bar) bar.appendChild(star);
         if (number && number.parentElement !== bar) bar.appendChild(number);
         if (speaker && speaker.parentElement !== bar) bar.appendChild(speaker);
+        if (clue && clue.parentElement !== bottomBar) bottomBar.appendChild(clue);
+        if (adminActions && adminActions.parentElement !== bottomBar) bottomBar.appendChild(adminActions);
 
         Array.from(inner.children).forEach(child => {
-            if (child !== bar && child !== content &&
+            if (child !== bar && child !== content && child !== bottomBar &&
                 (child.classList.contains('front') || child.classList.contains('back'))) {
                 content.appendChild(child);
             }
@@ -198,10 +209,36 @@
     grid-column:6; grid-row:1; display:flex !important;
     visibility:visible !important; opacity:1 !important; pointer-events:auto !important;
 }
+.lesson-card-bottombar {
+    position:absolute; left:0; right:0; bottom:0; width:100%; height:38px;
+    display:grid; grid-template-columns:repeat(3, minmax(0, 1fr));
+    align-items:center; box-sizing:border-box; z-index:60; pointer-events:none;
+}
+.lesson-card-bottombar > .admin-card-actions {
+    position:static !important; inset:auto !important; grid-column:1 / 4;
+    display:contents !important; pointer-events:none !important;
+}
+.lesson-card-bottombar > .admin-card-actions > .admin-card-edit {
+    grid-column:1; justify-self:start;
+}
+.lesson-card-bottombar > .vocabulary-clue-btn {
+    grid-column:2 !important; grid-row:1 !important; justify-self:center;
+}
+.lesson-card-bottombar > .admin-card-actions > .admin-card-delete {
+    grid-column:3; justify-self:end;
+}
+.lesson-card-bottombar .vocabulary-clue-btn,
+.lesson-card-bottombar .admin-card-edit,
+.lesson-card-bottombar .admin-card-delete {
+    position:relative !important; inset:auto !important; top:auto !important; right:auto !important;
+    left:auto !important; bottom:auto !important; transform:none !important; margin:0 !important;
+    pointer-events:auto !important; align-self:center;
+}
 @media (max-width:520px) {
     .lesson-card-topbar { height:38px; }
+    .lesson-card-bottombar { height:34px; }
     .lesson-card-content > .front,
-    .lesson-card-content > .back { padding-top:44px !important; padding-bottom:10px; }
+    .lesson-card-content > .back { padding-top:44px !important; padding-bottom:34px !important; }
 }
 `;
         document.head.appendChild(style);
