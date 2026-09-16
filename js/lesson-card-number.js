@@ -87,13 +87,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (badge.parentElement !== topbar) topbar.appendChild(badge);
 
             // The visible topbar label combines the lesson and this card's serial.
+            // Only write when the value actually changes. This is important because
+            // lesson-card-number.js observes the grid; repeatedly assigning the same
+            // text would create DOM mutations and make the Inspector show the tag as
+            // continuously changing/blinking.
             const tag = topbar.querySelector(":scope > .lesson-tag");
             const item = card.__lessonItem || {};
             if (tag) {
                 const lesson = String(item.lesson || "").trim();
                 const type = String(item.type || "").trim().toLowerCase();
                 const prefix = type === "grammar" ? "Gram." : "Voca.";
-                tag.textContent = lesson ? `${lesson} & ${prefix}${nextNumber}` : `${prefix}${nextNumber}`;
+                const label = lesson ? `${lesson} & ${prefix}${nextNumber}` : `${prefix}${nextNumber}`;
+                if (tag.textContent !== label) tag.textContent = label;
             }
         });
     }
