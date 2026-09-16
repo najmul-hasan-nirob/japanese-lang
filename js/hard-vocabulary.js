@@ -5,15 +5,12 @@
 // - Any card with data-favorite-key can use the same star system
 // - Kanji cards also use this persistent favourite store
 // - Changes are exposed to supabase-sync.js through japaneseLangDataChanged
-// - Hard vocabulary filter selection is also persisted locally
 // =====================================================
 (() => {
   'use strict';
 
   const STORAGE_KEY = 'japanese-lang-hard-vocabulary';
-  const FILTER_STORAGE_KEY = 'japanese-lang-hard-filter';
   let hardWords = new Set();
-  let hardMode = false;
 
   function loadStored() {
     try {
@@ -24,22 +21,7 @@
     }
   }
 
-  function loadFilterState() {
-    try {
-      return localStorage.getItem(FILTER_STORAGE_KEY) === 'true';
-    } catch (_) {
-      return false;
-    }
-  }
-
-  function saveFilterState() {
-    try {
-      localStorage.setItem(FILTER_STORAGE_KEY, String(hardMode));
-    } catch (_) {}
-  }
-
   loadStored();
-  hardMode = loadFilterState();
 
   const save = () => {
     try {
@@ -54,8 +36,6 @@
     document.getElementById('importantRulesList'),
     document.getElementById('kanjiGrid')
   ].filter(Boolean);
-
-  const panel = () => document.getElementById('typePanel');
 
   function cardKey(card) {
     const custom = card.getAttribute('data-favorite-key');
@@ -102,8 +82,7 @@
         hardWords.has(key) ? hardWords.delete(key) : hardWords.add(key);
         save();
         updateStar(card);
-
-        if (hardMode && card.closest('#grid')) applyFilter();
+        document.dispatchEvent(new CustomEvent('hardVocabularyUpdated'));
       });
     }
 
@@ -119,76 +98,37 @@
     grids().forEach(g => g.querySelectorAll(':scope > .card').forEach(updateStar));
   }
 
-  function applyFilter() {
-    addStars();
-
-    const cards = [...(document.getElementById('grid')?.querySelectorAll(':scope > .card') || [])];
-    let visible = 0;
-
-    cards.forEach(card => {
-      const isHard = !!card.querySelector('.vocabulary-back') && hardWords.has(cardKey(card));
-      card.style.display = isHard ? '' : 'none';
-      if (isHard) visible++;
-    });
-
-    const count = document.getElementById('cardCount');
-    if (count) count.textContent = `Showing ${visible} hard vocabulary cards`;
-  }
-
-  function clearFilter() {
-    hardMode = false;
-    saveFilterState();
-    document.getElementById('grid')?.querySelectorAll(':scope > .card').forEach(card => { card.style.display = ''; });
+  function sync() {
+    loadStored();
     addStars();
   }
+
+  window.japaneseLangHardVocabulary = {
+    getKey: cardKey,
+    isHard: key => hardWords.has(key),
+    sync
+  };
 
   function ensureCheckbox() {
-    const p = panel();
+    const p = document.getElementById('typePanel');
     if (!p || p.querySelector('input[value="hard"]')) return;
-
     const label = document.createElement('label');
     label.innerHTML = '<input type="checkbox" value="hard"> Hard vocabulary';
     p.appendChild(label);
     document.dispatchEvent(new CustomEvent('hardVocabularyFilterReady'));
   }
 
-  function restoreCheckbox() {
-    const input = panel()?.querySelector('input[value="hard"]');
-    if (!input) return;
-    input.checked = hardMode;
-    if (hardMode) setTimeout(applyFilter, 0);
-  }
-
   function init() {
     ensureCheckbox();
-
-    panel()?.addEventListener('change', event => {
-      if (event.target?.value === 'hard') {
-        hardMode = event.target.checked;
-        saveFilterState();
-        if (hardMode) {
-          setTimeout(applyFilter, 0);
-        } else {
-          clearFilter();
-        }
-        return;
-      }
-
-      if (hardMode) setTimeout(applyFilter, 0);
-    });
-
-    restoreCheckbox();
     addStars();
 
     document.addEventListener('lessonCardsRendered', () => {
       addStars();
-      if (hardMode) applyFilter();
     });
 
     window.addEventListener('japaneseLangCloudLoaded', () => {
-      loadStored();
-      addStars();
-      if (hardMode) applyFilter();
+      sync();
+      document.dispatchEvent(new CustomEvent('hardVocabularyUpdated'));
     });
 
     const kanjiGrid = document.getElementById('kanjiGrid');
