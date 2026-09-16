@@ -71,9 +71,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderLessons(){
         const grid=document.getElementById("grid"),mode=document.getElementById("mode"),typePanel=document.getElementById("typePanel");
         if(!grid||!mode||!typePanel)return;
-        const types=Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked"))
-            .map(cb=>cb.value)
+
+        const checkedTypes=Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked")).map(cb=>cb.value);
+        const hardSelected=checkedTypes.includes("hard");
+        // Hard vocabulary is a filter over vocabulary cards, not a replacement
+        // for the base vocabulary type. If Hard is the only selected checkbox,
+        // vocabulary must still be rendered so the hard filter has cards to test.
+        const types=checkedTypes
             .filter(value=>value!=="hard");
+        if (hardSelected && !types.includes("vocabulary")) types.push("vocabulary");
+
         let cards=[];selectedLessons().forEach(key=>{cards=cards.concat(buildLessonCards(key).filter(card=>types.includes(card.type)));});
         if(mode.value==="shuffle")shuffle(cards);
         grid.innerHTML="";const frag=document.createDocumentFragment();
@@ -88,9 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const counter=document.getElementById("cardCount");
         if(counter)counter.textContent=`Showing ${cards.length} cards`;
 
-        // Hard vocabulary is a second-stage filter. The card renderer can run
-        // multiple times (lesson loading, type changes, cloud restore, shuffle),
-        // so always re-apply the hard state after the new cards exist.
         if (window.japaneseLangHardVocabulary?.sync) {
             window.japaneseLangHardVocabulary.sync();
         }
