@@ -25,13 +25,38 @@
   const grid = () => document.getElementById('grid') || document.getElementById('importantRulesList');
   const panel = () => document.getElementById('typePanel');
 
-  function cardKey(card) {
+  // Keep the old key format for compatibility, but also use a stable key based
+  // on the actual lesson item. The old key depended on the current front side
+  // (Japanese/romaji), so changing direction could make a saved hard word
+  // impossible to find after a re-render.
+  function keyCandidates(card) {
+    const keys = [];
     const custom = card.getAttribute('data-favorite-key');
-    if (custom) return custom;
+    if (custom) keys.push(custom);
+
+    const item = card.__lessonItem;
+    if (item) {
+      const lesson = String(item.lesson || '');
+      const type = String(item.type || '');
+      const jp = String(item.jp || '').trim();
+      const english = String(item.en || '').trim();
+      keys.push(`v2|${lesson}|${type}|${jp}|${english}`);
+    }
+
     const front = card.querySelector('.front > div')?.textContent?.trim() || '';
     const romaji = card.querySelector('.romaji')?.textContent?.trim() || '';
     const english = card.querySelector('.english')?.textContent?.trim() || '';
-    return `${front}|${romaji}|${english}`;
+    keys.push(`${front}|${romaji}|${english}`);
+
+    return [...new Set(keys)];
+  }
+
+  function cardKey(card) {
+    return keyCandidates(card)[0] || '';
+  }
+
+  function isHardCard(card) {
+    return keyCandidates(card).some(key => key && hardWords.has(key));
   }
 
   function canFavourite(card) {
@@ -56,15 +81,20 @@
       star.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
-        const key = cardKey(card);
-        hardWords.has(key) ? hardWords.delete(key) : hardWords.add(key);
+
+        const key = `v2|${String(card.__lessonItem?.lesson || '')}|${String(card.__lessonItem?.type || '')}|${String(card.__lessonItem?.jp || '').trim()}|${String(card.__lessonItem?.en || '').trim()}`;
+        if (isHardCard(card)) {
+          keyCandidates(card).forEach(candidate => hardWords.delete(candidate));
+        } else {
+          hardWords.add(key);
+        }
         save();
         updateStar(card);
         if (hardMode) applyFilter();
       });
     }
 
-    const active = hardWords.has(cardKey(card));
+    const active = isHardCard(card);
     star.textContent = active ? '★' : '☆';
     star.classList.toggle('active', active);
     star.setAttribute('aria-pressed', String(active));
@@ -82,7 +112,7 @@
     let visible = 0;
 
     cards.forEach(card => {
-      const isHard = !!card.querySelector('.vocabulary-back') && hardWords.has(cardKey(card));
+      const isHard = !!card.querySelector('.vocabulary-back') && isHardCard(card);
       card.style.display = isHard ? '' : 'none';
       if (isHard) visible++;
     });
@@ -114,8 +144,6 @@
     else clearFilter();
   }
 
-  // Expose a tiny public bridge so the lesson renderer can re-apply the hard
-  // filter after every card rebuild. This removes the render/event race.
   window.japaneseLangHardVocabulary = {
     sync: syncModeFromCheckbox,
     apply: applyFilter,
