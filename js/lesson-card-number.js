@@ -85,6 +85,16 @@ document.addEventListener("DOMContentLoaded", () => {
             badge.setAttribute("aria-hidden", "true");
             if (badge.textContent !== nextNumber) badge.textContent = nextNumber;
             if (badge.parentElement !== topbar) topbar.appendChild(badge);
+
+            // The visible topbar label combines the lesson and this card's serial.
+            const tag = topbar.querySelector(":scope > .lesson-tag");
+            const item = card.__lessonItem || {};
+            if (tag) {
+                const lesson = String(item.lesson || "").trim();
+                const type = String(item.type || "").trim().toLowerCase();
+                const prefix = type === "grammar" ? "Gram." : "Voca.";
+                tag.textContent = lesson ? `${lesson} & ${prefix}${nextNumber}` : `${prefix}${nextNumber}`;
+            }
         });
     }
 
