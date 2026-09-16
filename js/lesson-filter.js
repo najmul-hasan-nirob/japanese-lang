@@ -69,8 +69,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return isIAdjective(item) ? '<span class="adjective-label">(い adj.)</span>' : '';
     }
 
-    function isHardVocabulary(card) {
+    function isHardVocabularyCard(card) {
         return !!card.querySelector('.vocabulary-back') && !!window.japaneseLangHardVocabulary?.isHard?.(card);
+    }
+
+    function getStoredHardKeys() {
+        try {
+            const saved = JSON.parse(localStorage.getItem("japanese-lang-hard-vocabulary") || "[]");
+            return new Set(Array.isArray(saved) ? saved : []);
+        } catch (_) {
+            return new Set();
+        }
+    }
+
+    function isHardVocabularyCardData(item) {
+        if (!item || item.type !== "vocabulary") return true;
+        const romaji = toRomaji(item.jp || "");
+        const front = showJapaneseFirst ? String(item.jp || "") : romaji;
+        const key = `${front}|${romaji}|${item.en || ""}`;
+        return getStoredHardKeys().has(key);
     }
 
     function renderLessons(){
@@ -83,11 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hardSelected && !types.includes("vocabulary")) types.push("vocabulary");
 
         let cards=[];selectedLessons().forEach(key=>{cards=cards.concat(buildLessonCards(key).filter(card=>types.includes(card.type)));});
-
-        if (hardSelected) {
-            cards = cards.filter(card => card.type !== "vocabulary" || isHardVocabularyCardData(card));
-        }
-
+        if (hardSelected) cards=cards.filter(card=>card.type!=="vocabulary" || isHardVocabularyCardData(card));
         if(mode.value==="shuffle")shuffle(cards);
         grid.innerHTML="";const frag=document.createDocumentFragment();
         cards.forEach(item=>{
@@ -103,19 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (window.japaneseLangHardVocabulary?.sync) window.japaneseLangHardVocabulary.sync();
         document.dispatchEvent(new CustomEvent("lessonCardsRendered"));
-    }
-
-    // This is deliberately checked against the same favourite store used by the stars.
-    // It runs on the data object before cards are rendered, so Hard Vocabulary never
-    // needs a second pass that can fight the main lesson filter.
-    function isHardVocabularyCardData(item) {
-        if (!item || item.type !== "vocabulary") return true;
-        const key = `${item.jp || ""}|${toRomaji(item.jp || "")}|${item.en || ""}`;
-        const stored = (() => {
-            try { return JSON.parse(localStorage.getItem("japanese-lang-hard-vocabulary") || "[]"); }
-            catch (_) { return []; }
-        })();
-        return Array.isArray(stored) && stored.includes(key);
     }
 
     function rerenderAfterLessonData(){updateLessonLabel();renderLessons();}
