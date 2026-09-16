@@ -4,7 +4,7 @@
 // - Existing vocabulary cards use the same store as before
 // - Any card with data-favorite-key can use the same star system
 // - Kanji cards also use this persistent favourite store
-// - supabase-sync.js mirrors this local store to Supabase
+// - Changes are exposed to supabase-sync.js through japaneseLangDataChanged
 // =====================================================
 (() => {
   'use strict';
@@ -25,13 +25,19 @@
   loadStored();
 
   const save = () => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords])); } catch (_) {}
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...hardWords]));
+      window.dispatchEvent(new Event('japaneseLangFavouriteChanged'));
+      window.dispatchEvent(new Event('japaneseLangDataChanged'));
+    } catch (_) {}
   };
+
   const grids = () => [
     document.getElementById('grid'),
     document.getElementById('importantRulesList'),
     document.getElementById('kanjiGrid')
   ].filter(Boolean);
+
   const panel = () => document.getElementById('typePanel');
 
   function cardKey(card) {
