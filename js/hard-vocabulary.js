@@ -118,6 +118,11 @@
   function init() {
     ensureCheckbox();
 
+    // Persistence may restore the checkbox before this script initializes.
+    // Read its current state so the actual hard-card filter is also restored.
+    const hardCheckbox = panel()?.querySelector('input[type="checkbox"][value="hard"]');
+    hardMode = !!hardCheckbox?.checked;
+
     panel()?.addEventListener('change', event => {
       if (event.target?.value === 'hard') {
         hardMode = event.target.checked;
@@ -133,6 +138,7 @@
     });
 
     addStars();
+    if (hardMode) setTimeout(applyFilter, 0);
 
     document.addEventListener('lessonCardsRendered', () => {
       addStars();
