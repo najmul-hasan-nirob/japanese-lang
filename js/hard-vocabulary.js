@@ -114,6 +114,15 @@
     else clearFilter();
   }
 
+  // Expose a tiny public bridge so the lesson renderer can re-apply the hard
+  // filter after every card rebuild. This removes the render/event race.
+  window.japaneseLangHardVocabulary = {
+    sync: syncModeFromCheckbox,
+    apply: applyFilter,
+    clear: clearFilter,
+    isActive: () => hardMode
+  };
+
   function init() {
     ensureCheckbox();
 
@@ -128,9 +137,6 @@
     });
 
     addStars();
-
-    // The persistence script may restore the checkbox before/while this script initializes.
-    // Always synchronize the internal mode with the actual checkbox state.
     syncModeFromCheckbox();
 
     document.addEventListener('lessonCardsRendered', () => {
