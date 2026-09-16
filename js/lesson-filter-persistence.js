@@ -1,21 +1,29 @@
 // =====================================================
 // Lesson filter persistence
 // =====================================================
-// Keeps Lesson selection + Order mode in the existing local cache and lets
-// supabase-sync.js include the same state in Cloud Sync.
+// Keeps Lesson selection, Type filters, and Order mode in the existing
+// local cache and lets supabase-sync.js include the same state in Cloud Sync.
 // =====================================================
 (() => {
     const KEY = "japanese-lang-lesson-filter-v1";
-    const DEFAULT = { selectedLessons: ["lesson1"], orderMode: "normal" };
+    const DEFAULT = {
+        selectedLessons: ["lesson1"],
+        selectedTypes: ["vocabulary"],
+        orderMode: "normal"
+    };
 
     function normalize(value) {
         if (!value || typeof value !== "object") return { ...DEFAULT };
         const selectedLessons = Array.isArray(value.selectedLessons)
             ? value.selectedLessons.filter(item => typeof item === "string" && /^lesson\d+$/.test(item))
             : [];
+        const selectedTypes = Array.isArray(value.selectedTypes)
+            ? value.selectedTypes.filter(item => typeof item === "string")
+            : [];
         const orderMode = value.orderMode === "shuffle" ? "shuffle" : "normal";
         return {
             selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
+            selectedTypes: selectedTypes.length ? selectedTypes : ["vocabulary"],
             orderMode
         };
     }
@@ -27,6 +35,7 @@
 
     function saveState() {
         const panel = document.getElementById("lessonPanel");
+        const typePanel = document.getElementById("typePanel");
         const mode = document.getElementById("mode");
         if (!panel) return;
 
@@ -34,10 +43,15 @@
             panel.querySelectorAll("input[type=checkbox][value^='lesson']:checked")
         ).map(cb => cb.value);
 
+        const selectedTypes = typePanel
+            ? Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value)
+            : getSaved().selectedTypes;
+
         const current = getSaved();
         const value = {
             ...current,
             selectedLessons: selectedLessons.length ? selectedLessons : ["lesson1"],
+            selectedTypes: selectedTypes.length ? selectedTypes : ["vocabulary"],
             orderMode: mode?.value === "shuffle" ? "shuffle" : "normal"
         };
 
@@ -47,19 +61,20 @@
 
     function restoreState() {
         const panel = document.getElementById("lessonPanel");
+        const typePanel = document.getElementById("typePanel");
         const mode = document.getElementById("mode");
         if (!panel) return false;
 
         const saved = getSaved();
-        const wanted = new Set(saved.selectedLessons);
-        const boxes = Array.from(
+        const wantedLessons = new Set(saved.selectedLessons);
+        const lessonBoxes = Array.from(
             panel.querySelectorAll("input[type=checkbox][value^='lesson']")
         );
-        if (!boxes.length) return false;
+        if (!lessonBoxes.length) return false;
 
         let changed = false;
-        boxes.forEach(cb => {
-            const checked = wanted.has(cb.value);
+        lessonBoxes.forEach(cb => {
+            const checked = wantedLessons.has(cb.value);
             if (cb.checked !== checked) {
                 cb.checked = checked;
                 changed = true;
@@ -67,7 +82,20 @@
         });
 
         const all = panel.querySelector("input[type=checkbox][value='all']");
-        if (all) all.checked = boxes.length > 0 && boxes.every(cb => cb.checked);
+        if (all) all.checked = lessonBoxes.length > 0 && lessonBoxes.every(cb => cb.checked);
+
+        let typeChanged = false;
+        if (typePanel) {
+            const wantedTypes = new Set(saved.selectedTypes);
+            const typeBoxes = Array.from(typePanel.querySelectorAll("input[type=checkbox]"));
+            typeBoxes.forEach(cb => {
+                const checked = wantedTypes.has(cb.value);
+                if (cb.checked !== checked) {
+                    cb.checked = checked;
+                    typeChanged = true;
+                }
+            });
+        }
 
         let modeChanged = false;
         if (mode && (mode.value === "normal" || mode.value === "shuffle") && mode.value !== saved.orderMode) {
@@ -76,8 +104,11 @@
         }
 
         if (changed) {
-            const target = boxes.find(cb => cb.checked) || boxes[0];
+            const target = lessonBoxes.find(cb => cb.checked) || lessonBoxes[0];
             target.dispatchEvent(new Event("change", { bubbles: true }));
+        } else if (typeChanged && typePanel) {
+            const target = typePanel.querySelector("input[type=checkbox]");
+            target?.dispatchEvent(new Event("change", { bubbles: true }));
         } else if (modeChanged) {
             mode.dispatchEvent(new Event("change", { bubbles: true }));
         }
@@ -87,6 +118,7 @@
 
     function init() {
         const panel = document.getElementById("lessonPanel");
+        const typePanel = document.getElementById("typePanel");
         const mode = document.getElementById("mode");
         if (!panel) return;
 
@@ -95,12 +127,15 @@
         panel.addEventListener("change", event => {
             if (event.target?.matches("input[type=checkbox][value^='lesson']")) saveState();
         });
+        typePanel?.addEventListener("change", event => {
+            if (event.target?.matches("input[type=checkbox]")) saveState();
+        });
         mode?.addEventListener("change", saveState);
     }
 
     window.addEventListener("japaneseLangCloudLoaded", () => {
         // Cloud Sync has already written the cloud values into localStorage.
-        // Restore both Lesson and Order after that pull, including Shuffle.
+        // Restore Lesson, Type, and Order after that pull.
         restoreState();
     });
 
