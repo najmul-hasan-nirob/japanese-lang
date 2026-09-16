@@ -5,6 +5,7 @@
 
         const HARD_STORAGE_KEY='japanese-lang-hard-vocabulary';
         const FILTER_STORAGE_KEY='japanese-lang-kanji-filter';
+        const SHUFFLE_STORAGE_KEY='japanese-lang-kanji-shuffle-v1';
         const mnemonicFiles={'山':'01.webp','川':'02.webp','田':'03.webp','日':'04.webp','月':'05.webp','火':'06.webp','水':'07.webp','木':'08.webp','金':'09.webp','土':'10.webp','一':'11.webp','二':'12.webp','三':'13.webp','四':'14.webp','五':'15.webp','六':'16.webp','七':'17.webp','八':'18.webp','九':'19.webp','十':'20.webp','百':'21.webp','千':'22.webp','万':'23.webp','円':'24.webp','年':'25.webp','上':'26.webp','下':'27.webp','中':'28.webp','半':'29.webp','分':'30.webp','人':'31.webp','子':'32.webp','女':'33.webp','男':'34.webp','目':'35.webp','口':'36.webp','耳':'37.webp','手':'38.webp','足':'39.webp','力':'40.webp'};
         const mnemonicBase='/japanese-lang/assets/kanji-mnemonics/';
         const cards=window.kanjiData.map(function(item,index){const no=item.no||index+1,extra=(window.n5KanjiBangla&&window.n5KanjiBangla[item.kanji])||{},has=Object.prototype.hasOwnProperty.call(mnemonicFiles,item.kanji);return{no:no,kanji:item.kanji||'',level:item.level||'N5',kunyomi:item.kunyomi||'',onyomi:item.onyomi||'',reading:item.reading||'',meaning:extra.meaning||item.meaning||'',mnemonicImage:has?mnemonicFiles[item.kanji]:'',banglaExamples:has&&Array.isArray(extra.examples)?extra.examples:[]};}).filter(function(item){return item.kanji;});
@@ -14,32 +15,24 @@
         function selectedLevels(){return Array.from(levelPanel.querySelectorAll('input[type="checkbox"][data-kanji-level]:checked')).map(function(x){return x.value;});}
         function hardSelected(){const input=levelPanel.querySelector('input[value="hard-kanji"]');return !!input&&input.checked;}
         function saveFilterState(){try{localStorage.setItem(FILTER_STORAGE_KEY,JSON.stringify({levels:selectedLevels(),hard:hardSelected(),order:mode.value==='shuffle'?'shuffle':'normal'}));}catch(_) {}}
-        function loadFilterState(){
-            let state=null;
-            try{state=JSON.parse(localStorage.getItem(FILTER_STORAGE_KEY)||'null');}catch(_){state=null;}
-            const levelInputs=levelPanel.querySelectorAll('input[data-kanji-level]'),hard=levelPanel.querySelector('input[value="hard-kanji"]');
-            if(state&&Array.isArray(state.levels)){
-                levelInputs.forEach(function(input){input.checked=state.levels.includes(input.value);});
-                if(hard) hard.checked=state.hard===true;
-                if(state.order==='shuffle'||state.order==='normal') mode.value=state.order;
-            } else {
-                levelInputs.forEach(function(input){input.checked=input.value==='N5'||input.value==='N4';});
-                if(hard) hard.checked=false;
-            }
-        }
+        function loadFilterState(){let state=null;try{state=JSON.parse(localStorage.getItem(FILTER_STORAGE_KEY)||'null');}catch(_){state=null;}const levelInputs=levelPanel.querySelectorAll('input[data-kanji-level]'),hard=levelPanel.querySelector('input[value="hard-kanji"]');if(state&&Array.isArray(state.levels)){levelInputs.forEach(function(input){input.checked=state.levels.includes(input.value);});if(hard)hard.checked=state.hard===true;if(state.order==='shuffle'||state.order==='normal')mode.value=state.order;}else{levelInputs.forEach(function(input){input.checked=input.value==='N5'||input.value==='N4';});if(hard)hard.checked=false;}}
         function updateLevelLabel(){const selected=selectedLevels(),hard=hardSelected();let label=selected.length===2?'N5 + N4':selected.length?selected.join(' + '):'None';if(hard)label=selected.length?(label+' + Hard Kanji'):'Hard Kanji';levelBtn.textContent=label;}
         function ensureHardKanjiOption(){if(levelPanel.querySelector('input[value="hard-kanji"]'))return;const label=document.createElement('label');label.innerHTML='<input type="checkbox" value="hard-kanji"> Hard Kanji';levelPanel.appendChild(label);}
-        function filtered(){
-            const q=search.value.trim().toLowerCase(),levels=selectedLevels(),hard=hardSelected(),hardSet=hard?storedHard():null;
-            return cards.filter(function(item){
-                if(levels.length&&!levels.includes(item.level))return false;
-                if(hard&&!hardSet.has('kanji|'+item.kanji))return false;
-                if(!q)return true;
-                return[item.kanji,item.kunyomi,item.onyomi,item.reading,item.meaning,item.level,String(item.no)].join(' ').toLowerCase().includes(q);
-            });
+        function baseFiltered(){const levels=selectedLevels(),hard=hardSelected(),hardSet=hard?storedHard():null;return cards.filter(function(item){if(levels.length&&!levels.includes(item.level))return false;if(hard&&!hardSet.has('kanji|'+item.kanji))return false;return true;});}
+        function searchFiltered(list){const q=search.value.trim().toLowerCase();if(!q)return list;return list.filter(function(item){return[item.kanji,item.kunyomi,item.onyomi,item.reading,item.meaning,item.level,String(item.no)].join(' ').toLowerCase().includes(q);});}
+        function cardKey(item){return String(item.level)+'|'+String(item.no)+'|'+String(item.kanji);}
+        function getShuffleStore(){try{const value=JSON.parse(localStorage.getItem(SHUFFLE_STORAGE_KEY)||'null');return value&&value.states&&typeof value.states==='object'?value:{version:1,states:{}};}catch(_){return{version:1,states:{}};}}
+        function setShuffleStore(value){try{localStorage.setItem(SHUFFLE_STORAGE_KEY,JSON.stringify(value));window.dispatchEvent(new CustomEvent('japaneseLangKanjiShuffleChanged'));}catch(_) {}}
+        function shuffleArray(list){const result=list.slice();for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const temp=result[i];result[i]=result[j];result[j]=temp;}return result;}
+        function shuffleSignature(list){return list.map(cardKey).sort().join('\u001f');}
+        function shuffledBase(list){
+            if(mode.value!=='shuffle')return list;
+            const signature=shuffleSignature(list),store=getShuffleStore(),saved=store.states[signature];
+            if(saved&&Array.isArray(saved.order)&&saved.order.length===list.length){const byKey=new Map(list.map(function(item){return[cardKey(item),item];}));const ordered=saved.order.map(function(key){return byKey.get(key)||null;}).filter(Boolean);if(ordered.length===list.length&&new Set(ordered.map(cardKey)).size===list.length)return ordered;}
+            const shuffled=shuffleArray(list),next={version:1,states:Object.assign({},store.states)};next.states[signature]={order:shuffled.map(cardKey),updatedAt:Date.now()};setShuffleStore(next);return shuffled;
         }
         function details(item){let html=item.meaning?'<div class="kanji-detail-meaning">'+esc(item.meaning)+'</div>':'';html+='<div class="kanji-reading-line"><span class="kanji-reading-label">Kunyomi:</span> '+(item.kunyomi?esc(item.kunyomi):'—')+'</div>';html+='<div class="kanji-reading-line"><span class="kanji-reading-label">Onyomi:</span> '+(item.onyomi?esc(item.onyomi):'—')+'</div>';if(item.banglaExamples.length){html+='<div class="kanji-bangla-examples"><div class="kanji-examples-title">উদাহরণ:</div>';html+=item.banglaExamples.map(function(ex){return'<div class="kanji-example-line"><span class="kanji-example-jp">'+esc(ex.jp)+'</span> — <span class="kanji-example-bn">'+esc(ex.bn)+'</span></div>';}).join('')+'</div>';}return html;}
-        function render(){let visible=filtered();if(mode.value==='shuffle')visible=visible.slice().sort(function(){return Math.random()-0.5;});grid.innerHTML=visible.map(function(item){let image=item.mnemonicImage?'<div class="kanji-mnemonic-wrap"><img class="kanji-mnemonic-image" src="'+mnemonicBase+item.mnemonicImage+'?v=3" alt="'+esc(item.kanji)+' mnemonic image" loading="lazy" decoding="async"><span class="kanji-mnemonic-fallback">Mnemonic image</span></div>':'';return'<div class="card kanji-card" data-no="'+item.no+'" data-level="'+esc(item.level)+'" data-kanji="'+esc(item.kanji)+'"><div class="inner"><div class="front"><div class="kanji-character">'+esc(item.kanji)+'</div></div><div class="back">'+image+'<div class="kanji-character small">'+esc(item.kanji)+'</div><div class="kanji-details">'+details(item)+'</div></div></div></div>';}).join('');grid.querySelectorAll('.card').forEach(function(card){card.addEventListener('click',function(){card.classList.toggle('flipped');});});grid.querySelectorAll('.kanji-mnemonic-image').forEach(function(img){img.addEventListener('error',function(){img.parentElement.classList.add('image-error');});});count.textContent='Showing '+visible.length+' kanji';clear.hidden=!search.value;updateLevelLabel();}
+        function render(){let visible=searchFiltered(shuffledBase(baseFiltered()));grid.innerHTML=visible.map(function(item){let image=item.mnemonicImage?'<div class="kanji-mnemonic-wrap"><img class="kanji-mnemonic-image" src="'+mnemonicBase+item.mnemonicImage+'?v=3" alt="'+esc(item.kanji)+' mnemonic image" loading="lazy" decoding="async"><span class="kanji-mnemonic-fallback">Mnemonic image</span></div>':'';return'<div class="card kanji-card" data-no="'+item.no+'" data-level="'+esc(item.level)+'" data-kanji="'+esc(item.kanji)+'"><div class="inner"><div class="front"><div class="kanji-character">'+esc(item.kanji)+'</div></div><div class="back">'+image+'<div class="kanji-character small">'+esc(item.kanji)+'</div><div class="kanji-details">'+details(item)+'</div></div></div></div>';}).join('');grid.querySelectorAll('.card').forEach(function(card){card.addEventListener('click',function(){card.classList.toggle('flipped');});});grid.querySelectorAll('.kanji-mnemonic-image').forEach(function(img){img.addEventListener('error',function(){img.parentElement.classList.add('image-error');});});count.textContent='Showing '+visible.length+' kanji';clear.hidden=!search.value;updateLevelLabel();}
 
         ensureHardKanjiOption();
         levelPanel.querySelectorAll('input[type="checkbox"]').forEach(function(input){if(input.value==='N5'||input.value==='N4')input.setAttribute('data-kanji-level','true');});
@@ -47,13 +40,7 @@
 
         levelBtn.addEventListener('click',function(e){e.stopPropagation();const open=levelPanel.classList.toggle('open');levelBtn.setAttribute('aria-expanded',String(open));});
         levelPanel.addEventListener('click',function(e){e.stopPropagation();});
-        levelPanel.addEventListener('change',function(e){
-            if(e.target&&e.target.type==='checkbox'){
-                saveFilterState();
-                updateLevelLabel();
-                render();
-            }
-        });
+        levelPanel.addEventListener('change',function(e){if(e.target&&e.target.type==='checkbox'){saveFilterState();updateLevelLabel();render();}});
         document.addEventListener('click',function(){levelPanel.classList.remove('open');levelBtn.setAttribute('aria-expanded','false');});
         search.addEventListener('input',render);clear.addEventListener('click',function(){search.value='';render();search.focus();});
         mode.addEventListener('change',function(){saveFilterState();render();});
