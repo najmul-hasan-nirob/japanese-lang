@@ -74,7 +74,6 @@
         display:none!important;
         width:100%!important;
         box-sizing:border-box!important;
-        padding:12px!important;
         background:var(--paper-cell,#fff)!important;
         color:var(--ink,#111)!important;
         border-top:1px solid var(--paper-line,#ddd)!important;
