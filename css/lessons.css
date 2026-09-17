@@ -298,3 +298,7 @@ html, body{ overscroll-behavior-y:none; }
 .lesson-card-bottombar{
         background-color: #18212c !important;
 }
+
+.inner .lesson-tag{
+    display: none !important;
+}
