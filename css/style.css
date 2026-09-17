@@ -58,7 +58,7 @@ body::before {
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    gap: 5px;
 }
 
 /* Shared header */
