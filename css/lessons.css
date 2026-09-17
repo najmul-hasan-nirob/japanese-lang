@@ -43,7 +43,7 @@
     align-items:center;
     gap:4px;
     text-align:center;
-    padding:40px;
+    padding:25px;
     line-height:1.4;
     word-break:break-word;
     backface-visibility:hidden;
@@ -106,7 +106,6 @@ body.dark .card.grammar .front{ color:var(--vermilion); }
     justify-content:center;
     text-align:center;
     gap:6px;
-    padding:18px 10px 10px 10px;
 }
 .vocabulary-back .romaji{
     font-family:'JetBrains Mono', monospace;
@@ -291,7 +290,7 @@ html, body{ overscroll-behavior-y:none; }
     }
 }
 
-.lesson-card-topbar, .front, .back{
+.lesson-card-topbar{
     border-radius: 5px 5px 0 0 !important;
 }
 
