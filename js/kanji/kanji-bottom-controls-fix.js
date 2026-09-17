@@ -39,8 +39,7 @@
       .kanji-card > .lesson-card-bottombar > .vocabulary-clue-btn{order:2!important}
       .kanji-card > .lesson-card-bottombar > .kanji-stroke-btn{order:3!important}
       .kanji-card > .lesson-card-bottombar > .admin-card-actions > .admin-card-delete{order:4!important}
-      .kanji-card > .lesson-card-bottombar .hard-star,
-      .kanji-card > .hard-star{display:none!important}
+      .kanji-card .hard-star:not(.lesson-card-topbar .hard-star){display:none!important}
       .kanji-card .kanji-merged-label{
         order:2!important;
         flex:1 1 auto!important;
@@ -134,8 +133,10 @@
     const bottom=card.querySelector(':scope > .lesson-card-bottombar');
     if(!bottom) return;
 
-    bottom.querySelectorAll('.hard-star').forEach(el=>el.remove());
-    card.querySelectorAll(':scope > .hard-star').forEach(el=>el.remove());
+    const top=card.querySelector(':scope > .lesson-card-topbar');
+    card.querySelectorAll('.hard-star').forEach(el=>{
+      if(!top || !top.contains(el)) el.remove();
+    });
 
     const actions=card.querySelector(':scope > .admin-card-actions');
     if(actions) bottom.appendChild(actions);
