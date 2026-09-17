@@ -39,9 +39,94 @@
       .kanji-card > .lesson-card-bottombar > .vocabulary-clue-btn{order:2!important}
       .kanji-card > .lesson-card-bottombar > .kanji-stroke-btn{order:3!important}
       .kanji-card > .lesson-card-bottombar > .admin-card-actions > .admin-card-delete{order:4!important}
-      .kanji-card > .lesson-card-bottombar .hard-star{display:none!important}
+      .kanji-card > .lesson-card-bottombar .hard-star,
+      .kanji-card > .hard-star{display:none!important}
+      .kanji-card .kanji-merged-label{
+        order:2!important;
+        flex:1 1 auto!important;
+        min-width:0!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        white-space:nowrap!important;
+        text-align:center!important;
+        color:#fff!important;
+        font-size:12px!important;
+        font-weight:700!important;
+        pointer-events:none!important;
+      }
+      .kanji-card .kanji-mnemonic-toggle{
+        order:7!important;
+        width:30px!important;
+        height:30px!important;
+        min-width:30px!important;
+        padding:0!important;
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        border:0!important;
+        border-radius:6px!important;
+        background:transparent!important;
+        color:#fff!important;
+        cursor:pointer!important;
+        pointer-events:auto!important;
+        font-size:17px!important;
+        line-height:1!important;
+      }
+      .kanji-card .kanji-mnemonic-toggle[aria-pressed="true"]{background:rgba(255,255,255,.18)!important}
+      .kanji-card .kanji-mnemonic-wrap.kanji-mnemonic-hidden{display:none!important}
     `;
     document.head.appendChild(style);
+  }
+
+  function setupTopbar(card){
+    const top=card.querySelector(':scope > .lesson-card-topbar');
+    if(!top) return;
+
+    const number=top.querySelector('.lesson-card-number');
+    const tag=top.querySelector('.lesson-tag');
+    if(number && tag){
+      let label=top.querySelector('.kanji-merged-label');
+      if(!label){
+        label=document.createElement('span');
+        label.className='kanji-merged-label';
+        top.insertBefore(label,number);
+      }
+      const level=tag.textContent.trim();
+      const serial=number.textContent.trim();
+      label.textContent=(level+' '+serial).trim();
+      number.style.display='none';
+      tag.style.display='none';
+    }
+
+    let toggle=top.querySelector('.kanji-mnemonic-toggle');
+    if(!toggle){
+      toggle=document.createElement('button');
+      toggle.type='button';
+      toggle.className='kanji-mnemonic-toggle';
+      toggle.textContent='▣';
+      toggle.title='Show mnemonic image';
+      toggle.setAttribute('aria-label','Show mnemonic image');
+      toggle.setAttribute('aria-pressed','false');
+      toggle.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const wrap=card.querySelector('.kanji-mnemonic-wrap');
+        if(!wrap) return;
+        const show=toggle.getAttribute('aria-pressed')!=='true';
+        toggle.setAttribute('aria-pressed',String(show));
+        toggle.textContent=show?'▣':'□';
+        toggle.title=show?'Hide mnemonic image':'Show mnemonic image';
+        toggle.setAttribute('aria-label',show?'Hide mnemonic image':'Show mnemonic image');
+        wrap.classList.toggle('kanji-mnemonic-hidden',!show);
+      });
+      top.appendChild(toggle);
+    }
+
+    const wrap=card.querySelector('.kanji-mnemonic-wrap');
+    if(wrap && !toggle.dataset.initialized){
+      wrap.classList.add('kanji-mnemonic-hidden');
+      toggle.dataset.initialized='true';
+    }
   }
 
   function fixCard(card){
@@ -50,6 +135,7 @@
     if(!bottom) return;
 
     bottom.querySelectorAll('.hard-star').forEach(el=>el.remove());
+    card.querySelectorAll(':scope > .hard-star').forEach(el=>el.remove());
 
     const actions=card.querySelector(':scope > .admin-card-actions');
     if(actions) bottom.appendChild(actions);
@@ -59,6 +145,8 @@
 
     const stroke=card.querySelector(':scope > .kanji-stroke-btn');
     if(stroke) bottom.appendChild(stroke);
+
+    setupTopbar(card);
   }
 
   function fixAll(){
