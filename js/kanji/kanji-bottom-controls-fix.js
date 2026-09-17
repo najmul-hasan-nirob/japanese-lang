@@ -2,6 +2,8 @@
   'use strict';
 
   const STYLE_ID = 'kanji-bottom-controls-fix-style';
+  let observer = null;
+  let scheduled = false;
 
   function injectStyle(){
     if(document.getElementById(STYLE_ID)) return;
@@ -92,7 +94,8 @@
       }
       const level=tag.textContent.trim();
       const serial=number.textContent.trim();
-      label.textContent=(level+' '+serial).trim();
+      const nextText=(level+' '+serial).trim();
+      if(label.textContent!==nextText) label.textContent=nextText;
       number.style.display='none';
       tag.style.display='none';
     }
@@ -139,30 +142,40 @@
     });
 
     const actions=card.querySelector(':scope > .admin-card-actions');
-    if(actions) bottom.appendChild(actions);
+    if(actions && actions.parentElement!==bottom) bottom.appendChild(actions);
 
     const clue=card.querySelector(':scope > .vocabulary-clue-btn');
-    if(clue) bottom.appendChild(clue);
+    if(clue && clue.parentElement!==bottom) bottom.appendChild(clue);
 
     const stroke=card.querySelector(':scope > .kanji-stroke-btn');
-    if(stroke) bottom.appendChild(stroke);
+    if(stroke && stroke.parentElement!==bottom) bottom.appendChild(stroke);
 
     setupTopbar(card);
   }
 
   function fixAll(){
+    scheduled=false;
     injectStyle();
     document.querySelectorAll('#kanjiGrid .kanji-card').forEach(fixCard);
   }
 
+  function scheduleFix(){
+    if(scheduled) return;
+    scheduled=true;
+    requestAnimationFrame(fixAll);
+  }
+
   function init(){
+    injectStyle();
     fixAll();
     const grid=document.getElementById('kanjiGrid');
     if(grid){
-      const observer=new MutationObserver(fixAll);
+      observer=new MutationObserver(function(mutations){
+        const relevant=mutations.some(m=>Array.from(m.addedNodes).some(node=>node.nodeType===1));
+        if(relevant) scheduleFix();
+      });
       observer.observe(grid,{childList:true,subtree:true});
     }
-    [100,300,700,1200].forEach(delay=>setTimeout(fixAll,delay));
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
