@@ -51,7 +51,7 @@
 .lesson-card-content{position:relative;width:100%;height:auto;min-height:0;box-sizing:border-box;overflow:visible;display:grid;flex:1 1 auto;grid-template-columns:minmax(0,1fr);grid-template-rows:1fr;align-items:stretch;pointer-events:none}
 .lesson-card-content>.front,.lesson-card-content>.back{position:relative;inset:auto;grid-area:1 / 1;width:100%;height:auto;min-height:0;box-sizing:border-box;padding-top:50px!important;padding-bottom:44px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:auto}
 .lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-tag,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{bottom:auto!important;margin:0!important;align-self:center}
-.lesson-card-bottombar{position:absolute;left:0;right:0;bottom:0;width:100%;height:38px;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;z-index:60;pointer-events:none;background:inherit;padding:0 10px}
+.lesson-card-bottombar{position:absolute;left:0;right:0;bottom:-30px;width:100%;height:38px;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;z-index:60;pointer-events:none;background:inherit;padding:0 10px}
 .lesson-card-bottombar>.admin-card-actions{position:static!important;inset:auto!important;display:contents!important;pointer-events:none!important}
 .lesson-card-bottombar>.admin-card-actions>.admin-card-edit{margin-right:auto!important}
 .lesson-card-bottombar>.vocabulary-clue-btn{position:absolute!important;left:50%!important;transform:translateX(-50%)!important}
