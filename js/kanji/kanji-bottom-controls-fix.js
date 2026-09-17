@@ -75,6 +75,18 @@
       }
       .kanji-card .kanji-mnemonic-toggle[aria-pressed="true"]{background:rgba(255,255,255,.18)!important}
       .kanji-card .kanji-mnemonic-wrap.kanji-mnemonic-hidden{display:none!important}
+      .kanji-card .inner > .kanji-stroke-section{
+        display:none!important;
+        width:100%!important;
+        box-sizing:border-box!important;
+        padding:12px!important;
+        background:var(--paper-cell,#fff)!important;
+        color:var(--ink,#111)!important;
+        border-top:1px solid var(--paper-line,#ddd)!important;
+        border-bottom:1px solid var(--paper-line,#ddd)!important;
+        text-align:center!important;
+      }
+      .kanji-card .inner > .kanji-stroke-section.open{display:block!important}
     `;
     document.head.appendChild(style);
   }
@@ -134,7 +146,8 @@
   function fixCard(card){
     if(!card || !card.classList.contains('kanji-card')) return;
     const bottom=card.querySelector(':scope > .lesson-card-bottombar');
-    if(!bottom) return;
+    const inner=card.querySelector(':scope > .inner');
+    if(!bottom || !inner) return;
 
     const top=card.querySelector(':scope > .lesson-card-topbar');
     card.querySelectorAll('.hard-star').forEach(el=>{
@@ -149,6 +162,9 @@
 
     const stroke=card.querySelector(':scope > .kanji-stroke-btn');
     if(stroke && stroke.parentElement!==bottom) bottom.appendChild(stroke);
+
+    const section=card.querySelector(':scope > .kanji-stroke-section');
+    if(section && section.parentElement!==inner) inner.appendChild(section);
 
     setupTopbar(card);
   }
