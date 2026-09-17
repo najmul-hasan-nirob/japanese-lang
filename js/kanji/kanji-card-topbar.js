@@ -21,7 +21,7 @@
         .kanji-stroke-stage svg { width:100%!important; height:100%!important; display:block!important; }
         .kanji-stroke-status { min-height:20px!important; font-size:11px!important; opacity:.7!important; }
         .kanji-stroke-error { min-height:60px!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:12px!important; }
-        @media (max-width:520px){ .kanji-card > .lesson-card-topbar button { width:28px!important;height:28px!important;min-width:28px!important; } .kanji-card > .kanji-stroke-section{padding:10px!important;} .kanji-stroke-stage{width:100%!important;max-height:200px!important;} }
+        @media (max-width:520px){ .kanji-card > .lesson-card-topbar button { width:28px!important;height:28px!important;min-width:28px!important; } .kanji-card > .kanji-stroke-section{padding:10px!important;} .kanji-stroke-stage{width:100%!important;max-height:250px!important;height:100%!important;} }
     `;
     document.head.appendChild(style);
 
