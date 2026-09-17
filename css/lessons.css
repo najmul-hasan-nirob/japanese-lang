@@ -302,3 +302,7 @@ html, body{ overscroll-behavior-y:none; }
 .inner .lesson-tag{
     display: none !important;
 }
+
+.lesson-card-bottombar {
+    border-radius: var(--radius) !important;
+}
