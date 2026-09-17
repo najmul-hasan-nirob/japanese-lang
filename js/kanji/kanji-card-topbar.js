@@ -17,7 +17,7 @@
         .kanji-card > .kanji-stroke-section { display:none!important; width:100%!important; box-sizing:border-box!important; padding:12px!important; background:var(--paper-cell,#fff)!important; color:var(--ink,#111)!important; border-top:1px solid var(--paper-line,#ddd)!important; border-bottom:1px solid var(--paper-line,#ddd)!important; text-align:center!important; }
         .kanji-card > .kanji-stroke-section.open { display:block!important; }
         .kanji-stroke-section-title { margin:0 0 6px!important; font-size:15px!important; font-weight:700!important; }
-        .kanji-stroke-stage { width:min(55vw,220px)!important; height:min(55vw,220px)!important; max-width:220px!important; max-height:220px!important; margin:0 auto 8px!important; display:flex!important; align-items:center!important; justify-content:center!important; overflow:hidden!important; background:rgba(128,128,128,.06)!important; border-radius:10px!important; }
+        .kanji-stroke-stage { display:flex!important; align-items:center!important; justify-content:center!important; overflow:hidden!important; background:rgba(128,128,128,.06)!important; border-radius:10px!important; }
         .kanji-stroke-stage svg { width:100%!important; height:100%!important; display:block!important; }
         .kanji-stroke-status { min-height:20px!important; font-size:11px!important; opacity:.7!important; }
         .kanji-stroke-error { min-height:60px!important; display:flex!important; align-items:center!important; justify-content:center!important; font-size:12px!important; }
