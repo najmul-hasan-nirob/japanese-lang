@@ -305,7 +305,3 @@ html, body{ overscroll-behavior-y:none; }
 .lesson-card-bottombar {
     border-radius: 0 0 5px 5px !important;
 }
-
-.lesson-tag{
-    color: #59cb75 !important;
-}
