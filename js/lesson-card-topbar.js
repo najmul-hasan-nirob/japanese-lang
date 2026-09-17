@@ -33,7 +33,10 @@
         if(!bottomBar){bottomBar=document.createElement('div');bottomBar.className='lesson-card-bottombar';bottomBar.setAttribute('aria-label','Card bottom controls');inner.appendChild(bottomBar)}
         const star=inner.querySelector(':scope > .hard-star'); const number=inner.querySelector(':scope > .lesson-card-number'); const speaker=findSpeaker(inner); const clue=inner.querySelector('.vocabulary-clue-btn'); const adminActions=card.querySelector(':scope > .admin-card-actions');
         let tag=bar.querySelector(':scope > .lesson-tag'); if(!tag){tag=document.createElement('span');tag.className='lesson-tag';tag.setAttribute('aria-hidden','true');bar.appendChild(tag)}
-        if(star&&star.parentElement!==bar)bar.appendChild(star); if(number&&number.parentElement!==bar)bar.appendChild(number); if(speaker&&speaker.parentElement!==bar)bar.appendChild(speaker); if(clue&&clue.parentElement!==bottomBar)bottomBar.appendChild(clue); if(adminActions&&adminActions.parentElement!==bottomBar)bottomBar.appendChild(adminActions);
+        if(star&&star.parentElement!==bar)bar.appendChild(star);
+        if(number)number.remove();
+        if(speaker&&speaker.parentElement!==bar)bar.appendChild(speaker);
+        if(clue&&clue.parentElement!==bottomBar)bottomBar.appendChild(clue); if(adminActions&&adminActions.parentElement!==bottomBar)bottomBar.appendChild(adminActions);
         Array.from(inner.children).forEach(child=>{if(child!==bar&&child!==content&&child!==bottomBar&&(child.classList.contains('front')||child.classList.contains('back')))content.appendChild(child)});
         if(speaker){makeVisibleSpeaker(speaker);setupSpeakerBehavior(card,speaker)} card.classList.add('lesson-card-structured');
     }
@@ -41,22 +44,20 @@
         if(document.getElementById('lesson-card-structure-styles'))return; const style=document.createElement('style');style.id='lesson-card-structure-styles';style.textContent=`
 .card.lesson-card-structured{position:relative;overflow:visible;border-radius:var(--radius);display:flex;align-items:stretch}
 .lesson-card-inner{position:relative;width:100%;height:auto;min-height:0;overflow:visible;border-radius:inherit;box-sizing:border-box;display:flex;flex-direction:column;flex:1 1 auto;transform-style:preserve-3d}
-.lesson-card-topbar{position:absolute;top:0;left:0;right:0;width:100%;height:42px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;justify-items:center;box-sizing:border-box;z-index:50;pointer-events:none}
+.lesson-card-topbar{position:absolute;top:0;left:0;right:0;width:100%;height:42px;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;z-index:50;pointer-events:none;padding:0 10px}
+.lesson-card-topbar>.hard-star{margin-right:auto!important}
+.lesson-card-topbar>.lesson-tag{position:absolute!important;left:50%!important;transform:translateX(-50%)!important;white-space:nowrap;overflow:visible!important;text-overflow:clip!important;max-width:none!important;width:max-content;font-size:9.5px;text-align:center;pointer-events:none}
+.lesson-card-topbar>.speaker-btn,.lesson-card-topbar>.speak-btn,.lesson-card-topbar>.pronunciation-btn{margin-left:auto!important;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
 .lesson-card-content{position:relative;width:100%;height:auto;min-height:0;box-sizing:border-box;overflow:visible;display:grid;flex:1 1 auto;grid-template-columns:minmax(0,1fr);grid-template-rows:1fr;align-items:stretch;pointer-events:none}
-.lesson-card-content>.front,.lesson-card-content>.back{position:relative;inset:auto;grid-area:1 / 1;width:100%;height:auto;min-height:0;box-sizing:border-box;padding-top:50px!important;padding-bottom:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:auto}
-.lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-tag,.lesson-card-topbar .lesson-card-number,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn,.lesson-card-topbar .vocabulary-clue-btn,.lesson-card-topbar .admin-card-edit,.lesson-card-topbar .admin-card-delete{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;transform:none!important;margin:0!important;pointer-events:auto;align-self:center;justify-self:center}
-.lesson-card-topbar .hard-star{grid-column:1;grid-row:1;justify-self:start}
-.lesson-card-topbar .lesson-tag{grid-column:2;grid-row:1;white-space:nowrap;overflow:visible;text-overflow:clip;max-width:none;font-size:9.5px;text-align:center;pointer-events:none}
-.lesson-card-topbar .lesson-card-number{display:none!important;position:absolute!important;width:0!important;height:0!important}
-.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{grid-column:3;grid-row:1;justify-self:end;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
-.lesson-card-bottombar{position:absolute;left:0;right:0;bottom:0;width:100%;height:38px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;box-sizing:border-box;z-index:60;pointer-events:none;background:inherit}
-.lesson-card-bottombar>.admin-card-actions{position:static!important;inset:auto!important;grid-column:1 / 4;display:contents!important;pointer-events:none!important}
-.lesson-card-bottombar>.admin-card-actions>.admin-card-edit{grid-column:1;justify-self:start}
-.lesson-card-bottombar>.vocabulary-clue-btn{grid-column:2!important;grid-row:1!important;justify-self:center}
-.lesson-card-bottombar>.admin-card-actions>.admin-card-delete{grid-column:3;justify-self:end}
-.lesson-card-bottombar .vocabulary-clue-btn,.lesson-card-bottombar .admin-card-edit,.lesson-card-bottombar .admin-card-delete{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;transform:none!important;margin:0!important;pointer-events:auto!important;align-self:center}
-.lesson-card-bottombar .admin-card-edit,.lesson-card-bottombar .admin-card-delete{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important}
-@media(max-width:520px){.lesson-card-topbar{height:38px}.lesson-card-bottombar{height:34px}.lesson-card-content>.front,.lesson-card-content>.back{padding-top:44px!important;padding-bottom:34px!important}}
+.lesson-card-content>.front,.lesson-card-content>.back{position:relative;inset:auto;grid-area:1 / 1;width:100%;height:auto;min-height:0;box-sizing:border-box;padding-top:50px!important;padding-bottom:44px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:auto}
+.lesson-card-topbar .hard-star,.lesson-card-topbar .lesson-tag,.lesson-card-topbar .speaker-btn,.lesson-card-topbar .speak-btn,.lesson-card-topbar .pronunciation-btn{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;margin:0!important;align-self:center}
+.lesson-card-bottombar{position:absolute;left:0;right:0;bottom:0;width:100%;height:38px;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;z-index:60;pointer-events:none;background:inherit;padding:0 10px}
+.lesson-card-bottombar>.admin-card-actions{position:static!important;inset:auto!important;display:contents!important;pointer-events:none!important}
+.lesson-card-bottombar>.admin-card-actions>.admin-card-edit{margin-right:auto!important}
+.lesson-card-bottombar>.vocabulary-clue-btn{position:absolute!important;left:50%!important;transform:translateX(-50%)!important}
+.lesson-card-bottombar>.admin-card-actions>.admin-card-delete{margin-left:auto!important}
+.lesson-card-bottombar .vocabulary-clue-btn,.lesson-card-bottombar .admin-card-edit,.lesson-card-bottombar .admin-card-delete{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;margin:0!important;pointer-events:auto!important;align-self:center;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important}
+@media(max-width:520px){.lesson-card-topbar{height:38px;padding:0 8px}.lesson-card-bottombar{height:38px;padding:0 8px}.lesson-card-content>.front,.lesson-card-content>.back{padding-top:42px!important;padding-bottom:42px!important}}
 `;document.head.appendChild(style)
     }
     function setupAll(grid){grid.querySelectorAll(':scope > .card').forEach(setupCard);if(typeof window.updateLessonCardNumbers==='function')window.updateLessonCardNumbers()}
