@@ -44,11 +44,6 @@
       .kanji-card .hard-star:not(.lesson-card-topbar .hard-star){display:none!important}
       .kanji-card .kanji-merged-label{
         order:2!important;
-        flex:1 1 auto!important;
-        min-width:0!important;
-        overflow:hidden!important;
-        text-overflow:ellipsis!important;
-        white-space:nowrap!important;
         text-align:center!important;
         color:#fff!important;
         font-size:12px!important;
