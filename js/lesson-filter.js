@@ -135,7 +135,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function rerenderAfterLessonData(){updateLessonLabel();renderLessons();}
     document.addEventListener("lessonDataLoaded",rerenderAfterLessonData);
     document.addEventListener("hardVocabularyFilterReady",()=>setTimeout(renderLessons,0));
-    document.addEventListener("hardVocabularyUpdated",()=>renderLessons(true));
+    document.addEventListener("hardVocabularyUpdated",()=>{
+        const typePanel=document.getElementById("typePanel");
+        const hardSelected=!!typePanel?.querySelector('input[type="checkbox"][value="hard"]:checked');
+        if (hardSelected) renderLessons(true);
+        else if (window.japaneseLangHardVocabulary?.sync) window.japaneseLangHardVocabulary.sync();
+    });
 
     lessonBtn.addEventListener("click",e=>{e.stopPropagation();const open=lessonPanel.classList.contains("open");document.querySelectorAll(".multiselect-panel.open").forEach(p=>p.classList.remove("open"));lessonPanel.classList.toggle("open",!open);lessonBtn.setAttribute("aria-expanded",String(!open));});
     allCheckbox.addEventListener("change",()=>{lessonCheckboxes().forEach(cb=>cb.checked=allCheckbox.checked);updateLessonLabel();window.lessonLoader?.syncSelectedLessons();});
