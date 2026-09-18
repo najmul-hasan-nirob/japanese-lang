@@ -90,8 +90,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return getStoredHardKeys().has(key);
     }
 
-    function renderLessons(){
+    function renderLessons(preserveFlippedCards=false){
         const grid=document.getElementById("grid"),mode=document.getElementById("mode"),typePanel=document.getElementById("typePanel");
+        const flippedKeys = new Set();
+        if (preserveFlippedCards) {
+            grid.querySelectorAll(":scope > .card.flipped").forEach(card => {
+                const item = card.__lessonItem;
+                if (item) flippedKeys.add(JSON.stringify([item.lesson || "", item.type || "", item.jp || "", item.en || "", item.bn || ""]));
+            });
+        }
         if(!grid||!mode||!typePanel)return;
 
         const checkedTypes=Array.from(typePanel.querySelectorAll("input[type=checkbox]:checked")).map(cb=>cb.value);
@@ -111,6 +118,13 @@ document.addEventListener("DOMContentLoaded", () => {
             card.addEventListener("click",()=>card.classList.toggle("flipped"));const speakText=isVocab?item.jp:cleanForSpeech(item.jp);if(speakText&&isSpeakableJapanese(speakText))card.appendChild(createSpeakerButton(speakText));frag.appendChild(card);
         });
         grid.appendChild(frag);
+        if (preserveFlippedCards && flippedKeys.size) {
+            grid.querySelectorAll(":scope > .card").forEach(card => {
+                const item = card.__lessonItem;
+                const key = item ? JSON.stringify([item.lesson || "", item.type || "", item.jp || "", item.en || "", item.bn || ""]) : "";
+                if (flippedKeys.has(key)) card.classList.add("flipped");
+            });
+        }
         const counter=document.getElementById("cardCount");
         if(counter)counter.textContent=`Showing ${cards.length} cards`;
 
@@ -121,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function rerenderAfterLessonData(){updateLessonLabel();renderLessons();}
     document.addEventListener("lessonDataLoaded",rerenderAfterLessonData);
     document.addEventListener("hardVocabularyFilterReady",()=>setTimeout(renderLessons,0));
-    document.addEventListener("hardVocabularyUpdated",()=>renderLessons());
+    document.addEventListener("hardVocabularyUpdated",()=>renderLessons(true));
 
     lessonBtn.addEventListener("click",e=>{e.stopPropagation();const open=lessonPanel.classList.contains("open");document.querySelectorAll(".multiselect-panel.open").forEach(p=>p.classList.remove("open"));lessonPanel.classList.toggle("open",!open);lessonBtn.setAttribute("aria-expanded",String(!open));});
     allCheckbox.addEventListener("change",()=>{lessonCheckboxes().forEach(cb=>cb.checked=allCheckbox.checked);updateLessonLabel();window.lessonLoader?.syncSelectedLessons();});
