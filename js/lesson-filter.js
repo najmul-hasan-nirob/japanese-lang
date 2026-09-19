@@ -144,7 +144,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function rerenderAfterLessonData(){updateLessonLabel();renderLessons();}
     document.addEventListener("lessonDataLoaded",rerenderAfterLessonData);
-    document.addEventListener("lessonSearchQueryChanged",()=>renderLessons(true));
+    document.addEventListener("lessonSearchQueryChanged",async()=>{
+        const query=String(window.lessonSearchQuery||"").trim();
+        if (query && window.lessonLoader?.loadLesson) {
+            await Promise.all(sortedLessonKeys().map(key=>window.lessonLoader.loadLesson(key)));
+        } else if (!query && window.lessonLoader?.syncSelectedLessons) {
+            await window.lessonLoader.syncSelectedLessons();
+            return;
+        }
+        renderLessons(true);
+    });
     document.addEventListener("hardVocabularyFilterReady",()=>setTimeout(renderLessons,0));
     document.addEventListener("hardVocabularyUpdated",()=>{
         const typePanel=document.getElementById("typePanel");
