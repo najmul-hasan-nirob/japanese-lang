@@ -172,6 +172,26 @@ document.addEventListener("DOMContentLoaded", () => {
             .trim();
     }
 
+    function searchMatch(text, query){
+        const t = normalizeSearch(text);
+        const q = normalizeSearch(query);
+        if (!q) return true;
+        if (t.includes(q)) return true;
+
+        // Ignore spaces/punctuation so partial searches stay forgiving.
+        const compactText = t.replace(/[\s\p{P}\p{S}]+/gu, "");
+        const compactQuery = q.replace(/[\s\p{P}\p{S}]+/gu, "");
+        if (compactQuery && compactText.includes(compactQuery)) return true;
+
+        // Progressive/fuzzy character matching: "okurim" still matches "okurimasu".
+        let qi = 0;
+        for (const ch of compactText) {
+            if (ch === compactQuery[qi]) qi++;
+            if (qi === compactQuery.length) return true;
+        }
+        return false;
+    }
+
     function getCardSearchText(card){
         const item = card.__lessonItem || {};
         const romaji = item.romaji || (typeof toRomaji === "function" ? toRomaji(item.jp || "") : "");
@@ -187,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let matches = 0;
 
         cards.forEach(card => {
-            const matched = !query || getCardSearchText(card).includes(query);
+            const matched = !query || searchMatch(getCardSearchText(card), query);
             card.dataset.lessonSearchHidden = matched ? "false" : "true";
             card.style.display = matched ? "" : "none";
             if (matched) matches++;
