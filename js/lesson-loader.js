@@ -56,7 +56,8 @@
             .filter(box => box.checked)
             .map(box => box.value);
 
-        const wanted = new Set(selected.length ? selected : ['lesson1']);
+        const searching = !!String(window.lessonSearchQuery || '').trim();
+        const wanted = new Set(searching ? lessonKeys() : (selected.length ? selected : ['lesson1']));
 
         Object.keys(store).forEach(key => {
             if (!wanted.has(key)) delete store[key];
