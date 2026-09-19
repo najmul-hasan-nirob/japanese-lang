@@ -6,7 +6,7 @@ const CACHE_KEY='japanese-lang-vocabulary-clues-v1';
 const CACHE_TTL=5*60*1000;
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function isAdmin(){return !!window.japaneseAdmin?.isUnlocked?.();}
-function identity(card){const lesson=card.querySelector('.lesson-tag')?.textContent?.trim()||'';const romaji=card.dataset.romaji||'';const english=card.querySelector('.english')?.textContent?.trim()||'';const front=card.querySelector('.front>div')?.textContent?.trim()||'';return {lesson,romaji,english,front};}
+function identity(card){const item=card.__lessonItem||{};const rawLesson=String(item.lesson||'').trim();const type=String(item.type||'').trim().toLowerCase();const typeLabel=type==='grammar'?'Grammar':'Vocabulary';const lesson=rawLesson?(rawLesson+' · '+typeLabel):(card.querySelector('.lesson-tag')?.textContent?.trim()||'');const romaji=card.dataset.romaji||'';const english=card.querySelector('.english')?.textContent?.trim()||String(item.en||'').trim();const front=card.querySelector('.front>div')?.textContent?.trim()||String(item.jp||'').trim();return {lesson,romaji,english,front};}
 function cardKey(card){const i=identity(card);return [i.lesson,i.romaji,i.english,i.front].join('|');}
 function url(card){return API+'?card_key='+encodeURIComponent(cardKey(card));}
 function authHeaders(){const t=window.japaneseAdmin?.getToken?.()||'';return t?{'x-admin-token':t,'Authorization':'Bearer '+t}:{};}
