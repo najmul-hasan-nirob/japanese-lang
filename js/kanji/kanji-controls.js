@@ -109,7 +109,20 @@
         if (!mobile) { mobile = document.createElement('button'); mobile.type='button'; mobile.id='kanjiMobileDirection'; mobile.className='direction-toggle'; mobile.addEventListener('click', function(e){e.preventDefault();e.stopPropagation();toggle();}); }
         let practiceMobile = document.getElementById('kanjiMobileWritingPractice');
         if (!practiceMobile) { practiceMobile=document.createElement('button');practiceMobile.type='button';practiceMobile.id='kanjiMobileWritingPractice';practiceMobile.className='direction-toggle';practiceMobile.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();toggleWritingPractice();}); }
-        bar.appendChild(mobile); bar.appendChild(practiceMobile); updateUI();
+        const screenField=document.getElementById('screenWakeField');
+        if(screenField) screenField.style.display='';
+        bar.appendChild(mobile);
+        bar.appendChild(practiceMobile);
+        if(screenField) bar.appendChild(screenField);
+        updateUI();
+    }
+
+    function restoreDesktopControls() {
+        const toolbar=document.querySelector('.toolbar');
+        const screenField=document.getElementById('screenWakeField');
+        if(screenField && toolbar && screenField.parentElement!==toolbar) toolbar.appendChild(screenField);
+        if(screenField) screenField.style.display='';
+        updateUI();
     }
 
     function syncResponsive() {
@@ -118,7 +131,7 @@
         const practiceDesktop = document.getElementById('kanjiWritingPractice');
         if (desktop) { const field=desktop.closest('.field'); if(field) field.style.display=mobile?'none':''; }
         if (practiceDesktop) { const field=practiceDesktop.closest('.field'); if(field) field.style.display=mobile?'none':''; }
-        if (mobile) ensureMobileControl(); else updateUI();
+        if (mobile) ensureMobileControl(); else restoreDesktopControls();
     }
 
     function init() {
