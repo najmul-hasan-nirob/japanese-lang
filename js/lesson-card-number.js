@@ -221,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.value = "";
         searchInput.focus();
         updateSearch();
+        document.dispatchEvent(new CustomEvent("lessonSearchQueryChanged"));
     });
 
     document.addEventListener("lessonCardsRendered", () => setTimeout(updateSearch, 0));
