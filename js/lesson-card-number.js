@@ -183,12 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const compactQuery = q.replace(/[\s\p{P}\p{S}]+/gu, "");
         if (compactQuery && compactText.includes(compactQuery)) return true;
 
-        // Progressive/fuzzy character matching: "okurim" still matches "okurimasu".
-        let qi = 0;
-        for (const ch of compactText) {
-            if (ch === compactQuery[qi]) qi++;
-            if (qi === compactQuery.length) return true;
-        }
         return false;
     }
 
