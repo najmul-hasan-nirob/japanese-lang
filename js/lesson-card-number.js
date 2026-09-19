@@ -181,6 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateSearch(){
         const query = normalizeSearch(searchInput.value);
+        window.lessonSearchQuery = query;
         clearButton.hidden = !query;
         const cards = currentCards();
         let matches = 0;
@@ -212,7 +213,10 @@ document.addEventListener("DOMContentLoaded", () => {
             : `Showing ${vocabularyCount} vocabulary`;
     }
 
-    searchInput.addEventListener("input", updateSearch);
+    searchInput.addEventListener("input", () => {
+        updateSearch();
+        document.dispatchEvent(new CustomEvent("lessonSearchQueryChanged"));
+    });
     clearButton.addEventListener("click", () => {
         searchInput.value = "";
         searchInput.focus();
