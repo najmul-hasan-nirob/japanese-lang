@@ -43,17 +43,24 @@
             saveFilterState();
             render();
         }
-        function details(item){let html=item.meaning?'<div class="kanji-detail-meaning">'+esc(item.meaning)+'</div>':'';html+='<div class="kanji-reading-line"><span class="kanji-reading-label">Kunyomi:</span> '+(item.kunyomi?esc(item.kunyomi):'—')+'</div>';html+='<div class="kanji-reading-line"><span class="kanji-reading-label">Onyomi:</span> '+(item.onyomi?esc(item.onyomi):'—')+'</div>';if(item.banglaExamples.length){html+='<div class="kanji-bangla-examples"><div class="kanji-examples-title">উদাহরণ:</div>';html+=item.banglaExamples.map(function(ex){return'<div class="kanji-example-line"><span class="kanji-example-jp">'+esc(ex.jp)+'</span> — <span class="kanji-example-bn">'+esc(ex.bn)+'</span></div>';}).join('')+'</div>';}return html;}
+        function primaryReading(kunyomi,onyomi){const value=String(kunyomi||onyomi||'').trim();if(!value)return '';return value.replace(/[（()）]/g,'').replace(/[、,]+/g,'/').replace(/\s*\/\s*/g,'/').replace(/\s+/g,'').trim();}
+        function details(item){const reading=primaryReading(item.kunyomi,item.onyomi);let html=item.meaning?'<div class="kanji-detail-meaning">'+esc(item.meaning)+(reading?' <span class="kanji-meaning-reading">（'+esc(reading)+'）</span>':'')+'</div>':'';html+='<div class="kanji-reading-line"><span class="kanji-reading-label">Kunyomi:</span> '+(item.kunyomi?esc(item.kunyomi):'—')+'</div>';html+='<div class="kanji-reading-line"><span class="kanji-reading-label">Onyomi:</span> '+(item.onyomi?esc(item.onyomi):'—')+'</div>';if(item.banglaExamples.length){html+='<div class="kanji-bangla-examples"><div class="kanji-examples-title">উদাহরণ:</div>';html+=item.banglaExamples.map(function(ex){return'<div class="kanji-example-line"><span class="kanji-example-jp">'+esc(ex.jp)+'</span> — <span class="kanji-example-bn">'+esc(ex.bn)+'</span></div>';}).join('')+'</div>';}return html;}
         function render(){let visible=searchFiltered(shuffledBase(baseFiltered()));grid.innerHTML=visible.map(function(item){let image=item.mnemonicImage?'<div class="kanji-mnemonic-wrap"><img class="kanji-mnemonic-image" src="'+mnemonicBase+item.mnemonicImage+'?v=3" alt="'+esc(item.kanji)+' mnemonic image" loading="lazy" decoding="async"><span class="kanji-mnemonic-fallback">Mnemonic image</span></div>':'';return'<div class="card kanji-card" data-no="'+item.no+'" data-level="'+esc(item.level)+'" data-kanji="'+esc(item.kanji)+'"><div class="inner"><div class="front"><div class="kanji-character">'+esc(item.kanji)+'</div></div><div class="back">'+image+'<div class="kanji-character small">'+esc(item.kanji)+'</div><div class="kanji-details">'+details(item)+'</div></div></div></div>';}).join('');grid.querySelectorAll('.card').forEach(function(card){card.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('button,a,input,select,textarea,label'))return;card.classList.toggle('flipped');});});grid.querySelectorAll('.kanji-mnemonic-image').forEach(function(img){img.addEventListener('error',function(){img.parentElement.classList.add('image-error');});});count.textContent='Showing '+visible.length+' kanji';clear.hidden=!search.value;updateLevelLabel();updateShuffleButton();}
+
         ensureHardKanjiOption();
         levelPanel.querySelectorAll('input[type="checkbox"]').forEach(function(input){if(input.value==='N5'||input.value==='N4')input.setAttribute('data-kanji-level','true');});
         loadFilterState();
+
         levelBtn.addEventListener('click',function(e){e.stopPropagation();const open=levelPanel.classList.toggle('open');levelBtn.setAttribute('aria-expanded',String(open));});
         levelPanel.addEventListener('click',function(e){e.stopPropagation();});
         levelPanel.addEventListener('change',function(e){if(e.target&&e.target.type==='checkbox'){saveFilterState();updateLevelLabel();render();}});
         document.addEventListener('click',function(){levelPanel.classList.remove('open');levelBtn.setAttribute('aria-expanded','false');});
         search.addEventListener('input',render);clear.addEventListener('click',function(){search.value='';render();search.focus();});
         mode.addEventListener('change',function(){saveFilterState();render();});
+
+        // One shared #shuffleBtn is used on desktop and mobile. main.js only moves this
+        // same DOM button into the mobile sticky bar. Clicking it always creates a new
+        // order for the current filter, while reload restores that saved order.
         document.addEventListener('click',function(e){
             const target=e.target&&e.target.closest ? e.target.closest('#shuffleBtn') : null;
             if(!target) return;
@@ -63,6 +70,7 @@
         },true);
         window.addEventListener('pagehide',saveFilterState);
         window.addEventListener('beforeunload',saveFilterState);
+
         updateLevelLabel();render();
         window.addEventListener('japaneseLangFavouriteChanged',render);
         window.addEventListener('japaneseLangCloudLoaded',function(){loadFilterState();updateLevelLabel();render();});
