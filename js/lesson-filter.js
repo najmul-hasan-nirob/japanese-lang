@@ -55,6 +55,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const bn={"I":"আমি","you":"তুমি / আপনি","student":"ছাত্র / শিক্ষার্থী","company employee":"কোম্পানির কর্মচারী","bank employee":"ব্যাংকের কর্মচারী","[medical] doctor":"ডাক্তার","researcher, scholar":"গবেষক","university":"বিশ্ববিদ্যালয়","hospital":"হাসপাতাল","yes":"হ্যাঁ","no":"না","~ years old":"~ বছর বয়স","how old (おいくつ is the polite form of なんさい)":"কত বছর বয়স","U.S.A.":"যুক্তরাষ্ট্র","U.K.":"যুক্তরাজ্য","India":"ভারত","Indonesia":"ইন্দোনেশিয়া","South Korea":"দক্ষিণ কোরিয়া","Thailand":"থাইল্যান্ড","China":"চীন","Germany":"জার্মানি","Japan":"জাপান","Brazil":"ব্রাজিল","this (thing here)":"এটি / এটা","that (thing near the listener)":"সেটি / ওটা","that (thing over there)":"ওটি / ওটা","book":"বই","dictionary":"অভিধান","magazine":"ম্যাগাজিন","newspaper":"সংবাদপত্র","notebook":"নোটবুক","business card":"ব্যবসায়িক কার্ড","(credit) card":"(ক্রেডিট) কার্ড","pencil":"পেন্সিল","ballpoint pen":"বলপেন","key":"চাবি","watch, clock":"ঘড়ি","umbrella":"ছাতা","bag, briefcase":"ব্যাগ / ব্রিফকেস","television":"টেলিভিশন","radio":"রেডিও","camera":"ক্যামেরা","computer":"কম্পিউটার","car, vehicle":"গাড়ি / যানবাহন","desk":"ডেস্ক","chair":"চেয়ার","chocolate":"চকলেট","coffee":"কফি"};
     function banglaMeaning(item){return item.bn||bn[item.en]||"বাংলা অর্থ যোগ করা হবে";}
 
+    function searchMatch(text, query){
+        const t = String(text || "").toLocaleLowerCase().normalize("NFKC").replace(/[\u200B-\u200D\uFEFF]/g,"").trim();
+        const q = String(query || "").toLocaleLowerCase().normalize("NFKC").replace(/[\u200B-\u200D\uFEFF]/g,"").trim();
+        if (!q) return true;
+        if (t.includes(q)) return true;
+        const compactText = t.replace(/[\s\p{P}\p{S}]+/gu,"");
+        const compactQuery = q.replace(/[\s\p{P}\p{S}]+/gu,"");
+        if (compactQuery && compactText.includes(compactQuery)) return true;
+        let qi = 0;
+        for (const ch of compactText) {
+            if (ch === compactQuery[qi]) qi++;
+            if (qi === compactQuery.length) return true;
+        }
+        return false;
+    }
+
     const nonIAdjectives = new Set(["きれい", "きらい", "ゆうめい", "ていねい", "せんせい", "がくせい", "かいしゃいん", "ぎんこういん", "はい", "いいえ", "～さい"]);
     function isIAdjective(item) {
         if (!item || item.type !== "vocabulary") return false;
@@ -114,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cards=cards.filter(item=>{
                 const romaji=toRomaji(item.jp||"");
                 const meaning=banglaMeaning(item);
-                return [item.jp,romaji,item.en,meaning,item.lesson,item.type].join(" ").toLocaleLowerCase().normalize("NFKC").includes(query);
+                return searchMatch([item.jp,romaji,item.en,meaning,item.lesson,item.type].join(" "),query);
             });
         }
         if (hardSelected) cards=cards.filter(card=>card.type!=="vocabulary" || isHardVocabularyCardData(card));
