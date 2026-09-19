@@ -70,7 +70,7 @@
       }
       .kanji-card .kanji-mnemonic-toggle[aria-pressed="true"]{background:rgba(255,255,255,.18)!important}
       .kanji-card .kanji-mnemonic-wrap.kanji-mnemonic-hidden{display:none!important}
-      .kanji-card .inner > .kanji-stroke-section{
+      .kanji-card > .kanji-stroke-section{
         display:none!important;
         width:100%!important;
         box-sizing:border-box!important;
@@ -80,7 +80,7 @@
         border-bottom:1px solid var(--paper-line,#ddd)!important;
         text-align:center!important;
       }
-      .kanji-card .inner > .kanji-stroke-section.open{display:block!important}
+      .kanji-card > .kanji-stroke-section.open{display:block!important}
     `;
     document.head.appendChild(style);
   }
@@ -158,7 +158,7 @@
     if(stroke && stroke.parentElement!==bottom) bottom.appendChild(stroke);
 
     const section=card.querySelector(':scope > .kanji-stroke-section');
-    if(section && section.parentElement!==inner) inner.appendChild(section);
+    if(section && section.parentElement!==card) card.appendChild(section);
 
     setupTopbar(card);
   }
