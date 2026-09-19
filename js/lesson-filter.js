@@ -106,7 +106,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const types=checkedTypes.filter(value=>value!=="hard");
         if (hardSelected && !types.includes("vocabulary")) types.push("vocabulary");
 
-        let cards=[];selectedLessons().forEach(key=>{cards=cards.concat(buildLessonCards(key).filter(card=>types.includes(card.type)));});
+        const searchQuery=String(window.lessonSearchQuery||"").trim();
+        const lessonsForSearch=searchQuery?sortedLessonKeys():selectedLessons();
+        let cards=[];lessonsForSearch.forEach(key=>{cards=cards.concat(buildLessonCards(key).filter(card=>types.includes(card.type)));});
+        if (searchQuery) {
+            const query=searchQuery.toLocaleLowerCase().normalize("NFKC").replace(/[\\u200B-\\u200D\\uFEFF]/g,"");
+            cards=cards.filter(item=>{
+                const romaji=toRomaji(item.jp||"");
+                const meaning=banglaMeaning(item);
+                return [item.jp,romaji,item.en,meaning,item.lesson,item.type].join(" ").toLocaleLowerCase().normalize("NFKC").includes(query);
+            });
+        }
         if (hardSelected) cards=cards.filter(card=>card.type!=="vocabulary" || isHardVocabularyCardData(card));
         if(mode.value==="shuffle")shuffle(cards);
         grid.innerHTML="";const frag=document.createDocumentFragment();
@@ -134,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function rerenderAfterLessonData(){updateLessonLabel();renderLessons();}
     document.addEventListener("lessonDataLoaded",rerenderAfterLessonData);
+    document.addEventListener("lessonSearchQueryChanged",()=>renderLessons(true));
     document.addEventListener("hardVocabularyFilterReady",()=>setTimeout(renderLessons,0));
     document.addEventListener("hardVocabularyUpdated",()=>{
         const typePanel=document.getElementById("typePanel");
