@@ -2,15 +2,41 @@
 (function(){
 'use strict';
 const API='https://levpdywhnikadumfocao.supabase.co/functions/v1/vocabulary-clues';
+const CACHE_KEY='japanese-lang-vocabulary-clues-v1';
+const CACHE_TTL=5*60*1000;
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function isAdmin(){return !!window.japaneseAdmin?.isUnlocked?.();}
 function identity(card){const lesson=card.querySelector('.lesson-tag')?.textContent?.trim()||'';const romaji=card.dataset.romaji||'';const english=card.querySelector('.english')?.textContent?.trim()||'';const front=card.querySelector('.front>div')?.textContent?.trim()||'';return {lesson,romaji,english,front};}
 function cardKey(card){const i=identity(card);return [i.lesson,i.romaji,i.english,i.front].join('|');}
 function url(card){return API+'?card_key='+encodeURIComponent(cardKey(card));}
 function authHeaders(){const t=window.japaneseAdmin?.getToken?.()||'';return t?{'x-admin-token':t,'Authorization':'Bearer '+t}:{};}
-async function load(card){try{const r=await fetch(url(card),{method:'GET',cache:'no-store'});if(!r.ok)return '';const d=await r.json();const clue=d?.clue||'';card.dataset.vocabularyClue=clue;card.classList.toggle('has-vocabulary-clue',!!clue);return clue;}catch(e){console.warn('Vocabulary clue load failed',e);return '';}}
-async function save(card,clue){if(!isAdmin())throw new Error('Admin mode is locked.');const i=identity(card);const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({card_key:cardKey(card),lesson:i.lesson,vocabulary:i.front,clue})});let data=null;try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data?.error||('HTTP '+r.status));card.dataset.vocabularyClue=data?.clue||clue;card.classList.toggle('has-vocabulary-clue',true);}
-async function remove(card){if(!isAdmin())throw new Error('Admin mode is locked.');const r=await fetch(url(card),{method:'DELETE',headers:authHeaders()});let data=null;try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data?.error||('HTTP '+r.status));card.dataset.vocabularyClue='';card.classList.remove('has-vocabulary-clue');}
+function readCache(){try{const value=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}');return value&&typeof value==='object'?value:{};}catch(_){return {};}}
+function writeCache(cache){try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(_){}}
+function cachedClue(card){const key=cardKey(card),entry=readCache()[key];if(!entry||typeof entry!=='object')return null;return {clue:String(entry.clue||''),savedAt:Number(entry.savedAt||0)};}
+function applyClue(card,clue){card.dataset.vocabularyClue=clue;card.classList.toggle('has-vocabulary-clue',!!clue);}
+function cacheClue(card,clue){const cache=readCache();cache[cardKey(card)]={clue:String(clue||''),savedAt:Date.now()};writeCache(cache);}
+function clearCachedClue(card){const cache=readCache();delete cache[cardKey(card)];writeCache(cache);}
+async function fetchClue(card){const r=await fetch(url(card),{method:'GET',cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();return d?.clue||'';}
+async function load(card,force=false){
+  const cached=cachedClue(card);
+  if(cached)applyClue(card,cached.clue);
+  const fresh=!!cached&&Date.now()-cached.savedAt<CACHE_TTL;
+  if(!force&&fresh)return cached.clue;
+  let lastError=null;
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const clue=await fetchClue(card);
+      applyClue(card,clue);
+      cacheClue(card,clue);
+      return clue;
+    }catch(e){lastError=e;if(attempt===0)await new Promise(resolve=>setTimeout(resolve,350));}
+  }
+  if(cached)return cached.clue;
+  console.warn('Vocabulary clue load failed:',lastError?.message||lastError);
+  return '';
+}
+async function save(card,clue){if(!isAdmin())throw new Error('Admin mode is locked.');const i=identity(card);const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({card_key:cardKey(card),lesson:i.lesson,vocabulary:i.front,clue})});let data=null;try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data?.error||('HTTP '+r.status));const saved=String(data?.clue||clue);applyClue(card,saved);cacheClue(card,saved);}
+async function remove(card){if(!isAdmin())throw new Error('Admin mode is locked.');const r=await fetch(url(card),{method:'DELETE',headers:authHeaders()});let data=null;try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data?.error||('HTTP '+r.status));applyClue(card,'');clearCachedClue(card);}
 let activeOverlay=null,activeCard=null,repositionHandler=null;
 function destroyOverlay(){if(repositionHandler){window.removeEventListener('scroll',repositionHandler,true);window.removeEventListener('resize',repositionHandler);repositionHandler=null;}if(activeOverlay){activeOverlay.remove();activeOverlay=null;}activeCard=null;}
 function mobileRowBounds(card){const grid=document.getElementById('grid');if(!grid)return null;const cards=[...grid.querySelectorAll(':scope>.card')];const r=card.getBoundingClientRect();const rowCards=cards.filter(c=>{const cr=c.getBoundingClientRect();return Math.abs(cr.top-r.top)<=3&&cr.width>0&&cr.height>0;});if(rowCards.length<2)return null;const rects=rowCards.map(c=>c.getBoundingClientRect());return {left:Math.min(...rects.map(x=>x.left)),top:Math.min(...rects.map(x=>x.top)),right:Math.max(...rects.map(x=>x.right)),bottom:Math.max(...rects.map(x=>x.bottom))};}
