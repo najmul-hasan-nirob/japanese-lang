@@ -33,7 +33,8 @@
         if (character) character.style.display = active ? 'none' : '';
         if (details) {
             details.querySelectorAll(':scope > *').forEach(function (item) {
-                item.style.display = active && !item.classList.contains('kanji-detail-meaning') ? 'none' : '';
+                const keepVisible = item.classList.contains('kanji-detail-meaning') || item.classList.contains('kanji-reading-line');
+                item.style.display = active && !keepVisible ? 'none' : '';
             });
             details.style.minHeight = active ? '120px' : '';
             details.style.justifyContent = active ? 'center' : '';
